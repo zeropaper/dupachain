@@ -1,0 +1,44 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "**/.env.*local"
+  ],
+  "globalEnv": [
+    "OPENAI_API_KEY",
+    "HUGGINGFACE_API_TOKEN",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_URL"
+  ],
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        "storybook-static/**",
+        ".next/**",
+        "!.next/cache/**"
+      ]
+    },
+    "test": {
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "publish": {
+      "dependsOn": [
+        "build",
+        "test",
+        "lint"
+      ],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

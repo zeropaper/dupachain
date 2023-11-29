@@ -1,0 +1,44 @@
+{
+  "name": "vb-monorepo",
+  "repository": "https://github.com/zeroapper/dupachain.git",
+  "private": true,
+  "scripts": {
+    "sb:start": "supabase start",
+    "sb:status": "supabase status",
+    "sb:stop": "supabase stop",
+    "sb:db:reset": "supabase db reset && pnpm sb:gen:types:dev",
+    "sb:gen:types:dev": "pnpm -C packages/supabase-types run dev",
+    "build": "turbo run build",
+    "clean": "turbo run clean --parallel",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,mdx,css,scss}\"",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-conventional": "^17.7.0",
+    "@trivago/prettier-plugin-sort-imports": "latest",
+    "eslint": "latest",
+    "eslint-config-turbo": "latest",
+    "eslint-config-prettier": "latest",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.3.0",
+    "npm-run-all": "latest",
+    "prettier": "latest",
+    "rimraf": "^3.0.2",
+    "supabase": "latest",
+    "turbo": "^1.10.16",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=18.18.2"
+  },
+  "packageManager": "pnpm@^8.11.0",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,md,mdx,scss,css}": [
+      "pnpm run format"
+    ]
+  }
+}

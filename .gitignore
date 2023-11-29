@@ -1,0 +1,59 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+.pnpm-store
+
+# Testing
+/coverage
+
+# Next.js
+.next
+out
+
+# Production
+build
+dist
+
+# Misc
+.DS_Store
+*.pem
+tsconfig.tsbuildinfo
+.build
+.esbuild
+
+# # VS Code
+# .vscode/settings.json
+# **/.vscode/settings.json
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local ENV files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Vercel
+.vercel
+
+# Turborepo
+.turbo
+
+# Jest
+/test-results/
+
+# Playwright
+/playwright-report/
+/playwright/.cache/
+
+.cache
+
+supabase/.temp

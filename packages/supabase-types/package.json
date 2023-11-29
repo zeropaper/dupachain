@@ -1,0 +1,14 @@
+{
+  "name": "@local/supabase-types",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "scripts": {
+    "dev": "supabase gen types typescript --local --schema public > ./database.types.ts",
+    "build": "supabase gen types typescript --project-id $VB_SUPABASE_PROJECT_ID --schema public > ./database.types.ts"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.32.0",
+    "supabase": "latest"
+  }
+}

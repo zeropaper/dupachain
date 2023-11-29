@@ -1,0 +1,5 @@
+packages:
+  - "scripts"
+  - "apps/*"
+  - "packages/*"
+  - "drupal/d10/web/modules/custom/bragger"

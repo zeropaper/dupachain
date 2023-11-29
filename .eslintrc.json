@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "extends": [
+    "turbo",
+    "prettier"
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "**/*.js",
+    "coverage"
+  ]
+}

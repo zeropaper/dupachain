@@ -1,0 +1,14 @@
+{
+  "name": "dev-scripts",
+  "private": true,
+  "dependencies": {
+    "@local/supabase-types": "workspace:*",
+    "cheerio": "1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "inquirer": "^9.2.12",
+    "socket.io-client": "^4.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "folders": [
+    {
+      "name": "app",
+      "path": "./apps/gateway"
+    },
+    {
+      "name": "scripts",
+      "path": "./scripts"
+    },
+    {
+      "name": "supabase",
+      "path": "./supabase"
+    },
+    {
+      "name": "project-root",
+      "path": "./"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "scripts/": true,
+      "apps/": true,
+      "supabase/": true
+    },
+    "files.watcherExclude": {},
+    "search.exclude": {},
+    "typescript.tsdk": "project-root/node_modules/typescript/lib",
+    "[sql]": {
+      "editor.defaultFormatter": "bradymholt.pgformatter"
+    }
+  }
+}
