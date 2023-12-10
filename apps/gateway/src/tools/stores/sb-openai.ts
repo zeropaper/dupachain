@@ -20,8 +20,9 @@ export async function getOpenAIStore({
 }
 
 export async function getOpenaiEmbedding(input: string): Promise<number[]> {
+  const { OPENAI_API_KEY } = await import("../../config");
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: OPENAI_API_KEY,
   });
   const result = await openai.embeddings.create({
     input,
@@ -35,9 +36,10 @@ export async function queryOpenaiEmbeddings(
   language = "en",
   count = 25,
 ) {
-  // Moderate the content to comply with OpenAI T&C
+  const { OPENAI_API_KEY } = await import("../../config");
+  // Moderate the content to comply with OpenAI T&C - TODO: consider that user messages are already moderated
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: OPENAI_API_KEY,
   });
   const sanitizedQuery = input.trim();
   const moderationResponse = await openai.moderations.create({
