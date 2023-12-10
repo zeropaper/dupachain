@@ -7,7 +7,7 @@ import pino from "pino";
 import pinoHttp from "pino-http";
 
 import { createAnonClient } from "./createAnonClient";
-import { addUserMessage } from "./addUserMessage";
+import { addUserMessage } from "./chats/addUserMessage";
 import { postDocumentBodySchema, postMessageBodySchema } from "./schemas";
 import { ingestDocument } from "./ingestDocument";
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";

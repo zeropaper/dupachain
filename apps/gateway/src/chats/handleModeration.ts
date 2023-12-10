@@ -1,6 +1,6 @@
 import OGOpenAI from "openai";
-import { OPENAI_API_KEY } from "./config";
-import { ChatMessagesRow } from "./types";
+import { OPENAI_API_KEY } from "../config";
+import { ChatMessagesRow } from "../types";
 
 export async function handleModeration({
   chatMessages,

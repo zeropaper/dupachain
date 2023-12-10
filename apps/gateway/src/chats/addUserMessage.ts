@@ -2,7 +2,7 @@ import { z } from "zod";
 import { answerUser } from "./answerUser";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
-import { postMessageBodySchema } from "./schemas";
+import { postMessageBodySchema } from "../schemas";
 
 export async function addUserMessage(
   supabase: SupabaseClient<Database>,

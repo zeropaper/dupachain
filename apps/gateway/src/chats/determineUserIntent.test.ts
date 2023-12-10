@@ -3,9 +3,9 @@ import { describe, it, expect } from "vitest";
 
 import { resolve } from "node:path";
 
-import { ChatMessagesRow } from "./types";
+import { ChatMessagesRow } from "../types";
 
-config({ path: resolve(__dirname, "../../../.env") });
+config({ path: resolve(__dirname, "../../../../.env") });
 
 type Run = [string, string[], ChatMessagesRow[]];
 

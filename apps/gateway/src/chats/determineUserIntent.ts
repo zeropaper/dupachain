@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { OpenAI } from "langchain/llms/openai";
 import { PromptTemplate } from "langchain/prompts";
-import { ChatMessagesRow } from "./types";
+import { ChatMessagesRow } from "../types";
 import { Callbacks } from "langchain/dist/callbacks/manager";
 
 const responseSchema = z.object({
