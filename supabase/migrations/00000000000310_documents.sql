@@ -13,6 +13,8 @@ CREATE TABLE "private"."documents"(
   "updated_at" timestamp with time zone NOT NULL DEFAULT (now() AT TIME ZONE 'utc'::text)
 );
 
+ALTER TABLE "private"."documents" ENABLE ROW LEVEL SECURITY;
+
 CREATE UNIQUE INDEX documents_pkey ON private.documents USING btree(id);
 
 ALTER TABLE "private"."documents"

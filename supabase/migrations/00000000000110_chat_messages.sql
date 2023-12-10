@@ -22,6 +22,17 @@ CREATE INDEX "idx_chat_messages_chat" ON "public"."chat_messages"("chat_id");
 
 ALTER TABLE "public"."chat_messages" validate CONSTRAINT "chat_messages_chat_id_fkey";
 
+ALTER TABLE "public"."chat_messages" ENABLE ROW LEVEL SECURITY;
+
+create policy "Allow anonymous insert on chat_messages" on public.chat_messages
+  for insert with check (true);
+
+create policy "Allow anonymous select on chat_messages no older than 5 days" on public.chat_messages
+for select using (
+  current_timestamp - created_at <= interval '5 days'
+  and chat_id in (select id from public.chats where current_timestamp - created_at <= interval '5 days')
+);
+
 CREATE TRIGGER handle_updated_at
   BEFORE UPDATE ON public.chat_messages
   FOR EACH ROW

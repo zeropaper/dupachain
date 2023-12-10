@@ -10,6 +10,15 @@ CREATE TABLE "public"."chats"(
 ALTER TABLE "public"."chats"
   ADD CONSTRAINT "chats_pkey" PRIMARY KEY ("id");
 
+ALTER TABLE "public"."chats" ENABLE ROW LEVEL SECURITY;
+
+create policy "Allow anonymous insert on chats" on public.chats
+  for insert with check (true);
+create policy "Allow anonymous select on chats no older than 5 days" on public.chats
+for select using (
+  current_timestamp - created_at <= interval '5 days'
+);
+
 CREATE TRIGGER handle_updated_at
   BEFORE UPDATE ON public.chats
   FOR EACH ROW
