@@ -11,6 +11,15 @@ import { StringOutputParser } from "langchain/schema/output_parser";
 import { formatDocumentsAsString } from "langchain/util/document";
 import { Database } from "@local/supabase-types";
 
+import { determineUserIntent } from "./determineUserIntent";
+import { handleModeration } from "./handleModeration";
+
+// 1. Determine the context of the user message
+// 2. Ensure the message safety
+// 3. Determine the intent of the user message
+// 4. Determine the chain to use
+// 5. Run the chain
+
 export async function answerUser(
   client: SupabaseClient<Database>,
   chatId: string,
@@ -26,6 +35,9 @@ export async function answerUser(
   if (!chatMessages) {
     throw new Error("No chat found");
   }
+  if (chatMessages.length < 2) {
+    throw new Error("Not enough chat messages");
+  }
 
   const lastUserMessage = chatMessages.at(-2);
   if (!lastUserMessage || lastUserMessage.role !== "user") {
@@ -36,8 +48,17 @@ export async function answerUser(
     throw new Error("No last assistant message found");
   }
 
+  await handleModeration({
+    chatMessages,
+  });
+
+  const intent = await determineUserIntent({
+    chatMessages,
+  });
+
   const model = new ChatOpenAI({
-    modelName: "gpt-3.5-turbo",
+    // https://platform.openai.com/docs/models/gpt-3-5
+    modelName: "gpt-3.5-turbo-1106",
   });
 
   const store = new SupabaseVectorStore(new OpenAIEmbeddings(), {

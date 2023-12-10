@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import pino from "pino";
 import { PORT } from "./config";
-import createSetup from "./app";
+import createSetup from "./createSetup";
 
 const logger = pino();
 

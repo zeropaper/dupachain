@@ -1,24 +1,15 @@
 import { config } from "dotenv";
-import {
-  afterEach,
-  describe,
-  it,
-  expect,
-  beforeEach,
-  beforeAll,
-  afterAll,
-} from "vitest";
-import { Server } from "node:http";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+
 import { resolve } from "node:path";
 import request from "supertest";
 import io from "socket.io-client";
-
-import createSetup from "./app";
 
 config({ path: resolve(__dirname, "../../../.env") });
 
 describe("createSetup", () => {
   it("should return a server", async () => {
+    const createSetup = await import("./createSetup").then((m) => m.default);
     const setup = await createSetup();
     expect(setup).toBeDefined();
     expect(setup).toHaveProperty("server");
@@ -29,6 +20,7 @@ describe("createSetup", () => {
   describe("running server", () => {
     let setup: any;
     beforeAll(async () => {
+      const createSetup = await import("./createSetup").then((m) => m.default);
       setup = await createSetup();
     });
     afterAll(() => {
@@ -54,11 +46,12 @@ describe("createSetup", () => {
 });
 
 describe("app", () => {
-  let setup: Awaited<ReturnType<typeof createSetup>>;
+  let setup: any;
   function requestApp() {
     return request(setup.app);
   }
   beforeAll(async () => {
+    const createSetup = await import("./createSetup").then((m) => m.default);
     setup = await createSetup();
   });
 
@@ -95,6 +88,7 @@ describe("app", () => {
   describe("sockets", () => {
     let setup: any;
     beforeAll(async () => {
+      const createSetup = await import("./createSetup").then((m) => m.default);
       setup = await createSetup();
       return new Promise((res) => setup.server.listen(3773, res));
     });
