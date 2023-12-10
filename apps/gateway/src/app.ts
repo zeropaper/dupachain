@@ -4,6 +4,8 @@ import { createServer } from "http";
 import { Server as SocketIOServer, type Socket } from "socket.io";
 import express from "express";
 import helmet from "helmet";
+import { type Logger } from "pino";
+import pinoHttp from "pino-http";
 
 import { createAnonClient } from "./createAnonClient";
 import { getOpenAIStore } from "./stores/sb-openai";
@@ -16,7 +18,7 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)]),
 );
 
-export default async function createSetup(): Promise<{
+export default async function createSetup(logger?: Logger): Promise<{
   server: ReturnType<typeof createServer>;
   app: ReturnType<typeof express>;
 }> {
@@ -25,6 +27,9 @@ export default async function createSetup(): Promise<{
   const io = new SocketIOServer(server);
   const { PUBLIC_DIR } = await import("./config");
   const supabase = await createAnonClient();
+
+  // logging - https://www.npmjs.com/package/pino-http#example
+  app.use(pinoHttp({ logger }));
 
   // security - https://helmetjs.github.io/
   app.use(helmet());
