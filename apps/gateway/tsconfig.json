@@ -7,8 +7,7 @@
     "outDir": "./dist"
   },
   "include": [
-    "src/**.ts",
-    "src/stores/openai_embeddings.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"
