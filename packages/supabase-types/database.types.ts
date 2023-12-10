@@ -56,38 +56,20 @@ export interface Database {
         Row: {
           created_at: string;
           id: string;
+          metadata: Json;
           updated_at: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
+          metadata?: Json;
           updated_at?: string;
         };
         Update: {
           created_at?: string;
           id?: string;
+          metadata?: Json;
           updated_at?: string;
-        };
-        Relationships: [];
-      };
-      openai_embeddings: {
-        Row: {
-          content: string | null;
-          embedding: string | null;
-          id: number;
-          metadata: Json | null;
-        };
-        Insert: {
-          content?: string | null;
-          embedding?: string | null;
-          id?: number;
-          metadata?: Json | null;
-        };
-        Update: {
-          content?: string | null;
-          embedding?: string | null;
-          id?: number;
-          metadata?: Json | null;
         };
         Relationships: [];
       };
@@ -96,6 +78,32 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
+      delete_hft_embeddings: {
+        Args: {
+          doc_id: string;
+        };
+        Returns: undefined;
+      };
+      delete_openai_embeddings: {
+        Args: {
+          doc_id: string;
+        };
+        Returns: undefined;
+      };
+      match_hft_embeddings: {
+        Args: {
+          query_embedding: string;
+          filter?: Json;
+          match_count?: number;
+        };
+        Returns: {
+          id: number;
+          content: string;
+          metadata: Json;
+          embedding: Json;
+          similarity: number;
+        }[];
+      };
       match_openai_embeddings: {
         Args: {
           query_embedding: string;
