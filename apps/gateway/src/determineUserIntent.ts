@@ -1,20 +1,27 @@
+import { z } from "zod";
 import { OpenAI } from "langchain/llms/openai";
 import { PromptTemplate } from "langchain/prompts";
 import { ChatMessagesRow } from "./types";
+import { Callbacks } from "langchain/dist/callbacks/manager";
 
-export async function determineUserIntent({
+const responseSchema = z.object({
+  intent: z.string(),
+  confidence: z.number().min(0).max(1),
+});
+
+export default async function determineUserIntent({
   chatMessages,
   possibleIntents = ["greet", "goodbye", "question", "statement"],
+  callbacks,
 }: {
   chatMessages: ChatMessagesRow[];
   possibleIntents?: string[];
+  callbacks?: Callbacks;
 }) {
-  const { OPENAI_API_KEY } = await import("./config");
   const [lastAssistantMessage, lastUserMessage] = chatMessages.slice(-2);
 
   const model = new OpenAI({
     temperature: 0,
-    openAIApiKey: OPENAI_API_KEY,
     // https://platform.openai.com/docs/models/gpt-3-5
     // Similar capabilities as text-davinci-003 but compatible with legacy Completions endpoint and not Chat Completions.
     modelName: "gpt-3.5-turbo-instruct",
@@ -55,5 +62,11 @@ Your answer:`);
       .join("\n\n"),
   });
 
-  return JSON.parse(await model.invoke(formatted, {}));
+  return responseSchema.parse(
+    JSON.parse(
+      await model.invoke(formatted, {
+        callbacks,
+      }),
+    ),
+  );
 }

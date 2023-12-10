@@ -11,7 +11,7 @@ import { StringOutputParser } from "langchain/schema/output_parser";
 import { formatDocumentsAsString } from "langchain/util/document";
 import { Database } from "@local/supabase-types";
 
-import { determineUserIntent } from "./determineUserIntent";
+import determineUserIntent from "./determineUserIntent";
 import { handleModeration } from "./handleModeration";
 
 // 1. Determine the context of the user message
