@@ -3,35 +3,72 @@ import { Server as SocketIOServer, type Socket } from "socket.io";
 import express from "express";
 import helmet from "helmet";
 import { type Logger } from "pino";
+import pino from "pino";
 import pinoHttp from "pino-http";
 
 import { createAnonClient } from "./createAnonClient";
 import { addUserMessage } from "./addUserMessage";
 import { postDocumentBodySchema, postMessageBodySchema } from "./schemas";
 import { ingestDocument } from "./ingestDocument";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 // for getting updates
 const subscribers = new Map<string, Set<Socket>>();
-async function subscribeToChat(chatId: string, socket: Socket): Promise<void> {
+async function subscribeToChat({
+  chatId,
+  socket,
+  logger,
+}: {
+  chatId: string;
+  socket: Socket;
+  logger: Logger;
+}): Promise<void> {
   if (!subscribers.has(chatId)) {
     subscribers.set(chatId, new Set());
   }
 
   const chatSubscribers = subscribers.get(chatId)!;
   chatSubscribers.add(socket);
-  console.log(
+  logger.info(
     `added subscriber to chat ${chatId}, now has ${chatSubscribers.size} subscribers`,
   );
 
   socket.on("disconnect", () => {
     chatSubscribers.delete(socket);
-    console.log(
+    logger.info(
       `removed subscriber from chat ${chatId}, now has ${chatSubscribers.size} subscribers`,
     );
   });
 }
 
-export default async function createSetup(logger?: Logger): Promise<{
+function makeSupabaseEventHandler({ logger }: { logger: Logger }) {
+  return function handleSupabaseEvent(
+    payload: RealtimePostgresChangesPayload<{
+      [key: string]: any;
+    }>,
+  ) {
+    logger.info("got chat message update", payload);
+    switch (payload.eventType) {
+      case "INSERT":
+      case "UPDATE":
+        const chatId = payload.new.chat_id;
+        const chatSubscribers = subscribers.get(chatId);
+        if (!chatSubscribers) {
+          logger.info(`no subscribers for chat ${chatId}`);
+          return;
+        }
+        chatSubscribers.forEach((socket) => {
+          socket.emit("chat message", payload.new);
+        });
+        break;
+      default:
+        logger.info(`ignoring event type ${payload.eventType}`);
+        return;
+    }
+  };
+}
+
+export default async function createSetup(logger: Logger = pino()): Promise<{
   server: ReturnType<typeof createServer>;
   app: ReturnType<typeof express>;
 }> {
@@ -60,40 +97,41 @@ export default async function createSetup(logger?: Logger): Promise<{
     try {
       // use a try-catch because not only dealing with supbabase errors
       const document = postDocumentBodySchema.parse(req.body);
-      console.log("document", document);
+      logger.info("document", document);
 
       await ingestDocument(document);
 
       res.status(204).end();
     } catch (err) {
-      console.error("error", err);
-      next(new Error("Ingestion error"));
+      logger.error("Document ingestion error", err);
+      next(new Error("Document ingestion error"));
     }
   });
 
-  // for starting a chat
+  // for starting a chat - TODO: consider all chat interactions over sockets
   app.post("/chats", express.json(), async (req, res, next) => {
     const insertChat = await supabase
       .from("chats")
       .insert({})
       .select()
       .single();
-    console.info("insertChat", insertChat);
+    logger.info("insertChat", insertChat);
     if (insertChat.error) {
-      console.error("insertChat error", insertChat.error);
-      return next(new Error("insertChat error"));
+      logger.error("Chat creation error", insertChat.error);
+      return next(new Error("Chat creation error"));
     }
 
     res.status(insertChat.status).send(JSON.stringify(insertChat.data));
   });
 
+  // for sending a message - TODO: consider all chat interactions over sockets
   app.post("/messages", express.json(), async (req, res, next) => {
     const { chat_id, content } = postMessageBodySchema.parse(req.body);
     const insertMessage = await addUserMessage(supabase, { chat_id, content });
 
     if (insertMessage.error) {
-      console.error("insertMessage error", insertMessage.error);
-      return next(new Error("insertMessage error"));
+      logger.error("Message creation error", insertMessage.error);
+      return next(new Error("Message creation error"));
     }
 
     res.status(insertMessage.status).send(JSON.stringify(insertMessage.data));
@@ -108,41 +146,22 @@ export default async function createSetup(logger?: Logger): Promise<{
         schema: "public",
         table: "chat_messages",
       },
-      (payload) => {
-        console.log("got chat message update", payload);
-        switch (payload.eventType) {
-          case "INSERT":
-          case "UPDATE":
-            const chatId = payload.new.chat_id;
-            const chatSubscribers = subscribers.get(chatId);
-            if (!chatSubscribers) {
-              console.log(`no subscribers for chat ${chatId}`);
-              return;
-            }
-            chatSubscribers.forEach((socket) => {
-              socket.emit("chat message", payload.new);
-            });
-            break;
-          default:
-            console.log(`ignoring event type ${payload.eventType}`);
-            return;
-        }
-      },
+      makeSupabaseEventHandler({ logger }),
     )
     .subscribe();
 
   io.on("connection", (socket) => {
-    console.log("a user connected");
+    logger.info("a user connected");
     socket.on("subscribe", async (chatId: string) => {
-      console.log("subscribe", chatId);
-      await subscribeToChat(chatId, socket);
+      logger.info("subscribe", chatId);
+      await subscribeToChat({ chatId, socket, logger });
     });
     socket.on("chat message", async (data) => {
-      console.log("incoming user message", data);
+      logger.info("incoming user message", data);
       await addUserMessage(supabase, data);
     });
     socket.on("disconnect", () => {
-      console.log("user disconnected");
+      logger.info("user disconnected");
     });
   });
 
