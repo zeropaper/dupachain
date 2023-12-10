@@ -2,6 +2,7 @@ import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { createServiceClient } from "../../createServiceClient";
 import OpenAI from "openai";
+import { OPENAI_API_KEY } from "../../config";
 
 export async function getOpenAIStore({
   filter,
@@ -36,7 +37,6 @@ export async function queryOpenaiEmbeddings(
   language = "en",
   count = 25,
 ) {
-  const { OPENAI_API_KEY } = await import("../../config");
   // Moderate the content to comply with OpenAI T&C - TODO: consider that user messages are already moderated
   const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
