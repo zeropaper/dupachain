@@ -2,22 +2,22 @@ CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 
 CREATE EXTENSION IF NOT EXISTS "pg_jsonschema" WITH SCHEMA "extensions";
 
-CREATE SEQUENCE "private"."openai_embeddings_id_seq";
+CREATE SEQUENCE "public"."openai_embeddings_id_seq";
 
-CREATE TABLE "private"."openai_embeddings"(
-  "id" bigint NOT NULL DEFAULT nextval('private.openai_embeddings_id_seq'::regclass),
+CREATE TABLE "public"."openai_embeddings"(
+  "id" bigint NOT NULL DEFAULT nextval('public.openai_embeddings_id_seq'::regclass),
   "content" text,
   "metadata" jsonb,
   "embedding" vector(1536)
 );
 
-ALTER TABLE "private"."openai_embeddings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."openai_embeddings" ENABLE ROW LEVEL SECURITY;
 
-ALTER SEQUENCE "private"."openai_embeddings_id_seq" owned BY "private"."openai_embeddings"."id";
+ALTER SEQUENCE "public"."openai_embeddings_id_seq" owned BY "public"."openai_embeddings"."id";
 
-CREATE UNIQUE INDEX openai_embeddings_pkey ON private.openai_embeddings USING btree(id);
+CREATE UNIQUE INDEX openai_embeddings_pkey ON public.openai_embeddings USING btree(id);
 
-ALTER TABLE "private"."openai_embeddings"
+ALTER TABLE "public"."openai_embeddings"
   ADD CONSTRAINT "openai_embeddings_pkey" PRIMARY KEY USING INDEX "openai_embeddings_pkey";
 
 -- borrowed from
@@ -41,7 +41,7 @@ BEGIN
 (embedding::text)::jsonb AS embedding,
     1 -(documents.embedding <=> query_embedding) AS similarity
   FROM
-    private.openai_embeddings AS documents
+    public.openai_embeddings AS documents
   WHERE
     documents.metadata @> FILTER
   ORDER BY
@@ -55,7 +55,7 @@ CREATE OR REPLACE FUNCTION delete_openai_embeddings(doc_id text)
   LANGUAGE plpgsql
   AS $$
 BEGIN
-  DELETE FROM private.openai_embeddings
+  DELETE FROM public.openai_embeddings
   WHERE metadata ->> 'document_id' = doc_id::text;
 END;
 $$;
@@ -65,14 +65,14 @@ CREATE OR REPLACE FUNCTION cleanup_openai_embeddings()
   LANGUAGE plpgsql
   AS $$
 BEGIN
-  DELETE FROM private.openai_embeddings
+  DELETE FROM public.openai_embeddings
   WHERE metadata ->> 'document_id' = OLD.id::text;
   RETURN OLD;
 END;
 $$;
 
 CREATE TRIGGER trigger_cleanup_openai_embeddings
-  AFTER DELETE ON private.documents
+  AFTER DELETE ON public.documents
   FOR EACH ROW
   EXECUTE FUNCTION cleanup_openai_embeddings();
 
