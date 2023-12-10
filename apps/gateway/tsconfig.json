@@ -1,9 +1,16 @@
 {
   "compilerOptions": {
+    "strict": true,
     "target": "es6",
+    "esModuleInterop": true,
     "module": "commonjs",
     "outDir": "./dist"
   },
-  "include": ["*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**.ts",
+    "src/stores/openai_embeddings.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
