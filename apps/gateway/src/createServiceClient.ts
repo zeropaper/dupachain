@@ -1,14 +1,14 @@
 import type { Database, SupabaseClient } from "@local/supabase-types";
 import { createClient } from "@supabase/supabase-js";
+import { SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL } from "./config";
 
 const moduleScope: {
   client?: SupabaseClient<Database>;
 } = {};
-export async function createServiceClient() {
+export function createServiceClient() {
   if (typeof window !== "undefined") {
     throw new Error("createServiceClient must NOT be called in the browser");
   }
-  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = await import("./config");
   if (moduleScope.client) {
     return moduleScope.client;
   }
