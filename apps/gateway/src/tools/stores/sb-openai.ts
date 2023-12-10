@@ -65,7 +65,7 @@ export async function queryOpenaiEmbeddings(
   });
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(`Error querying OpenAI embeddings: ${error.message}`);
   }
 
   return data;

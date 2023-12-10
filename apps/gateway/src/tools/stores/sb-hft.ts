@@ -56,7 +56,9 @@ export async function queryHftEmbeddings(
   });
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(
+      `Error querying HuggingFace Transformers with Supabase/gte-small embeddings: ${error.message}`,
+    );
   }
 
   return data;
