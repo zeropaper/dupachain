@@ -5,6 +5,10 @@
       "path": "./apps/gateway"
     },
     {
+      "name": "chains",
+      "path": "./chains"
+    },
+    {
       "name": "scripts",
       "path": "./scripts"
     },
@@ -21,14 +25,12 @@
     "files.exclude": {
       "**/node_modules": true,
       "scripts/": true,
-      "apps/": true,
+      "chains/": true,
+      "apps/gateway": true,
       "supabase/": true
     },
     "files.watcherExclude": {},
     "search.exclude": {},
     "typescript.tsdk": "project-root/node_modules/typescript/lib",
-    "[sql]": {
-      "editor.defaultFormatter": "bradymholt.pgformatter"
-    }
   }
 }
