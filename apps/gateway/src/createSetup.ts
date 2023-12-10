@@ -103,7 +103,10 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 
       res.status(204).end();
     } catch (err) {
-      logger.error("Document ingestion error", err);
+      logger.error({
+        message: "Document ingestion error",
+        error: err,
+      });
       next(new Error("Document ingestion error"));
     }
   });
@@ -115,9 +118,11 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
       .insert({})
       .select()
       .single();
-    logger.info("insertChat", insertChat);
     if (insertChat.error) {
-      logger.error("Chat creation error", insertChat.error);
+      logger.error({
+        message: "Chat creation error",
+        error: insertChat.error,
+      });
       return next(new Error("Chat creation error"));
     }
 
@@ -130,7 +135,10 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
     const insertMessage = await addUserMessage(supabase, { chat_id, content });
 
     if (insertMessage.error) {
-      logger.error("Message creation error", insertMessage.error);
+      logger.error({
+        message: "Message creation error",
+        error: insertMessage.error,
+      });
       return next(new Error("Message creation error"));
     }
 
