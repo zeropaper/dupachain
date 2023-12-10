@@ -73,8 +73,28 @@ describe("app", () => {
     });
 
     describe("/documents", () => {
-      it.todo(
-        "creates a document with a reference, content, metadata, and format",
+      it.each([
+        [
+          "html",
+          "<h1>test</h1><h2>test</h2><h3>test</h3><h4>test</h4><h5>test</h5><h6>test</h6><p>test</p>",
+        ],
+        [
+          "markdown",
+          "# test\n## test\n### test\n#### test\n##### test\n###### test\n\ntest",
+        ],
+      ])(
+        'creates a document with a reference, content, metadata for "%s" format',
+        async (format, content) => {
+          const response = await requestApp()
+            .post("/documents")
+            .send({
+              reference: "test",
+              content,
+              metadata: { whatever: "test" },
+              format,
+            });
+          expect(response.status).toBe(204);
+        },
       );
       it.todo("does not create a document with an invalid format");
     });
