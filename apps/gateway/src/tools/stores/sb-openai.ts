@@ -21,7 +21,6 @@ export async function getOpenAIStore({
 }
 
 export async function getOpenaiEmbedding(input: string): Promise<number[]> {
-  const { OPENAI_API_KEY } = await import("../../config");
   const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
   });
