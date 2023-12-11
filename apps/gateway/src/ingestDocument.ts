@@ -34,7 +34,7 @@ export async function ingestDocument(options: {
   switch (embeddingType) {
     case "openai":
       const { getOpenAIStore } = await import("./tools/stores/sb-openai");
-      store = await getOpenAIStore();
+      store = getOpenAIStore();
       splitter = RecursiveCharacterTextSplitter.fromLanguage(format, {
         chunkSize: 1024,
         chunkOverlap: 60,
@@ -42,7 +42,7 @@ export async function ingestDocument(options: {
       break;
     case "hft":
       const { getHftStore } = await import("./tools/stores/sb-hft");
-      store = await getHftStore();
+      store = getHftStore();
       splitter = RecursiveCharacterTextSplitter.fromLanguage(format, {
         chunkSize: 256,
         chunkOverlap: 20,
