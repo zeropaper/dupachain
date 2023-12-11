@@ -1,8 +1,6 @@
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { PromptTemplate } from "langchain/prompts";
-import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import {
   RunnableSequence,
   RunnablePassthrough,
@@ -13,6 +11,7 @@ import { Database } from "@local/supabase-types";
 
 import determineUserIntent from "./determineUserIntent";
 import { handleModeration } from "./handleModeration";
+import { getOpenAIStore } from "../tools/stores";
 
 // 1. Determine the context of the user message
 // 2. Ensure the message safety
@@ -83,11 +82,7 @@ export async function answerUser(
     modelName: "gpt-3.5-turbo-1106",
   });
 
-  const store = new SupabaseVectorStore(new OpenAIEmbeddings(), {
-    client,
-    tableName: "openai_embeddings",
-    queryName: "match_openai_embeddings",
-  });
+  const store = await getOpenAIStore();
 
   const retriever = store.asRetriever();
 
