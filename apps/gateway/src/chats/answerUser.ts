@@ -48,6 +48,28 @@ export async function answerUser(
     throw new Error("No last assistant message found");
   }
 
+  function saveAnswer(answer: string) {
+    return client
+      .from("chat_messages")
+      .update({
+        content: answer,
+        finished: true,
+      })
+      .eq("id", lastAssistantMessage!.id)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          throw new Error(error.message);
+        }
+        if (!data) {
+          throw new Error("Could not update assistant message");
+        }
+        return data;
+      });
+  }
+
+  // TODO: should the moderation and intent determination be done in parallel?
   await handleModeration({
     chatMessages,
   });
@@ -86,13 +108,6 @@ Question: {question}`);
   ]);
 
   const answer = await chain.invoke(lastUserMessage.content);
-  console.log("answer", answer);
 
-  await client
-    .from("chat_messages")
-    .update({
-      content: answer,
-      finished: true,
-    })
-    .eq("id", lastAssistantMessage.id);
+  return saveAnswer(answer);
 }
