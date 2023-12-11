@@ -1,11 +1,13 @@
 import { config } from "dotenv";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { vi, describe, it, expect, beforeAll, afterAll } from "vitest";
 
 import { resolve } from "node:path";
 import request from "supertest";
 import io from "socket.io-client";
 
 config({ path: resolve(__dirname, "../../../.env") });
+
+vi.mock("./tools/stores/sb-hft");
 
 describe("createSetup", () => {
   it("should return a server", async () => {

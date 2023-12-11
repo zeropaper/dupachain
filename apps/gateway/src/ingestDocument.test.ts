@@ -1,7 +1,9 @@
 import { config } from "dotenv";
-import { describe, it, expect, beforeAll } from "vitest";
+import { vi, describe, it, expect, beforeAll } from "vitest";
 
 import { resolve } from "node:path";
+
+vi.mock("./tools/stores/sb-hft");
 
 config({ path: resolve(__dirname, "../../../.env") });
 
