@@ -1,8 +1,7 @@
-// NOTE: the store using HuggingFace Transformers with Supabase/gte-small model for embeddings is cause tests to fail, at least if store is imported here
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { Json } from "./types";
+import { Json } from "../types";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
-import { getHftStore, getOpenAIStore } from "./tools/stores";
+import { getHftStore, getOpenAIStore } from "../tools/stores";
 
 export async function ingestDocument(options: {
   content: string;
