@@ -2,6 +2,7 @@
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Json } from "./types";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
+import { getHftStore, getOpenAIStore } from "./tools/stores";
 
 export async function ingestDocument(options: {
   content: string;
@@ -33,7 +34,6 @@ export async function ingestDocument(options: {
 
   switch (embeddingType) {
     case "openai":
-      const { getOpenAIStore } = await import("./tools/stores/sb-openai");
       store = getOpenAIStore();
       splitter = RecursiveCharacterTextSplitter.fromLanguage(format, {
         chunkSize: 1024,
@@ -41,7 +41,6 @@ export async function ingestDocument(options: {
       });
       break;
     case "hft":
-      const { getHftStore } = await import("./tools/stores/sb-hft");
       store = getHftStore();
       splitter = RecursiveCharacterTextSplitter.fromLanguage(format, {
         chunkSize: 256,
