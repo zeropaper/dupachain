@@ -19,16 +19,25 @@ export async function getHftStore({
   });
 }
 
+class HFTEmbeddingPipeline {
+  static task = "feature-extrction";
+  static model = "Supabase/gte-small";
+  static instance: Promise<Pipeline> | null = null;
+
+  static async getInstance(options?: Parameters<Pipeline>[1]) {
+    if (this.instance === null) {
+      this.instance = pipeline(this.task, this.model, options);
+    }
+
+    return this.instance;
+  }
+}
+
 export async function getHftEmbedding(
   input: string,
   options: Parameters<Pipeline>[1] = {},
 ): Promise<number[]> {
-  const generateEmbedding = await pipeline(
-    "feature-extraction",
-    // https://huggingface.co/Supabase/gte-small, for german maybe: "dbmdz/bert-base-german-cased"
-    "Supabase/gte-small",
-    options,
-  );
+  const generateEmbedding = await HFTEmbeddingPipeline.getInstance(options);
 
   // Generate a vector using Transformers.js
   const output = await generateEmbedding(input, {
