@@ -1,17 +1,9 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { PromptTemplate } from "langchain/prompts";
-import {
-  RunnableSequence,
-  RunnablePassthrough,
-} from "langchain/schema/runnable";
-import { StringOutputParser } from "langchain/schema/output_parser";
-import { formatDocumentsAsString } from "langchain/util/document";
 import { Database } from "@local/supabase-types";
 
 import determineUserIntent from "./determineUserIntent";
 import { handleModeration } from "./handleModeration";
-import { getOpenAIStore } from "../tools/stores";
+import { runChain } from "./runChain";
 
 // 1. Determine the context of the user message
 // 2. Ensure the message safety
@@ -77,32 +69,7 @@ export async function answerUser(
     chatMessages,
   });
 
-  const model = new ChatOpenAI({
-    // https://platform.openai.com/docs/models/gpt-3-5
-    modelName: "gpt-3.5-turbo-1106",
-  });
-
-  const store = await getOpenAIStore();
-
-  const retriever = store.asRetriever();
-
-  const prompt =
-    PromptTemplate.fromTemplate(`Answer the question based only on the following context:
-{context}
-
-Question: {question}`);
-
-  const chain = RunnableSequence.from([
-    {
-      context: retriever.pipe(formatDocumentsAsString),
-      question: new RunnablePassthrough(),
-    },
-    prompt,
-    model,
-    new StringOutputParser(),
-  ]);
-
-  const answer = await chain.invoke(lastUserMessage.content);
+  const answer = await runChain({ chatMessages });
 
   return saveAnswer(answer);
 }
