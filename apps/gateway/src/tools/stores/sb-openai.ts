@@ -4,15 +4,15 @@ import { createServiceClient } from "../../createServiceClient";
 import OpenAI from "openai";
 import { OPENAI_API_KEY } from "../../config";
 
-export async function getOpenAIStore({
+export function getOpenAIStore({
   filter,
   upsertBatchSize,
 }: Omit<
   ConstructorParameters<typeof SupabaseVectorStore>[1],
   "client" | "tableName" | "queryName"
-> = {}): Promise<SupabaseVectorStore> {
+> = {}): SupabaseVectorStore {
   return new SupabaseVectorStore(new OpenAIEmbeddings(), {
-    client: await createServiceClient(),
+    client: createServiceClient(),
     tableName: "openai_embeddings",
     queryName: "match_openai_embeddings",
     filter,

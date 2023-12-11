@@ -3,15 +3,15 @@ import { Pipeline, pipeline } from "@xenova/transformers";
 import { HuggingFaceTransformersEmbeddings } from "langchain/embeddings/hf_transformers";
 import { createServiceClient } from "../../createServiceClient";
 
-export async function getHftStore({
+export function getHftStore({
   filter,
   upsertBatchSize,
 }: Omit<
   ConstructorParameters<typeof SupabaseVectorStore>[1],
   "client" | "tableName" | "queryName"
-> = {}): Promise<SupabaseVectorStore> {
+> = {}): SupabaseVectorStore {
   return new SupabaseVectorStore(new HuggingFaceTransformersEmbeddings(), {
-    client: await createServiceClient(),
+    client: createServiceClient(),
     tableName: "hft_embeddings",
     queryName: "match_hft_embeddings",
     filter,
