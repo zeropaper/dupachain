@@ -5,8 +5,6 @@ This is a playground for [supabase](https://supabase.com)d
 
 [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com)
 
-![dupachain-chat-screenshot-1](https://github.com/zeropaper/dupachain/assets/65971/af30b10c-26fe-421d-9d5c-3b7ce7885b47)
-
 ## Prerequisites
 
 ### Node
@@ -37,8 +35,6 @@ In order to run supabase locally, you also need to ensure
 - Everytime you use the `pnpm sb:db:reset` script, you will need to enable the "realtime"
   feature of the `chat_messages` table  
   ![image](https://github.com/zeropaper/dupachain/assets/65971/a650efe4-233d-4d77-8cf2-8eb3e4d4240d)
-- The supabase directory also contains a `.csv` file that can be imported in the `openai_embeddings` table.  
-  The [scraping is very basic](./scripts/01-scrape.ts) and the data is not very clean, but it serves the purpose.
 
 ### Environment variables
 
@@ -49,7 +45,7 @@ directory and should look like:
 OPENAI_API_KEY="<no i'm not giving you mine>"
 
 # get the values from running `npm supabase status`
-SUPABASE_URL="<usually: http://localhost:54321>"
+SUPABASE_URL="<usually: http://127.0.0.1:54321>"
 SUPABASE_ANON_KEY="<the anon key>"
 SUPABASE_SERVICE_ROLE_KEY="<the service key>"
 ```
@@ -80,4 +76,7 @@ the following structure:
 }
 ```
 
-The whole front-end is in the index.html file of the ["gateway" app](./apps/gateway).
+The whole front-end is in the [index.html](./apps/gateway/src/index.html) file
+of the ["gateway" app](./apps/gateway) but it can be overriden by adding a
+`index.html` file in the public of the app or by setting the `PUBLIC_DIR`
+environment variable.
