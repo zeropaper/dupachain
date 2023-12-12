@@ -60,7 +60,7 @@ and [socket.io](https://www.npmjs.com/package/socket.io) to provide a simple API
 realtime communication.
 
 The most interesting bits are probably located in the
-[`answerUser.ts`](./apps/gateway/src/answerUser.ts) file and the
+[`answerUser.ts`](./apps/gateway/src/chats/answerUser.ts) file and the
 [POST `/documents` handler](./apps/gateway/src/index.ts).
 
 The "ingestion" of the content is done by sending "POST" requests to the
