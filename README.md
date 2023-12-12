@@ -10,7 +10,7 @@ This is a playground for [supabase](https://supabase.com)d
 ### Node
 
 - `node`: install using [NVM](https://github.com/nvm-sh/nvm/blob/master/README.md#installing-and-updating)
-  (`nvm install 18 && nvm use 18`)
+  (`nvm install 20 && nvm use 20`)
 - `pnpm`: is the package manager that is used in this project, install with `npm i -g pnpm`
 
 ### Supabase
