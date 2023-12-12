@@ -73,6 +73,78 @@ export interface Database {
         };
         Relationships: [];
       };
+      documents: {
+        Row: {
+          content: string;
+          created_at: string;
+          format: Database["public"]["Enums"]["document_format"];
+          id: string;
+          metadata: Json | null;
+          reference: string;
+          updated_at: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          format: Database["public"]["Enums"]["document_format"];
+          id?: string;
+          metadata?: Json | null;
+          reference: string;
+          updated_at?: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          format?: Database["public"]["Enums"]["document_format"];
+          id?: string;
+          metadata?: Json | null;
+          reference?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      hft_embeddings: {
+        Row: {
+          content: string | null;
+          embedding: string | null;
+          id: number;
+          metadata: Json | null;
+        };
+        Insert: {
+          content?: string | null;
+          embedding?: string | null;
+          id?: number;
+          metadata?: Json | null;
+        };
+        Update: {
+          content?: string | null;
+          embedding?: string | null;
+          id?: number;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
+      openai_embeddings: {
+        Row: {
+          content: string | null;
+          embedding: string | null;
+          id: number;
+          metadata: Json | null;
+        };
+        Insert: {
+          content?: string | null;
+          embedding?: string | null;
+          id?: number;
+          metadata?: Json | null;
+        };
+        Update: {
+          content?: string | null;
+          embedding?: string | null;
+          id?: number;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -120,7 +192,7 @@ export interface Database {
       };
     };
     Enums: {
-      [_ in never]: never;
+      document_format: "html" | "markdown";
     };
     CompositeTypes: {
       [_ in never]: never;
