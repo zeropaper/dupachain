@@ -1,0 +1,17 @@
+{
+  "name": "@local/cache",
+  "private": true,
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "dependencies": {
+    "rimraf": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "vitest": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "test": "vitest --passWithNoTests"
+  }
+}

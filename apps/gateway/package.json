@@ -6,6 +6,7 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
+    "@local/cache": "workspace:*",
     "@local/supabase-types": "workspace:*",
     "@supabase/supabase-js": "^2.32.0",
     "@xenova/transformers": "^2.10.1",
