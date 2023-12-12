@@ -3,6 +3,11 @@
 This is a playground for [supabase](https://supabase.com)d
 [LangChain](https://js.langchain.com/docs/get_started/introduction) project.
 
+Its aim is to provide some structure and a starting point for the project by putting together
+a stack of open-source tools that can help developing LangChain chains, tools and apps.
+It considers the usual deterministic approach of engineering and tries to provide a set of tools
+that allow assessing the quality of the chain and its tools.
+
 [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com)
 
 ## Prerequisites
