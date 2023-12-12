@@ -43,8 +43,7 @@ In order to run supabase locally, you also need to ensure
 
 ### Environment variables
 
-You will need to create a `.env` file in the ["gateway" app](./apps/gateway)
-directory and should look like:
+You will need to create a `.env` in the root directory and should look like:
 
 ```txt
 OPENAI_API_KEY="<no i'm not giving you mine>"
