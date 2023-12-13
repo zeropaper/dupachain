@@ -8,12 +8,15 @@ import { StringOutputParser } from "langchain/schema/output_parser";
 import { formatDocumentsAsString } from "langchain/util/document";
 import { getOpenAIStore } from "../tools/stores";
 import { ChatMessagesRow } from "../types";
+import { Callbacks } from "langchain/callbacks";
 
 export async function runChain({
   chatMessages,
+  callbacks,
 }: {
   chatMessages: ChatMessagesRow[];
   systemPrompt: string;
+  callbacks?: Callbacks;
 }) {
   const lastUserMessage = chatMessages.at(-2);
   if (!lastUserMessage || lastUserMessage.role !== "user") {
@@ -23,11 +26,14 @@ export async function runChain({
   const model = new ChatOpenAI({
     // https://platform.openai.com/docs/models/gpt-3-5
     modelName: "gpt-3.5-turbo-1106",
+    callbacks,
   });
 
   const store = await getOpenAIStore();
 
-  const retriever = store.asRetriever();
+  const retriever = store.asRetriever({
+    callbacks,
+  });
 
   const prompt =
     PromptTemplate.fromTemplate(`You're an AI assistant who answers questions about documents.
@@ -59,6 +65,6 @@ Question: {question}`);
     new StringOutputParser(),
   ]);
 
-  const answer = await chain.invoke(lastUserMessage.content);
+  const answer = await chain.invoke(lastUserMessage.content, { callbacks });
   return answer;
 }
