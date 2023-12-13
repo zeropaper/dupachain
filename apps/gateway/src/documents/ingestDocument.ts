@@ -2,6 +2,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Json } from "../types";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { getHftStore, getOpenAIStore } from "../tools/stores";
+import { createServiceClient } from "../createServiceClient";
 
 export async function ingestDocument(options: {
   content: string;
@@ -25,14 +26,28 @@ export async function ingestDocument(options: {
     content,
     metadata,
     reference,
-    embeddingType = "openai",
+    embeddingType = "hft",
   } = options;
+
+  const supabase = createServiceClient();
+
+  const { error } = await supabase.from("documents").upsert({
+    reference,
+    content,
+    metadata,
+    format,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   let store: SupabaseVectorStore;
   let splitter: RecursiveCharacterTextSplitter;
 
   switch (embeddingType) {
     case "openai":
+      await supabase.rpc("delete_openai_embeddings", { reference });
       store = getOpenAIStore();
       splitter = RecursiveCharacterTextSplitter.fromLanguage(format, {
         chunkSize: 1024,
@@ -40,6 +55,7 @@ export async function ingestDocument(options: {
       });
       break;
     case "hft":
+      await supabase.rpc("delete_hft_embeddings", { reference });
       store = getHftStore();
       splitter = RecursiveCharacterTextSplitter.fromLanguage(format, {
         chunkSize: 256,
@@ -61,5 +77,6 @@ export async function ingestDocument(options: {
     ],
   );
 
-  return store.addDocuments(splitDocuments);
+  // not awaiting on purpose
+  store.addDocuments(splitDocuments);
 }

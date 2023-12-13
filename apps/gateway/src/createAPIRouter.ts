@@ -14,19 +14,7 @@ export function createAPIRouter(logger: Logger) {
     // use a try-catch because not only dealing with supbabase errors
     try {
       const document = postDocumentBodySchema.parse(req.body);
-      const supabase = createServiceClient();
-      const { error } = await supabase.from("documents").upsert(document);
-
-      if (error) {
-        logger.error({
-          message: "Document upsert error",
-          error,
-        });
-        return next(new Error("Document upsert error"));
-      }
-
-      // not awaiting
-      ingestDocument(document);
+      await ingestDocument(document);
 
       res.status(204).end();
     } catch (err) {
