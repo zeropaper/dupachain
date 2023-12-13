@@ -15,8 +15,18 @@ export function createAPIRouter(logger: Logger) {
     try {
       const document = postDocumentBodySchema.parse(req.body);
       const supabase = createServiceClient();
+      const { error } = await supabase.from("documents").upsert(document);
 
-      await ingestDocument(document);
+      if (error) {
+        logger.error({
+          message: "Document upsert error",
+          error,
+        });
+        return next(new Error("Document upsert error"));
+      }
+
+      // not awaiting
+      ingestDocument(document);
 
       res.status(204).end();
     } catch (err) {
