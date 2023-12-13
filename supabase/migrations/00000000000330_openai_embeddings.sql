@@ -50,13 +50,13 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION delete_openai_embeddings(doc_id text)
+CREATE OR REPLACE FUNCTION delete_openai_embeddings(reference text)
   RETURNS VOID
   LANGUAGE plpgsql
   AS $$
 BEGIN
   DELETE FROM public.openai_embeddings
-  WHERE metadata ->> 'document_id' = doc_id::text;
+  WHERE metadata ->> 'reference' = reference::text;
 END;
 $$;
 
@@ -66,7 +66,7 @@ CREATE OR REPLACE FUNCTION cleanup_openai_embeddings()
   AS $$
 BEGIN
   DELETE FROM public.openai_embeddings
-  WHERE metadata ->> 'document_id' = OLD.id::text;
+  WHERE metadata ->> 'reference' = OLD.reference::text;
   RETURN OLD;
 END;
 $$;
