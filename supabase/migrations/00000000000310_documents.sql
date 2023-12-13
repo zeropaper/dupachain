@@ -13,9 +13,13 @@ CREATE TABLE "public"."documents"(
   "updated_at" timestamp with time zone NOT NULL DEFAULT (now() AT TIME ZONE 'utc'::text)
 );
 
+ALTER TABLE public.documents ADD CONSTRAINT unique_document_reference UNIQUE (reference);
+
 ALTER TABLE "public"."documents" ENABLE ROW LEVEL SECURITY;
 
 CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree(id);
+
+CREATE INDEX idx_document_reference ON public.documents(reference);
 
 ALTER TABLE "public"."documents"
   ADD CONSTRAINT "documents_pkey" PRIMARY KEY USING INDEX "documents_pkey";
