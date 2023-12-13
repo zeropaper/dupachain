@@ -88,7 +88,7 @@ describe("app", () => {
         'creates a document with a reference, content, metadata for "%s" format',
         async (format, content) => {
           const response = await requestApp()
-            .post("/documents")
+            .post("/api/documents")
             .send({
               reference: "test",
               content,
