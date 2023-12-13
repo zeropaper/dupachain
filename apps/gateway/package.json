@@ -2,6 +2,7 @@
   "name": "gateway",
   "private": true,
   "scripts": {
+    "test": "vitest",
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts"
   },
