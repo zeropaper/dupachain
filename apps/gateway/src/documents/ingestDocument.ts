@@ -31,15 +31,20 @@ export async function ingestDocument(options: {
 
   const supabase = createServiceClient();
 
-  const { error } = await supabase.from("documents").upsert({
-    reference,
-    content,
-    metadata,
-    format,
-  });
+  const { error } = await supabase.from("documents").upsert(
+    {
+      reference,
+      content,
+      metadata,
+      format,
+    },
+    {
+      onConflict: "reference",
+    },
+  );
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(`Error upserting document: ${error.message}`);
   }
 
   let store: SupabaseVectorStore;

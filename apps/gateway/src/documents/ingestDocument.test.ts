@@ -37,7 +37,7 @@ describe.each(["hft", "openai"] as const)(
           format,
           embeddingType,
         }),
-      ).resolves.toBeDefined();
+      ).resolves.toBeUndefined();
     });
   },
 );
