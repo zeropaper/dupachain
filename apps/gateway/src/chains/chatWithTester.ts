@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { ChatMessagesRow } from "../types";
-import { RunChain } from "../types";
+import { ChatMessagesRow, RunChain } from "../types";
+import { Callbacks } from "langchain/callbacks";
 
 export type Details = ["tester" | "agent", number, any, any][];
 
@@ -19,12 +19,14 @@ export async function chatWithTester({
   testerDescription,
   maxCalls = 10,
   model = "gpt-3.5-turbo-1106",
+  callbacks,
 }: {
   runChain: RunChain;
   systemPrompt: string;
   testerDescription: string;
   maxCalls?: number;
   model?: "gpt-3.5-turbo-1106" | "gpt-4-1106-preview";
+  callbacks?: Callbacks;
 }): Promise<{ details: Details }> {
   const openai = new OpenAI();
 
@@ -54,7 +56,6 @@ export async function chatWithTester({
       role: "assistant",
       content: info.message,
     });
-    console.log("\x1b[33mtester\n%s\x1b[0m", JSON.stringify(info, null, 2));
     if (info.goalMet) {
       break;
     }
@@ -72,13 +73,15 @@ export async function chatWithTester({
           role: msg.role === "assistant" ? "user" : "assistant",
         })) as ChatMessagesRow[],
     };
-    const chainResult = await runChain(agentSetup);
+    const chainResult = await runChain({
+      ...agentSetup,
+      callbacks,
+    });
     details.push(["agent", Date.now(), agentSetup, chainResult]);
     messages.push({
       role: "assistant",
       content: chainResult,
     });
-    console.log("\x1b[34magent\n%s\x1b[0m", messages.at(-1)?.content);
   }
 
   return {

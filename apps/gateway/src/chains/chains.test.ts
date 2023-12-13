@@ -2,6 +2,7 @@ import { config } from "dotenv";
 import { vi, describe, it, expect } from "vitest";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
+import { CallbackHandler } from "langfuse-langchain";
 
 import { FileSystemCache } from "@local/cache";
 import {
@@ -77,6 +78,17 @@ describe.each(runs)("%s chain", (chainName, setups) => {
         }[] = [];
         for (const testerDescription of testerDescriptions) {
           try {
+            const {
+              LANGFUSE_BASE_URL,
+              LANGFUSE_PUBLIC_KEY,
+              LANGFUSE_SECRET_KEY,
+            } = await import("../config");
+            const agentCallbackHandler = new CallbackHandler({
+              publicKey: LANGFUSE_PUBLIC_KEY,
+              secretKey: LANGFUSE_SECRET_KEY,
+              baseUrl: LANGFUSE_BASE_URL,
+            });
+
             const setup = {
               systemPrompt,
               testerDescription,
@@ -93,9 +105,14 @@ describe.each(runs)("%s chain", (chainName, setups) => {
             }
             const result = await chatWithTester({
               runChain,
+              callbacks: [
+                // @ts-expect-error - langfuse's version of langchain seems outdated
+                agentCallbackHandler,
+              ],
               ...setup,
             });
             await cache.set(cacheKey, result.details);
+            await agentCallbackHandler.shutdownAsync();
             results.push({
               finished: true,
               output: result.details,
