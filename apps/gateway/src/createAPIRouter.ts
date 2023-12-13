@@ -3,21 +3,18 @@ import { type Logger } from "pino";
 import { addUserMessage } from "./chats/addUserMessage";
 import { postDocumentBodySchema, postMessageBodySchema } from "./schemas";
 import { ingestDocument } from "./documents/ingestDocument";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@local/supabase-types";
+import { createServiceClient } from "./createServiceClient";
+import { createAnonClient } from "./createAnonClient";
 
-export function createAPIRouter(
-  logger: Logger,
-  supabase: SupabaseClient<Database>,
-) {
+export function createAPIRouter(logger: Logger) {
   const router = express.Router();
 
   // for vector store ingestion
   router.post("/documents", express.json(), async (req, res, next) => {
+    // use a try-catch because not only dealing with supbabase errors
     try {
-      // use a try-catch because not only dealing with supbabase errors
       const document = postDocumentBodySchema.parse(req.body);
-      logger.info("document", document);
+      const supabase = createServiceClient();
 
       await ingestDocument(document);
 
@@ -33,6 +30,7 @@ export function createAPIRouter(
 
   // for starting a chat - TODO: consider all chat interactions over sockets
   router.post("/chats", express.json(), async (req, res, next) => {
+    const supabase = createAnonClient();
     const insertChat = await supabase
       .from("chats")
       .insert({})
@@ -51,6 +49,7 @@ export function createAPIRouter(
 
   // for sending a message - TODO: consider all chat interactions over sockets
   router.post("/messages", express.json(), async (req, res, next) => {
+    const supabase = createAnonClient();
     const { chat_id, content } = postMessageBodySchema.parse(req.body);
     const insertMessage = await addUserMessage(supabase, { chat_id, content });
 

@@ -91,7 +91,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
     res.sendFile(__dirname + "/index.html");
   });
 
-  const router = createAPIRouter(logger, supabase);
+  const router = createAPIRouter(logger);
 
   app.use("/api", router);
 
