@@ -1,25 +1,6 @@
+import { resolve } from "node:path";
+import { FileSystemCache } from "@local/cache";
 import { CheerioAPI, load } from "cheerio";
-import { writeFile, stat, readFile } from "fs/promises";
-import { resolve } from "path";
-
-async function fileExists(path: string) {
-  try {
-    await stat(path);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-const cacheFilePath = resolve(__dirname, "cache.json");
-async function readCacheFile() {
-  return (await fileExists(cacheFilePath))
-    ? JSON.parse(await readFile(cacheFilePath, "utf-8"))
-    : null;
-}
-async function writeCacheFile(data: any) {
-  return writeFile(cacheFilePath, JSON.stringify(data, null, 2));
-}
 
 type PageType = "snowboards" | "bindings" | "boots" | "pages" | "team";
 type ScrapMap = Record<
@@ -563,8 +544,12 @@ ${product.content}`,
   }
 }
 
+const cache = new FileSystemCache<DocumentBase[]>({
+  path: resolve(__dirname, ".cache"),
+});
+
 async function main() {
-  const cached = await readCacheFile();
+  const cached = await cache.get("scrap-nitro");
 
   if (cached) {
     await processScrap(cached);
@@ -588,7 +573,7 @@ async function main() {
     .map((page) => page.value)
     .flat()
     .map((page) => page.value);
-  await writeCacheFile(normalized);
+  await cache.set("scrap-nitro", normalized);
   await processScrap(normalized);
   console.log("done");
 }

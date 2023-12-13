@@ -176,6 +176,9 @@ importers:
 
   scripts:
     dependencies:
+      '@local/cache':
+        specifier: workspace:*
+        version: link:../packages/cache
       '@local/supabase-types':
         specifier: workspace:*
         version: link:../packages/supabase-types
