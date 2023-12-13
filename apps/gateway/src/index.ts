@@ -1,15 +1,21 @@
-import "dotenv/config";
+import { resolve } from "path";
+import { config } from "dotenv";
 
 import pino from "pino";
-import { PORT } from "./config";
-import createSetup from "./createSetup";
+
+// the dotenv config must be called before importing anything else
+// it is supposed to be located at the root of the project
+config({ path: resolve(__dirname, "../../../.env") });
 
 const logger = pino();
 
-createSetup(logger)
-  .then(({ server }) => {
-    server.listen(PORT, () => {
-      logger.info(`listening on port ${PORT}`);
-    });
-  })
-  .catch((err) => logger.fatal(err));
+async function main() {
+  const createSetup = await import("./createSetup").then((m) => m.default);
+  const { PORT } = await import("./config");
+  const setup = await createSetup(logger);
+  setup.server.listen(PORT, () => {
+    console.log(`listening on port ${PORT}`);
+  });
+}
+
+main();
