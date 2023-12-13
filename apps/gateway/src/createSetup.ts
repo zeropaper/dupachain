@@ -92,8 +92,10 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
     res.sendFile(__dirname + "/index.html");
   });
 
+  const router = express.Router();
+
   // for vector store ingestion
-  app.post("/documents", express.json(), async (req, res, next) => {
+  router.post("/documents", express.json(), async (req, res, next) => {
     try {
       // use a try-catch because not only dealing with supbabase errors
       const document = postDocumentBodySchema.parse(req.body);
@@ -112,7 +114,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   });
 
   // for starting a chat - TODO: consider all chat interactions over sockets
-  app.post("/chats", express.json(), async (req, res, next) => {
+  router.post("/chats", express.json(), async (req, res, next) => {
     const insertChat = await supabase
       .from("chats")
       .insert({})
@@ -130,7 +132,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   });
 
   // for sending a message - TODO: consider all chat interactions over sockets
-  app.post("/messages", express.json(), async (req, res, next) => {
+  router.post("/messages", express.json(), async (req, res, next) => {
     const { chat_id, content } = postMessageBodySchema.parse(req.body);
     const insertMessage = await addUserMessage(supabase, { chat_id, content });
 
@@ -144,6 +146,8 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 
     res.status(insertMessage.status).send(JSON.stringify(insertMessage.data));
   });
+
+  app.use("/api", router);
 
   supabase
     .channel("chat_messages")
