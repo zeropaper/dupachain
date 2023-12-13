@@ -78,10 +78,8 @@ export async function chatWithTester({
       callbacks,
     });
     details.push(["agent", Date.now(), agentSetup, chainResult]);
-    messages.push({
-      role: "assistant",
-      content: chainResult,
-    });
+    // ! replace the content of the last message with the chain result
+    messages[messages.length - 1].content = chainResult;
   }
 
   return {
