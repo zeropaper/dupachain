@@ -152,13 +152,13 @@ export interface Database {
     Functions: {
       delete_hft_embeddings: {
         Args: {
-          doc_id: string;
+          reference: string;
         };
         Returns: undefined;
       };
       delete_openai_embeddings: {
         Args: {
-          doc_id: string;
+          reference: string;
         };
         Returns: undefined;
       };
