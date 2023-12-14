@@ -48,16 +48,7 @@ export async function answerUser(
       })
       .eq("id", lastAssistantMessage!.id)
       .select()
-      .single()
-      .then(({ data, error }) => {
-        if (error) {
-          throw new Error(error.message);
-        }
-        if (!data) {
-          throw new Error("Could not update assistant message");
-        }
-        return data;
-      });
+      .single();
   }
 
   // TODO: should the moderation and intent determination be done in parallel?
