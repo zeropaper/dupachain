@@ -14,8 +14,12 @@ export async function addUserMessage(
     finished: true,
   });
   if (insertUserMessage.error) {
-    console.error("insertUserMessage error", insertUserMessage.error);
-    return { error: insertUserMessage.error };
+    return {
+      error: new Error(
+        `Could not insert user message: ${insertUserMessage.error}`,
+      ),
+      data: null,
+    };
   }
   const insertAssistantMessage = await supabase
     .from("chat_messages")
@@ -28,8 +32,12 @@ export async function addUserMessage(
     .select()
     .single();
   if (insertAssistantMessage.error) {
-    console.error("insertAssistantMessage error", insertAssistantMessage.error);
-    return { error: insertAssistantMessage.error };
+    return {
+      error: new Error(
+        `Could not insert assistant message: ${insertAssistantMessage.error}`,
+      ),
+      data: null,
+    };
   }
 
   // not awaiting this because we don't want to block the response
