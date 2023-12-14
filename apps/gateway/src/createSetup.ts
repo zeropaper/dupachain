@@ -110,13 +110,44 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 
   io.on("connection", (socket) => {
     logger.info("a user connected");
-    socket.on("subscribe", async (chatId: string) => {
-      logger.info("subscribe", chatId);
-      await subscribeToChat({ chatId, socket, logger });
+    socket.on("start", async (cb) => {
+      logger.info("start");
+      const { data, error } = await supabase
+        .from("chats")
+        .insert({})
+        .select("id")
+        .single();
+      if (error) {
+        logger.error(error);
+        cb({ status: "error", error: error.message });
+        return;
+      }
+      if (!data) {
+        logger.error("no data");
+        cb({ status: "error", error: "no data" });
+        return;
+      }
+      subscribeToChat({ chatId: data.id, socket, logger })
+        .then(() => {
+          cb({ status: "ok", result: { chat_id: data.id } });
+        })
+        .catch((error) => {
+          cb({ status: "error", error: error.message });
+        });
     });
-    socket.on("chat message", async (data) => {
-      logger.info("incoming user message", data);
-      await addUserMessage(supabase, data);
+    socket.on("chat message", async (data, cb) => {
+      logger.info(data);
+      addUserMessage(supabase, data)
+        .then(({ data, error }) => {
+          cb(
+            error
+              ? { status: "error", error: error.message }
+              : { status: "ok", result: data },
+          );
+        })
+        .catch((error) => {
+          cb({ status: "error", error: error.message });
+        });
     });
     socket.on("disconnect", () => {
       logger.info("user disconnected");
