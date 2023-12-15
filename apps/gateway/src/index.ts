@@ -7,7 +7,14 @@ import pino from "pino";
 // it is supposed to be located at the root of the project
 config({ path: resolve(__dirname, "../../../.env") });
 
-const logger = pino();
+const logger =
+  process.env.NODE_ENV === "production"
+    ? pino()
+    : pino({
+        transport: {
+          target: "pino-pretty",
+        },
+      });
 
 async function main() {
   const createSetup = await import("./createSetup").then((m) => m.default);
