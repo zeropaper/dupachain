@@ -1,6 +1,7 @@
 CREATE TYPE "public"."document_format" AS enum(
   'html',
-  'markdown'
+  'markdown',
+  'json'
 );
 
 CREATE TABLE "public"."documents"(

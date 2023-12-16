@@ -192,7 +192,7 @@ export interface Database {
       };
     };
     Enums: {
-      document_format: "html" | "markdown";
+      document_format: "html" | "markdown" | "json";
     };
     CompositeTypes: {
       [_ in never]: never;

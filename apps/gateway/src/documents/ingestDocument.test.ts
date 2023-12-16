@@ -16,6 +16,7 @@ const runs = [
     "markdown",
     "# test\n## test\n### test\n#### test\n##### test\n###### test\n\ntest",
   ],
+  ["json", '{"test": "test"}'],
 ] as const;
 
 describe.each(["hft", "openai"] as const)(

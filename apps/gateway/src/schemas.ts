@@ -17,7 +17,7 @@ export const postDocumentBodySchema = z.object({
   reference: z.string(),
   content: z.string(),
   metadata: jsonSchema,
-  format: z.enum(["html", "markdown"]),
+  format: z.enum(["html", "markdown", "json"]),
 });
 // for posting messages
 

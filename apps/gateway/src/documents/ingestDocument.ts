@@ -3,22 +3,13 @@ import { Json } from "../types";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { getHftStore, getOpenAIStore } from "../tools/stores";
 import { createServiceClient } from "../createServiceClient";
+import { DatabaseTable } from "@local/supabase-types";
 
 export async function ingestDocument(options: {
   content: string;
-  metadata:
-    | ((string | number | boolean | { [key: string]: Json } | Json[]) &
-        (
-          | string
-          | number
-          | boolean
-          | { [key: string]: Json }
-          | Json[]
-          | undefined
-        ))
-    | null;
+  metadata: Json;
   reference: string;
-  format: "html" | "markdown";
+  format: DatabaseTable<"documents", "Insert">["format"];
   embeddingType?: "openai" | "hft";
 }) {
   const {
@@ -45,6 +36,10 @@ export async function ingestDocument(options: {
 
   if (error) {
     throw new Error(`Error upserting document: ${error.message}`);
+  }
+
+  if (format !== "html" && format !== "markdown") {
+    return;
   }
 
   let store: SupabaseVectorStore;
