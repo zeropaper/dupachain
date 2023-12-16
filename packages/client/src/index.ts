@@ -80,6 +80,43 @@ export function getClient(url?: string) {
     });
   }
 
+  function join(newChatId: string) {
+    socket = url ? io(url) : io();
+    if (chatId && chatId === newChatId) {
+      return Promise.resolve();
+    }
+    if (chatId && chatId !== newChatId) {
+      return Promise.reject(new Error("chat already started"));
+    }
+    return new Promise((resolve, reject) => {
+      socket
+        .timeout(5000)
+        .emit(
+          "join",
+          newChatId,
+          (
+            err: unknown,
+            ack:
+              | { status: "error"; error: string }
+              | { status: "ok"; result: ChatMessageInfo[] },
+          ) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            if (ack.status === "error") {
+              reject(new Error(`socket error: ${ack.error}`));
+              return;
+            }
+            chatId = newChatId;
+            chats[chatId!] = ack.result;
+            resolve(ack.result);
+            commit();
+          },
+        );
+    });
+  }
+
   function stop(disconnect: boolean = false) {
     if (socket && disconnect) socket.disconnect();
     chatId = null;
@@ -127,6 +164,7 @@ export function getClient(url?: string) {
     subscribe,
     getMessages,
     start,
+    join,
     stop,
     send,
   };

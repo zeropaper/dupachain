@@ -159,6 +159,57 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   io.on("connection", (socket) => {
     logger.info({ op: "socket connection", socket: socket.id });
 
+    socket.on("join", async (chatId, cb = () => {}) => {
+      anonClient
+        .from("chat_messages")
+        .select("content, role, created_at, updated_at, finished, id, chat_id")
+        .eq("chat_id", chatId)
+        .order("created_at", { ascending: true })
+        .then(({ data, error }) => {
+          if (error) {
+            logger.error({
+              op: "join",
+              socket: socket.id,
+              error,
+            });
+            cb({ status: "error", error: error.message });
+            return;
+          }
+          if (!data) {
+            logger.error({
+              op: "join",
+              socket: socket.id,
+              error: "no data",
+            });
+            cb({ status: "error", error: "no data" });
+            return;
+          }
+          logger.info({
+            op: "join",
+            socket: socket.id,
+            chatId,
+            messages: data,
+          });
+          subscribeToChat({ chatId, socket, logger, client: anonClient })
+            .then(() => {
+              logger.info({
+                op: "socket subscribe",
+                socket: socket.id,
+                chatId,
+              });
+              cb({ status: "ok", result: data });
+            })
+            .catch((error) => {
+              logger.error({
+                op: "socket subscribe",
+                socket: socket.id,
+                error,
+              });
+              cb({ status: "error", error: error.message });
+            });
+        });
+    });
+
     socket.on("start", async (cb = () => {}) => {
       const { data, error } = await anonClient
         .from("chats")
