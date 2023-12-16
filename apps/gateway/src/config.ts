@@ -14,7 +14,7 @@ export const {
   LANGFUSE_SECRET_KEY,
   PORT,
   PUBLIC_DIR,
-  CORS_ORIGIN,
+  CORS_ORIGINS,
 } = parseEnv(process.env, {
   OPENAI_API_KEY: z.string(),
   SERPAPI_API_KEY: z.string(),
@@ -27,5 +27,5 @@ export const {
   LANGFUSE_SECRET_KEY: z.string(),
   PORT: z.string().default("3030"),
   PUBLIC_DIR: z.string().default(resolve(__dirname, "..", "public")),
-  CORS_ORIGIN: z.string().optional(),
+  CORS_ORIGINS: z.string().optional(),
 });

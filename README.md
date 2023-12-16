@@ -52,6 +52,8 @@ OPENAI_API_KEY="<no i'm not giving you mine>"
 SUPABASE_URL="<usually: http://127.0.0.1:54321>"
 SUPABASE_ANON_KEY="<the anon key>"
 SUPABASE_SERVICE_ROLE_KEY="<the service key>"
+
+CORS_ORIGINS="http://localhost:3030,http://localhost:5173"
 ```
 
 ## Structure

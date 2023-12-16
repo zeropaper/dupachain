@@ -96,13 +96,13 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 }> {
   const app = express();
   const server = createServer(app);
-  const { PUBLIC_DIR, CORS_ORIGIN } = await import("./config");
+  const { PUBLIC_DIR, CORS_ORIGINS } = await import("./config");
   const anonClient = await createAnonClient();
 
-  const allowedOrigins = CORS_ORIGIN ? CORS_ORIGIN.split(",") : [];
+  const allowedOrigins = CORS_ORIGINS ? CORS_ORIGINS.split(",") : [];
   const io = new SocketIOServer(
     server,
-    CORS_ORIGIN
+    CORS_ORIGINS
       ? {
           cors: {
             origin: "*",
@@ -117,7 +117,9 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
               cb(null, false);
               return;
             }
-            cb(null, allowedOrigins.includes(origin));
+            const allowed = allowedOrigins.includes(origin);
+            logger.info({ op: "socket.io allowRequest", origin, allowed });
+            cb(null, allowed);
           },
         }
       : {},
