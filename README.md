@@ -23,6 +23,11 @@ that allow assessing the quality of the chain and its tools.
 In order to run supabase locally, you also need to ensure
 [their prerequisites are met](https://github.com/supabase/supabase/blob/master/DEVELOPERS.md#local-development).
 
+### Langfuse
+
+Is used log LLM and chat model calls. You can run it locally or use their hosted version.
+The integration is done through the [`langfuse-langchain` package](https://langfuse.com/docs/langchain/typescript).
+
 ## Setup
 
 1. `pnpm i` to install the dependencies
@@ -52,6 +57,10 @@ OPENAI_API_KEY="<no i'm not giving you mine>"
 SUPABASE_URL="<usually: http://127.0.0.1:54321>"
 SUPABASE_ANON_KEY="<the anon key>"
 SUPABASE_SERVICE_ROLE_KEY="<the service key>"
+
+LANGFUSE_BASE_URL="http://localhost:8000"
+LANGFUSE_PUBLIC_KEY="pk-lf-79ac5ed4-08c8-4998-befa-5aaa859e0bca"
+LANGFUSE_SECRET_KEY="sk-lf-ab3c17f2-1541-4512-bb0e-05e36cc3f740"
 
 CORS_ORIGINS="http://localhost:3030,http://localhost:5173"
 ```
