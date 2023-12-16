@@ -46,14 +46,12 @@ function makeSupabaseEventHandler({ logger }: { logger: Logger }) {
       [key: string]: any;
     }>,
   ) {
-    logger.info("got chat message update", payload);
     switch (payload.eventType) {
       case "INSERT":
       case "UPDATE":
         const chatId = payload.new.chat_id;
         const chatSubscribers = subscribers.get(chatId);
         if (!chatSubscribers) {
-          logger.info(`no subscribers for chat ${chatId}`);
           return;
         }
         chatSubscribers.forEach((socket) => {
@@ -61,7 +59,6 @@ function makeSupabaseEventHandler({ logger }: { logger: Logger }) {
         });
         break;
       default:
-        logger.info(`ignoring event type ${payload.eventType}`);
         return;
     }
   };
@@ -132,7 +129,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
     .subscribe();
 
   io.on("connection", (socket) => {
-    logger.info("a user connected");
+    logger.info({ op: "socket connection", socket: socket.id });
     socket.on("start", async (cb) => {
       logger.info("start");
       const { data, error } = await supabase
@@ -141,17 +138,30 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
         .select("id")
         .single();
       if (error) {
-        logger.error(error);
+        logger.error({
+          op: "socket start",
+          socket: socket.id,
+          error,
+        });
         cb({ status: "error", error: error.message });
         return;
       }
       if (!data) {
-        logger.error("no data");
+        logger.error({
+          op: "socket start",
+          socket: socket.id,
+          error: "no data",
+        });
         cb({ status: "error", error: "no data" });
         return;
       }
       subscribeToChat({ chatId: data.id, socket, logger })
         .then(() => {
+          logger.info({
+            op: "socket subscribe",
+            socket: socket.id,
+            chatId: data.id,
+          });
           cb({ status: "ok", result: { chat_id: data.id } });
         })
         .catch((error) => {
