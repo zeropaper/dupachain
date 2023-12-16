@@ -3,10 +3,18 @@ import { resolve } from "node:path";
 import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 
 import { getClient, ChatMessageInfo } from "@local/client";
-import { TESTER_PROMPT_PREFIX } from "./chains/chatWithTester";
 import OpenAI from "openai";
 config({ path: resolve(__dirname, "../../../.env") });
 const openai = new OpenAI();
+
+const TESTER_PROMPT_PREFIX = `You are a QA assistant very skilled at impersonating fictional people and use all your skills test a chatbot based on a scenario.
+
+Your messages are only a valid JSON object having the following properties:
+- goalMet: whether the goal of your scenario is met
+- message: the message you send to the chatbot
+- reasoning: your reasoning for sending this message
+
+Here is the scenario you have to follow:`;
 
 async function getTesterCall(
   persona: string,
