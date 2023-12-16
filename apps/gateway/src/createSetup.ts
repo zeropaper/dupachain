@@ -73,9 +73,32 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 }> {
   const app = express();
   const server = createServer(app);
-  const io = new SocketIOServer(server);
-  const { PUBLIC_DIR } = await import("./config");
-  const supabase = await createAnonClient();
+  const { PUBLIC_DIR, CORS_ORIGIN } = await import("./config");
+  const anonClient = await createAnonClient();
+
+  const allowedOrigins = CORS_ORIGIN ? CORS_ORIGIN.split(",") : [];
+  const io = new SocketIOServer(
+    server,
+    CORS_ORIGIN
+      ? {
+          cors: {
+            origin: "*",
+          },
+          allowRequest: (req, cb) => {
+            const origin = req.headers.origin;
+            if (!origin) {
+              logger.info({
+                op: "socket.io allowRequest",
+                origin: "no origin",
+              });
+              cb(null, false);
+              return;
+            }
+            cb(null, allowedOrigins.includes(origin));
+          },
+        }
+      : {},
+  );
 
   // logging - https://www.npmjs.com/package/pino-http#example
   app.use(pinoHttp({ logger }));
