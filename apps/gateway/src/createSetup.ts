@@ -8,8 +8,12 @@ import pinoHttp from "pino-http";
 
 import { createAnonClient } from "./createAnonClient";
 import { addUserMessage } from "./chats/addUserMessage";
-import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import {
+  RealtimePostgresChangesPayload,
+  SupabaseClient,
+} from "@supabase/supabase-js";
 import { createAPIRouter as createAPIRouter } from "./createAPIRouter";
+import { Database } from "@local/supabase-types";
 
 // for getting updates
 const subscribers = new Map<string, Set<Socket>>();
@@ -17,10 +21,12 @@ async function subscribeToChat({
   chatId,
   socket,
   logger,
+  client: anonClient,
 }: {
   chatId: string;
   socket: Socket;
   logger: Logger;
+  client: SupabaseClient<Database>;
 }): Promise<void> {
   if (!subscribers.has(chatId)) {
     subscribers.set(chatId, new Set());
@@ -28,19 +34,39 @@ async function subscribeToChat({
 
   const chatSubscribers = subscribers.get(chatId)!;
   chatSubscribers.add(socket);
-  logger.info(
-    `added subscriber to chat ${chatId}, now has ${chatSubscribers.size} subscribers`,
-  );
+
+  logger.info({
+    op: "chat connect",
+    socket: socket.id,
+    subscribersCount: chatSubscribers.size,
+  });
+
+  socket.on("user message", async (data, cb = () => {}) => {
+    logger.info({ op: "user message", socket: socket.id, data });
+    addUserMessage(anonClient, data, logger)
+      .then(({ data, error }) => {
+        cb(
+          error
+            ? { status: "error", error: error.message }
+            : { status: "ok", result: data },
+        );
+      })
+      .catch((error) => {
+        cb({ status: "error", error: error.message });
+      });
+  });
 
   socket.on("disconnect", () => {
     chatSubscribers.delete(socket);
-    logger.info(
-      `removed subscriber from chat ${chatId}, now has ${chatSubscribers.size} subscribers`,
-    );
+    logger.info({
+      op: "chat diconnect",
+      socket: socket.id,
+      subscribersCount: chatSubscribers.size,
+    });
   });
 }
 
-function makeSupabaseEventHandler({ logger }: { logger: Logger }) {
+function makeSupabaseEventHandler() {
   return function handleSupabaseEvent(
     payload: RealtimePostgresChangesPayload<{
       [key: string]: any;
@@ -115,7 +141,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 
   app.use("/api", router);
 
-  supabase
+  anonClient
     .channel("chat_messages")
     .on(
       "postgres_changes",
@@ -124,15 +150,15 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
         schema: "public",
         table: "chat_messages",
       },
-      makeSupabaseEventHandler({ logger }),
+      makeSupabaseEventHandler(),
     )
     .subscribe();
 
   io.on("connection", (socket) => {
     logger.info({ op: "socket connection", socket: socket.id });
-    socket.on("start", async (cb) => {
-      logger.info("start");
-      const { data, error } = await supabase
+
+    socket.on("start", async (cb = () => {}) => {
+      const { data, error } = await anonClient
         .from("chats")
         .insert({})
         .select("id")
@@ -155,7 +181,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
         cb({ status: "error", error: "no data" });
         return;
       }
-      subscribeToChat({ chatId: data.id, socket, logger })
+      subscribeToChat({ chatId: data.id, socket, logger, client: anonClient })
         .then(() => {
           logger.info({
             op: "socket subscribe",
@@ -165,25 +191,13 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
           cb({ status: "ok", result: { chat_id: data.id } });
         })
         .catch((error) => {
+          logger.error({
+            op: "socket subscribe",
+            socket: socket.id,
+            error,
+          });
           cb({ status: "error", error: error.message });
         });
-    });
-    socket.on("chat message", async (data, cb) => {
-      logger.info(data);
-      addUserMessage(supabase, data)
-        .then(({ data, error }) => {
-          cb(
-            error
-              ? { status: "error", error: error.message }
-              : { status: "ok", result: data },
-          );
-        })
-        .catch((error) => {
-          cb({ status: "error", error: error.message });
-        });
-    });
-    socket.on("disconnect", () => {
-      logger.info("user disconnected");
     });
   });
 

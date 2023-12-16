@@ -3,12 +3,14 @@ import { answerUser } from "./answerUser";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
 import { postMessageBodySchema } from "../schemas";
+import { Logger } from "pino";
 
 export async function addUserMessage(
-  supabase: SupabaseClient<Database>,
+  anonClient: SupabaseClient<Database>,
   message: z.infer<typeof postMessageBodySchema>,
+  logger: Logger,
 ) {
-  const insertUserMessage = await supabase.from("chat_messages").insert({
+  const insertUserMessage = await anonClient.from("chat_messages").insert({
     ...postMessageBodySchema.parse(message),
     role: "user",
     finished: true,
@@ -21,7 +23,7 @@ export async function addUserMessage(
       data: null,
     };
   }
-  const insertAssistantMessage = await supabase
+  const insertAssistantMessage = await anonClient
     .from("chat_messages")
     .insert({
       chat_id: message.chat_id,
@@ -41,7 +43,9 @@ export async function addUserMessage(
   }
 
   // not awaiting this because we don't want to block the response
-  answerUser(supabase, message.chat_id);
+  answerUser(message.chat_id, logger).catch((error) => {
+    logger.error({ error, message });
+  });
 
   return insertAssistantMessage;
 }

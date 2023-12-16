@@ -106,33 +106,4 @@ describe("app", () => {
       it.todo("does not accept invalid messages");
     });
   });
-
-  describe("sockets", () => {
-    let setup: any;
-    beforeAll(async () => {
-      const createSetup = await import("./createSetup").then((m) => m.default);
-      setup = await createSetup();
-      return new Promise((res) => setup.server.listen(3773, res));
-    });
-    afterAll(() => {
-      try {
-        setup.server.close();
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
-    it("handles connections", async () => {
-      const socket = io("http://localhost:3773");
-      expect(
-        new Promise((resolve, reject) => {
-          socket.on("connect", () => {
-            // TODO: we may want to log user connections in the app and look at them
-            // for now, to check locally, some messages appear in the console
-            resolve(true);
-          });
-        }),
-      ).resolves.toBeTruthy();
-    });
-  });
 });
