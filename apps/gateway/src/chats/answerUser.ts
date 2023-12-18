@@ -1,4 +1,3 @@
-import determineUserIntent from "./determineUserIntent";
 import { handleModeration } from "./handleModeration";
 import { runChain } from "../chains/toolCalling";
 import { createServiceClient } from "../createServiceClient";
@@ -81,10 +80,6 @@ export async function answerUser(chat: ChatsRow, logger: Logger) {
     await handleModeration({
       chatMessages,
     });
-
-    // const intent = await determineUserIntent({
-    //   chatMessages,
-    // });
 
     const agentCallbackHandler = new CallbackHandler({
       publicKey: LANGFUSE_PUBLIC_KEY,
