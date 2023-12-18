@@ -1,4 +1,6 @@
 import { LitElement, css, html } from "lit";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { ChatMessageInfo } from "./types";
 
@@ -61,12 +63,16 @@ export class ChatElement extends LitElement {
     ul.append(
       ...this._messages.map((message) => {
         const li = document.createElement("li");
+        const markdown = message.content;
+        marked.parse(markdown, { async: true }).then((html) => {
+          li.querySelector(".content")!.innerHTML = DOMPurify.sanitize(html);
+        });
         li.classList.add(message.role === "assistant" ? "assistant" : "user");
         li.innerHTML = `
             <div class="avatar">${
               message.role === "assistant" ? "AI" : "you"
             }</div>
-            <div class="content">${message.content}</div>
+            <div class="content"></div>
           `;
         return li;
       }),
