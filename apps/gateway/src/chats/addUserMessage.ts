@@ -44,7 +44,11 @@ export async function addUserMessage(
 
   // not awaiting this because we don't want to block the response
   answerUser(message.chat_id, logger).catch((error) => {
-    logger.error({ error, message });
+    logger.error({
+      op: "addUserMessage answerUser",
+      error: error instanceof Error ? error.message : error,
+      message,
+    });
   });
 
   return insertAssistantMessage;
