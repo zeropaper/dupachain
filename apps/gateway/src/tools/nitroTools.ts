@@ -4,7 +4,7 @@ import { Callbacks } from "langchain/callbacks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
 
-export async function createNitroSearchTools({
+export async function createNitroTools({
   callbacks,
   client: serviceClient,
 }: {
@@ -27,6 +27,8 @@ export async function createNitroSearchTools({
   }
 
   const snowboardsData = await loadDataFromDocument<{
+    snowboardsByFits: Record<string, Record<string, string[]>>;
+    snowboardsBySizes: Record<string, Record<string, string[]>>;
     features: Record<
       string,
       {
@@ -46,6 +48,12 @@ export async function createNitroSearchTools({
     >;
   }>("snowboards data en");
   const { characteristicValues } = snowboardsData;
+  const bindingsData = await loadDataFromDocument<{
+    bindingsByCharacter: Record<string, Record<string, string[]>>;
+  }>("bindings data en");
+  const bootsData = await loadDataFromDocument<{
+    bootsByCharacter: Record<string, Record<string, string[]>>;
+  }>("boots data en");
 
   const characteristicsSchema = z.object({
     ...Object.entries(characteristicValues).reduce(
@@ -74,7 +82,7 @@ export async function createNitroSearchTools({
   });
 
   const snowboardsSearchTool = new DynamicStructuredTool({
-    name: "snowboard_characteristics_search",
+    name: "search_snowboard_by_characteristics",
     description: "Search the snowboards catalog by characteristics",
     schema: characteristicsSchema.extend({
       size: z
@@ -86,7 +94,7 @@ export async function createNitroSearchTools({
         .describe("Size range in cm"),
     }),
     func: async (search) => {
-      const metadata = {
+      const filter = {
         characteristics: Object.entries(search).reduce(
           (acc, [key, value]) => {
             if (!value || key === "size") {
@@ -100,20 +108,99 @@ export async function createNitroSearchTools({
       const { data, error } = await serviceClient
         .from("documents")
         .select("reference, metadata, content")
-        .contains("metadata", metadata)
-        .limit(5);
-
-      console.info("nitro snowboard search", data, error);
+        .contains("metadata", filter)
+        .limit(3);
 
       if (error) {
         return "Error";
       }
-      return JSON.stringify(data);
+      return JSON.stringify(
+        data.map(({ content, reference }) => ({
+          content,
+          reference,
+        })),
+      ).replaceAll("https://nitrosnowboards.com/en/23-24/", "");
     },
+    callbacks,
+  });
+
+  const listSnowboardByFits = new DynamicStructuredTool({
+    name: "list_snowboards_by_fits",
+    description: "List of snowboards by fits",
+    schema: z.object({}),
+    func: async () =>
+      JSON.stringify(snowboardsData.snowboardsByFits).replaceAll(
+        "https://nitrosnowboards.com/en/23-24/",
+        "",
+      ),
+    callbacks,
+  });
+
+  const listSnowboardBySizes = new DynamicStructuredTool({
+    name: "list_snowboards_by_sizes",
+    description: "List of snowboards by sizes",
+    schema: z.object({
+      min: z.number().optional().describe("snowboard minimum size in cm"),
+      max: z.number().optional().describe("snowboard maximum size in cm"),
+    }),
+    func: async ({ min, max }) => {
+      const filtered: Record<string, Record<string, string[]>> = {};
+      for (const [key, value] of Object.entries(
+        snowboardsData.snowboardsBySizes,
+      )) {
+        if (min && max) {
+          if (parseInt(key) >= min && parseInt(key) <= max) {
+            filtered[key] = value;
+          }
+        } else if (min) {
+          if (parseInt(key) >= min) {
+            filtered[key] = value;
+          }
+        } else if (max) {
+          if (parseInt(key) <= max) {
+            filtered[key] = value;
+          }
+        } else {
+          filtered[key] = value;
+        }
+      }
+      return JSON.stringify(filtered).replaceAll(
+        "https://nitrosnowboards.com/en/23-24/",
+        "",
+      );
+    },
+    callbacks,
+  });
+
+  const listBootsByCharacter = new DynamicStructuredTool({
+    name: "list_boots_by_character",
+    description: "List of boots by character",
+    schema: z.object({}),
+    func: async () =>
+      JSON.stringify(bootsData.bootsByCharacter).replaceAll(
+        "https://nitrosnowboards.com/en/23-24/",
+        "",
+      ),
+    callbacks,
+  });
+
+  const listBindingsByCharacter = new DynamicStructuredTool({
+    name: "list_bindings_by_character",
+    description: "List of bindings by character",
+    schema: z.object({}),
+    func: async () =>
+      JSON.stringify(bindingsData.bindingsByCharacter).replaceAll(
+        "https://nitrosnowboards.com/en/23-24/",
+        "",
+      ),
     callbacks,
   });
 
   return {
     snowboardsSearchTool,
+    listSnowboardByFits,
+    listSnowboardBySizes,
+    listBootsByCharacter,
+    listBindingsByCharacter,
   };
 }

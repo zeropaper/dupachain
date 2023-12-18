@@ -9,7 +9,7 @@ import {
   LANGFUSE_SECRET_KEY,
 } from "../config";
 import { Logger } from "pino";
-import { createNitroSearchTools } from "../tools/nitroTools";
+import { createNitroTools } from "../tools/nitroTools";
 import { Callbacks } from "langchain/callbacks";
 import { AgentExecutor } from "langchain/agents";
 
@@ -95,7 +95,7 @@ export async function answerUser(chatId: string, logger: Logger) {
       // @ts-expect-error - langfuse's version of langchain seems outdated
       agentCallbackHandler,
     ];
-    const nitroTools = await createNitroSearchTools({
+    const nitroTools = await createNitroTools({
       client: serviceClient,
       callbacks,
     });

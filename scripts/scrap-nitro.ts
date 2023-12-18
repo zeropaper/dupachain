@@ -31,9 +31,7 @@ const featuresExtractor = (selector: string) => ($: CheerioAPI) =>
       return {
         id,
         title: $(el).text().trim(),
-        description: $(
-          `[about="/en/taxonomy/term/${id}"] .field--name-description`,
-        )
+        description: $(`.taxonomy-term-${id} .field--name-description`)
           .text()
           .trim(),
       };
@@ -421,51 +419,6 @@ interface DocumentBase {
     [key: string]: any;
   };
 }
-/* 
-interface Metadata {
-  subheadline?: string
-  matchingProducts?: Record<string, string>;
-  features?: Feature[]
-  sustainabilityEfforts?: Feature[]
-  characteristics?: Characteristics
-  fit?: Fit
-  specs?: Record<string, any>;
-  title: string
-  language: string
-  type: string
-  productType?: string
-  character?: Character
-  favorites?: Record<string, string>;
-  personType?: string
-}
-
-interface Feature {
-  id: number
-  title: string
-  description: string
-}
-
-interface Characteristics {
-  Shape: string
-  Camber: string
-  Width: string
-  Flex: string
-  Sidecut: string
-}
-
-interface Fit {
-  "All Mountain": string
-  Backcountry: string
-  Park: string
-  Flex: string
-}
-
-interface Character {
-  Response: string
-  Freedom: string
-  Comfort: string
-}
- */
 
 async function postDocument(document: DocumentBase) {
   return fetch("http://localhost:3030/api/documents", {
@@ -476,13 +429,14 @@ async function postDocument(document: DocumentBase) {
     body: JSON.stringify(document),
   });
 }
+
 async function processScrap(documents: DocumentBase[]) {
   await Promise.allSettled(documents.map(postDocument));
 
   const productTypes = ["snowboards", "bindings", "boots"];
   for (const productType of productTypes) {
     const products = documents.filter(
-      (document) => document.metadata.productType === productType,
+      (document) => document?.metadata?.productType === productType,
     );
     const link = (product: DocumentBase) =>
       `[${product.metadata.title}](${product.reference})`;
@@ -490,6 +444,72 @@ async function processScrap(documents: DocumentBase[]) {
     let content = "";
     switch (productType) {
       case "snowboards":
+        const features = new Set<{
+          id: string;
+          title: string;
+          description: string;
+        }>();
+        const characteristicValues: Record<string, Set<string>> = {};
+        const snowboardsBySizes: Record<string, string[]> = {};
+        const snowboardsByFits: Record<string, Record<string, string[]>> = {};
+        const characteristics = products.reduce(
+          (obj, p) => {
+            for (const size of Object.keys(p.metadata.specs)) {
+              snowboardsBySizes[size] = snowboardsBySizes[size] || [];
+              snowboardsBySizes[size].push(p.reference);
+            }
+            Object.entries(p.metadata.fit as Record<string, string>).forEach(
+              ([fit, value]) => {
+                if (!snowboardsByFits[fit]) {
+                  snowboardsByFits[fit] = {};
+                }
+                snowboardsByFits[fit][value] =
+                  snowboardsByFits[fit][value] || [];
+                snowboardsByFits[fit][value].push(p.reference);
+              },
+            );
+            obj[p.reference] = {
+              characteristics: p.metadata.characteristics,
+              fit: p.metadata.fit,
+              features: p.metadata.features.map((feature: any) => feature.id),
+            };
+            p.metadata.features.forEach((feature: any) => {
+              features.add(feature);
+            });
+            Object.entries(p.metadata.characteristics).forEach(
+              ([key, value]) => {
+                characteristicValues[key] =
+                  characteristicValues[key] || new Set();
+                characteristicValues[key].add(value as string);
+              },
+            );
+            return obj;
+          },
+          {} as Record<string, any>,
+        );
+
+        await postDocument({
+          content: "data",
+          format: "markdown",
+          reference: `snowboards data en`,
+          metadata: {
+            title: "snowboards data",
+            language: "en",
+            type: "data",
+
+            characteristicValues: Object.entries(characteristicValues).reduce(
+              (obj, [key, value]) => {
+                obj[key] = Array.from(value);
+                return obj;
+              },
+              {} as any,
+            ),
+            features: Array.from(features),
+            characteristics,
+            snowboardsBySizes,
+            snowboardsByFits,
+          },
+        });
         content = `# Snowboards
 ${products
   .map(
@@ -503,6 +523,31 @@ ${product.content}`,
         break;
 
       case "bindings":
+        const bindingsByCharacter: Record<
+          string,
+          Record<string, string[]>
+        > = {};
+        for (const product of products) {
+          const { character } = product.metadata;
+          for (const key of Object.keys(character)) {
+            bindingsByCharacter[key] = bindingsByCharacter[key] || {};
+            bindingsByCharacter[key][character[key]] =
+              bindingsByCharacter[key][character[key]] || [];
+            bindingsByCharacter[key][character[key]].push(product.reference);
+          }
+        }
+        await postDocument({
+          content: "data",
+          format: "markdown",
+          reference: `bindings data en`,
+          metadata: {
+            title: "bindings data",
+            language: "en",
+            type: "data",
+
+            bindingsByCharacter,
+          },
+        });
         content = `# Bindings
 
 ${products
@@ -517,6 +562,28 @@ ${product.content}`,
         break;
 
       case "boots":
+        const bootsByCharacter: Record<string, Record<string, string[]>> = {};
+        for (const product of products) {
+          const { character } = product.metadata;
+          for (const key of Object.keys(character)) {
+            bootsByCharacter[key] = bootsByCharacter[key] || {};
+            bootsByCharacter[key][character[key]] =
+              bootsByCharacter[key][character[key]] || [];
+            bootsByCharacter[key][character[key]].push(product.reference);
+          }
+        }
+        await postDocument({
+          content: "data",
+          format: "markdown",
+          reference: `boots data en`,
+          metadata: {
+            title: "boots data",
+            language: "en",
+            type: "data",
+
+            bootsByCharacter,
+          },
+        });
         content = `# Boots\n\n${products
           .map(
             (product) => `## ${link(product)}
@@ -559,7 +626,7 @@ async function main() {
   // parallelize a bit
   const promises = (await Promise.allSettled(
     Object.keys(scrapMap)
-      // .filter((key) => key === "snowboards")
+      // .filter((key) => key === "boots")
       .map((key) =>
         Promise.allSettled(
           scrapMap[key as PageType].pages
