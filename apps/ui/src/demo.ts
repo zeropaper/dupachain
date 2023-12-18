@@ -24,12 +24,15 @@ async function init() {
     });
 
     chatEl.addEventListener("send", async (e) => {
+      chatEl.loading = true;
       if (!chatId) {
         chatId = await client.start().then(({ chat_id }) => chat_id);
         // update the hash of the window url
         window.location.hash = chatId!;
       }
-      client.send(e.detail.content);
+      await client.send(e.detail.content);
+      chatEl.loading = false;
+      chatEl.clearInput();
     });
   });
 

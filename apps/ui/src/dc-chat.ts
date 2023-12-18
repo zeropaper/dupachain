@@ -46,6 +46,10 @@ export class ChatElement extends LitElement {
   @state()
   private _messages: ChatMessageInfo[] = [];
 
+  clearInput() {
+    this.textarea.value = "";
+  }
+
   setMessages(messages: ChatMessageInfo[]) {
     this._messages = messages;
     this.renderMessages();
