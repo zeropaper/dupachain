@@ -115,11 +115,13 @@ export async function createNitroTools({
         return "Error";
       }
       return JSON.stringify(
-        data.map(({ content, reference }) => ({
+        data.map(({ content, reference, metadata }) => ({
           content,
           reference,
+          // @ts-expect-error - supabase Json
+          sizes: Object.keys(metadata.specs),
         })),
-      ).replaceAll("https://nitrosnowboards.com/en/23-24/", "");
+      ).replaceAll("https://nitrosnowboards.com", "");
     },
     callbacks,
   });
@@ -130,7 +132,7 @@ export async function createNitroTools({
     schema: z.object({}),
     func: async () =>
       JSON.stringify(snowboardsData.snowboardsByFits).replaceAll(
-        "https://nitrosnowboards.com/en/23-24/",
+        "https://nitrosnowboards.com",
         "",
       ),
     callbacks,
@@ -165,7 +167,7 @@ export async function createNitroTools({
         }
       }
       return JSON.stringify(filtered).replaceAll(
-        "https://nitrosnowboards.com/en/23-24/",
+        "https://nitrosnowboards.com",
         "",
       );
     },
@@ -178,7 +180,7 @@ export async function createNitroTools({
     schema: z.object({}),
     func: async () =>
       JSON.stringify(bootsData.bootsByCharacter).replaceAll(
-        "https://nitrosnowboards.com/en/23-24/",
+        "https://nitrosnowboards.com",
         "",
       ),
     callbacks,
@@ -190,7 +192,7 @@ export async function createNitroTools({
     schema: z.object({}),
     func: async () =>
       JSON.stringify(bindingsData.bindingsByCharacter).replaceAll(
-        "https://nitrosnowboards.com/en/23-24/",
+        "https://nitrosnowboards.com",
         "",
       ),
     callbacks,
