@@ -5,8 +5,12 @@
       "path": "./apps/gateway"
     },
     {
-      "name": "chains",
-      "path": "./chains"
+      "name": "ui",
+      "path": "./apps/ui"
+    },
+    {
+      "name": "client",
+      "path": "./packages/client"
     },
     {
       "name": "scripts",
@@ -26,7 +30,8 @@
       "**/node_modules": true,
       "scripts/": true,
       "chains/": true,
-      "apps/gateway": true,
+      "packages/": true,
+      "apps/": true,
       "supabase/": true
     },
     "files.watcherExclude": {},
