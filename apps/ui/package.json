@@ -11,10 +11,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@local/client": "workspace:*",
+    "dompurify": "^3.0.6",
     "lit": "^3.1.0",
-    "@local/client": "workspace:*"
+    "marked": "^11.1.0"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   }
