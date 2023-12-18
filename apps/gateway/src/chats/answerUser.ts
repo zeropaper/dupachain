@@ -31,7 +31,10 @@ export async function answerUser(chatId: string, logger: Logger) {
       throw new Error("Not enough chat messages");
     }
   } catch (error) {
-    logger.error({ error });
+    logger.error({
+      op: "answerUser validation",
+      error: error instanceof Error ? error.message : error,
+    });
     return;
   }
 
@@ -46,7 +49,10 @@ export async function answerUser(chatId: string, logger: Logger) {
       throw new Error("No last assistant message found");
     }
   } catch (error) {
-    logger.error({ error });
+    logger.error({
+      op: "answerUser validation",
+      error: error instanceof Error ? error.message : error,
+    });
     return;
   }
 
@@ -103,7 +109,10 @@ export async function answerUser(chatId: string, logger: Logger) {
 
     return saveAnswer(assistantAnswer);
   } catch (error) {
-    logger.error({ error });
+    logger.error({
+      op: "answerUser processing",
+      error: error instanceof Error ? error.message : error,
+    });
     return saveAnswer(`Sorry, something went wrong`);
   }
 }
