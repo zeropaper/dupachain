@@ -54,6 +54,7 @@ export function getClient(url?: string) {
         .timeout(5000)
         .emit(
           "start",
+          {},
           (
             err: unknown,
             ack:
@@ -169,3 +170,5 @@ export function getClient(url?: string) {
     send,
   };
 }
+
+export type ChatClient = ReturnType<typeof getClient>;

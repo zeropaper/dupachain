@@ -12,13 +12,14 @@ import { Logger } from "pino";
 import { createNitroTools } from "../tools/nitroTools";
 import { Callbacks } from "langchain/callbacks";
 import { AgentExecutor } from "langchain/agents";
+import { ChatsRow } from "../types";
 
-export async function answerUser(chatId: string, logger: Logger) {
+export async function answerUser(chat: ChatsRow, logger: Logger) {
   const serviceClient = createServiceClient();
   const { data: chatMessages, error } = await serviceClient
     .from("chat_messages")
     .select("*")
-    .eq("chat_id", chatId)
+    .eq("chat_id", chat.id)
     .order("created_at", { ascending: true });
   try {
     if (error) {
@@ -89,7 +90,7 @@ export async function answerUser(chatId: string, logger: Logger) {
       publicKey: LANGFUSE_PUBLIC_KEY,
       secretKey: LANGFUSE_SECRET_KEY,
       baseUrl: LANGFUSE_BASE_URL,
-      userId: chatId,
+      userId: chat.id,
     });
     const callbacks: Callbacks = [
       // @ts-expect-error - langfuse's version of langchain seems outdated
@@ -102,7 +103,7 @@ export async function answerUser(chatId: string, logger: Logger) {
     const tools: AgentExecutor["tools"] = [...Object.values(nitroTools)];
     const assistantAnswer = await runChain({
       chatMessages,
-      systemPrompt: `You are Reto, a Nitro snowboards specialist. You are talking to a customer who wants to buy a snowboard. You are trying to find out what kind of snowboard the customer wants. If they need some gears, you ask questions that will allow picking the best items in catalog. If you need more information from the user, you ask 1 question at a time and give some examples. You are a chatbot, you are succint. You do not go off topic. You do not talk about other brands, only Nitro.`,
+      systemPrompt: chat.metadata!.systemPrompt as string,
       callbacks,
       tools,
     });

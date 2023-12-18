@@ -1,13 +1,15 @@
 import { z } from "zod";
 import { answerUser } from "./answerUser";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@local/supabase-types";
+import { Database, DatabaseTable } from "@local/supabase-types";
 import { postMessageBodySchema } from "../schemas";
 import { Logger } from "pino";
+import { ChatsRow } from "../types";
 
 export async function addUserMessage(
   anonClient: SupabaseClient<Database>,
   message: z.infer<typeof postMessageBodySchema>,
+  chat: ChatsRow,
   logger: Logger,
 ) {
   const insertUserMessage = await anonClient.from("chat_messages").insert({
@@ -43,7 +45,7 @@ export async function addUserMessage(
   }
 
   // not awaiting this because we don't want to block the response
-  answerUser(message.chat_id, logger).catch((error) => {
+  answerUser(chat, logger).catch((error) => {
     logger.error({
       op: "addUserMessage answerUser",
       error: error instanceof Error ? error.message : error,

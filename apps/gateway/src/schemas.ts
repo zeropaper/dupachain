@@ -25,3 +25,28 @@ export const postMessageBodySchema = z.object({
   chat_id: z.string(),
   content: z.string(),
 });
+
+export const agentSchema = z.object({
+  systemPrompt: z.string(),
+  tools: z
+    .object({
+      loaders: z.array(z.string()),
+      allowedTools: z.array(z.string()),
+    })
+    .optional(),
+  testing: z
+    .object({
+      personas: z.array(
+        z.object({
+          name: z.string(),
+          profile: z.string(),
+          maxCalls: z.number().default(10),
+        }),
+      ),
+    })
+    .optional(),
+});
+
+export const chatsRowMetadataSchema = z.object({
+  systemPrompt: z.string(),
+});

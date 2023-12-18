@@ -1,10 +1,15 @@
-import { Database } from "@local/supabase-types";
-import { Literal } from "./schemas";
+import { z } from "zod";
+import { Json, DatabaseTable, Database } from "@local/supabase-types";
 import { Callbacks } from "langchain/dist/callbacks";
+import { agentSchema, chatsRowMetadataSchema } from "./schemas";
 
-export type ChatMessagesRow =
-  Database["public"]["Tables"]["chat_messages"]["Row"];
-export type Json = Literal | { [key: string]: Json } | Json[];
+export { Json, DatabaseTable, Database };
+
+export type ChatMessagesRow = DatabaseTable<"chat_messages", "Row">;
+
+export type ChatsRow = DatabaseTable<"chats", "Row"> & {
+  metadata: Json & z.infer<typeof chatsRowMetadataSchema>;
+};
 
 export interface RunChain {
   (options: {
@@ -13,3 +18,5 @@ export interface RunChain {
     callbacks?: Callbacks;
   }): Promise<string>;
 }
+
+export type Agent = z.infer<typeof agentSchema>;

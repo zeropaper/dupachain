@@ -13,26 +13,31 @@ import {
   SupabaseClient,
 } from "@supabase/supabase-js";
 import { createAPIRouter as createAPIRouter } from "./createAPIRouter";
-import { Database } from "@local/supabase-types";
+import { Database, DatabaseTable } from "@local/supabase-types";
+import { loadAgent } from "./loadAgent";
+import { ChatsRow } from "./types";
+import { isChatsRow } from "./type-guards";
+
+const DEFAULT_AGENT_ID = "default";
 
 // for getting updates
 const subscribers = new Map<string, Set<Socket>>();
 async function subscribeToChat({
-  chatId,
+  chat,
   socket,
   logger,
   client: anonClient,
 }: {
-  chatId: string;
+  chat: ChatsRow;
   socket: Socket;
   logger: Logger;
   client: SupabaseClient<Database>;
 }): Promise<void> {
-  if (!subscribers.has(chatId)) {
-    subscribers.set(chatId, new Set());
+  if (!subscribers.has(chat.id)) {
+    subscribers.set(chat.id, new Set());
   }
 
-  const chatSubscribers = subscribers.get(chatId)!;
+  const chatSubscribers = subscribers.get(chat.id)!;
   chatSubscribers.add(socket);
 
   logger.info({
@@ -43,7 +48,7 @@ async function subscribeToChat({
 
   socket.on("user message", async (data, cb = () => {}) => {
     logger.info({ op: "user message", socket: socket.id, data });
-    addUserMessage(anonClient, data, logger)
+    addUserMessage(anonClient, data, chat, logger)
       .then(({ data, error }) => {
         cb(
           error
@@ -114,7 +119,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
                 op: "socket.io allowRequest",
                 origin: "no origin",
               });
-              cb(null, false);
+              cb(null, true);
               return;
             }
             const allowed = allowedOrigins.includes(origin);
@@ -160,6 +165,38 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
     logger.info({ op: "socket connection", socket: socket.id });
 
     socket.on("join", async (chatId, cb = () => {}) => {
+      const { data: chat, error } = await anonClient
+        .from("chats")
+        .select()
+        .eq("id", chatId)
+        .single();
+      if (error) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error,
+        });
+        cb({ status: "error", error: error.message });
+        return;
+      }
+      if (!chat) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: "no chat",
+        });
+        cb({ status: "error", error: "no chat" });
+        return;
+      }
+      if (!isChatsRow(chat)) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: "invalid chat",
+        });
+        cb({ status: "error", error: "invalid chat" });
+        return;
+      }
       anonClient
         .from("chat_messages")
         .select("content, role, created_at, updated_at, finished, id, chat_id")
@@ -190,7 +227,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
             chatId,
             messages: data,
           });
-          subscribeToChat({ chatId, socket, logger, client: anonClient })
+          subscribeToChat({ chat, socket, logger, client: anonClient })
             .then(() => {
               logger.info({
                 op: "socket subscribe",
@@ -210,48 +247,81 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
         });
     });
 
-    socket.on("start", async (cb = () => {}) => {
-      const { data, error } = await anonClient
-        .from("chats")
-        .insert({})
-        .select("id")
-        .single();
-      if (error) {
-        logger.error({
-          op: "socket start",
-          socket: socket.id,
-          error,
-        });
-        cb({ status: "error", error: error.message });
-        return;
-      }
-      if (!data) {
-        logger.error({
-          op: "socket start",
-          socket: socket.id,
-          error: "no data",
-        });
-        cb({ status: "error", error: "no data" });
-        return;
-      }
-      subscribeToChat({ chatId: data.id, socket, logger, client: anonClient })
-        .then(() => {
-          logger.info({
-            op: "socket subscribe",
-            socket: socket.id,
-            chatId: data.id,
-          });
-          cb({ status: "ok", result: { chat_id: data.id } });
-        })
-        .catch((error) => {
+    socket.on(
+      "start",
+      async (
+        { agentId = DEFAULT_AGENT_ID }: { agentId?: string } = {},
+        cb = () => {},
+      ) => {
+        try {
+          const agentDescription = loadAgent(agentId);
+          const { data, error } = await anonClient
+            .from("chats")
+            .insert({
+              metadata: {
+                systemPrompt: agentDescription.systemPrompt,
+              },
+            })
+            .select()
+            .single();
+          if (error) {
+            logger.error({
+              op: "socket start",
+              socket: socket.id,
+              error,
+            });
+            cb({ status: "error", error: error.message });
+            return;
+          }
+          if (!data) {
+            logger.error({
+              op: "socket start",
+              socket: socket.id,
+              error: "no data",
+            });
+            cb({ status: "error", error: "no data" });
+            return;
+          }
+          if (!isChatsRow(data)) {
+            logger.error({
+              op: "socket start",
+              socket: socket.id,
+              error: "invalid chat",
+            });
+            cb({ status: "error", error: "invalid chat" });
+            return;
+          }
+          subscribeToChat({ chat: data, socket, logger, client: anonClient })
+            .then(() => {
+              logger.info({
+                op: "socket subscribe",
+                socket: socket.id,
+                chatId: data.id,
+              });
+              cb({ status: "ok", result: { chat_id: data.id } });
+            })
+            .catch((error) => {
+              logger.error({
+                op: "socket subscribe",
+                socket: socket.id,
+                error,
+              });
+              cb({ status: "error", error: error.message });
+            });
+        } catch (error) {
           logger.error({
-            op: "socket subscribe",
+            op: "socket start",
             socket: socket.id,
             error,
           });
-          cb({ status: "error", error: error.message });
-        });
-    });
+          cb({
+            status: "error",
+            error: error instanceof Error ? error.message : error,
+          });
+          return;
+        }
+      },
+    );
   });
 
   return { app, server };
