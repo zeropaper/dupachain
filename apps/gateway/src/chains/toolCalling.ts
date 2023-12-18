@@ -22,7 +22,6 @@ import { Callbacks } from "langchain/callbacks";
 import { resolve } from "path";
 
 import { ChatMessagesRow } from "../types";
-import { createSnowboardSearchTool } from "../tools/nitroTools";
 
 export async function runChain({
   chatMessages,
