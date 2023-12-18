@@ -72,11 +72,11 @@ export async function runChain({
       "system",
       `${systemPrompt}. You don't go off topic. Before recommending something you always search for it and give back the reference.`,
     ],
-    // ...(chatMessages.slice(-8, -2) || []).map((message) =>
-    //   message.role === "user"
-    //     ? new HumanMessage(message.content)
-    //     : new AIMessage(message.content),
-    // ),
+    ...(chatMessages.slice(-8, -2) || []).map((message) =>
+      message.role === "user"
+        ? new HumanMessage(message.content)
+        : new AIMessage(message.content),
+    ),
     ["human", "{input}"],
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
