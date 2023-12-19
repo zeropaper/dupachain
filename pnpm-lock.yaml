@@ -65,6 +65,12 @@ importers:
       '@xenova/transformers':
         specifier: ^2.10.1
         version: 2.10.1
+      cheerio:
+        specifier: 1.0.0-rc.12
+        version: 1.0.0-rc.12
+      chrono-node:
+        specifier: ^2.7.3
+        version: 2.7.3
       common-tags:
         specifier: ^1.8.2
         version: 1.8.2
@@ -79,10 +85,10 @@ importers:
         version: 7.1.0
       langchain:
         specifier: ^0.0.198
-        version: 0.0.198(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)
+        version: 0.0.198(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)(cheerio@1.0.0-rc.12)
       langfuse-langchain:
         specifier: ^1.3.0
-        version: 1.3.0(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)
+        version: 1.3.0(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)(cheerio@1.0.0-rc.12)
       openai:
         specifier: ^4.20.1
         version: 4.20.1
@@ -2205,6 +2211,13 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /chrono-node@2.7.3:
+    resolution: {integrity: sha512-M/CusGocGJaubS8OFPEzmSa6IT/MJo2LaVqFyUVaLMo+UWwqyahKHsDe9FQBzwaytVGwR/bwZ5JhnAcu894Owg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      dayjs: 1.11.10
+    dev: false
+
   /cli-cursor@3.1.0:
     resolution: {integrity: sha512-I/zHAwsKf9FqGoXM4WWRACob9+SNukZTd94DWF57E4toouRulbCxcUh6RKUEOQlYTHJnzkPMySvPNaaSLNfLZw==}
     engines: {node: '>=8'}
@@ -2491,6 +2504,10 @@ packages:
   /dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
     dev: true
+
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
+    dev: false
 
   /debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -4015,7 +4032,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /langchain@0.0.157(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1):
+  /langchain@0.0.157(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)(cheerio@1.0.0-rc.12):
     resolution: {integrity: sha512-G69Azp9KN/0ispqTM/Ns+UyaOm+GR4TAh3U41idA1gTyyG2n8zcO1hEC/HA4TwcxyNvWVHgX0vLo956Is5DcgQ==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -4276,6 +4293,7 @@ packages:
       ansi-styles: 5.2.0
       binary-extensions: 2.2.0
       camelcase: 6.3.0
+      cheerio: 1.0.0-rc.12
       decamelize: 1.2.0
       expr-eval: 2.0.2
       flat: 5.0.2
@@ -4298,7 +4316,7 @@ packages:
       - encoding
     dev: false
 
-  /langchain@0.0.198(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1):
+  /langchain@0.0.198(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)(cheerio@1.0.0-rc.12):
     resolution: {integrity: sha512-YC0O1g8r61InCWyF5NmiQjdghdq6LKcgMrDZtqLbgDxAe4RoSldonm+5oNXS3yjCISG0j3s5Cty+yB7klqvUpg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -4609,6 +4627,7 @@ packages:
       '@supabase/supabase-js': 2.39.0
       '@xenova/transformers': 2.10.1
       binary-extensions: 2.2.0
+      cheerio: 1.0.0-rc.12
       expr-eval: 2.0.2
       flat: 5.0.2
       js-tiktoken: 1.0.8
@@ -4632,10 +4651,10 @@ packages:
     resolution: {integrity: sha512-SW6105T+YP1cTe0yMf//7kyshCgvCTyFBMTgH2H3s9rTAR4e+78DA/BBrUL/Mt4Q5eMWui7iGuAYb3pgGsdQ9w==}
     dev: false
 
-  /langfuse-langchain@1.3.0(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1):
+  /langfuse-langchain@1.3.0(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)(cheerio@1.0.0-rc.12):
     resolution: {integrity: sha512-RISG36O0zk+XNa+mzTzBgH+UIXkRs7v2LvILoG+T8xsHccScohncZBOJTYpFfU3+1FD1CLT4penE0KNshe2jpQ==}
     dependencies:
-      langchain: 0.0.157(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)
+      langchain: 0.0.157(@supabase/supabase-js@2.39.0)(@xenova/transformers@2.10.1)(cheerio@1.0.0-rc.12)
     transitivePeerDependencies:
       - '@aws-crypto/sha256-js'
       - '@aws-sdk/client-dynamodb'

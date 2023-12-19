@@ -11,6 +11,8 @@
     "@local/supabase-types": "workspace:*",
     "@supabase/supabase-js": "^2.32.0",
     "@xenova/transformers": "^2.10.1",
+    "cheerio": "1.0.0-rc.12",
+    "chrono-node": "^2.7.3",
     "common-tags": "^1.8.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
