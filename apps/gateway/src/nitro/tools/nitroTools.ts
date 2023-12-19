@@ -4,7 +4,7 @@ import { Callbacks } from "langchain/callbacks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
 
-export async function createNitroTools({
+export async function loadTools({
   callbacks,
   client: serviceClient,
 }: {

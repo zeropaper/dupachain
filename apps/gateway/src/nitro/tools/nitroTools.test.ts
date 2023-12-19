@@ -7,7 +7,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 config({ path: resolve(__dirname, "../../../../.env") });
 
-import { createNitroTools } from "./nitroTools";
+import { loadTools } from "./nitroTools";
 import { AgentExecutor } from "langchain/agents";
 
 describe("createNitroTools", () => {
@@ -15,7 +15,7 @@ describe("createNitroTools", () => {
   let serviceClient: SupabaseClient<Database>;
 
   beforeAll(async () => {
-    const createServiceClient = await import("../createServiceClient").then(
+    const createServiceClient = await import("../../createServiceClient").then(
       (m) => m.createServiceClient,
     );
     serviceClient = createServiceClient();
@@ -23,7 +23,7 @@ describe("createNitroTools", () => {
 
   it("creates a set of tools", async () => {
     const load = async () => {
-      tools = await createNitroTools({ client: serviceClient });
+      tools = await loadTools({ client: serviceClient });
     };
     await expect(load()).resolves.toBeUndefined();
     expect(tools).toHaveProperty("snowboardsSearchTool");
