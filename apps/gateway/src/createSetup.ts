@@ -140,12 +140,6 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   // serve the public directory
   app.get("/", express.static(PUBLIC_DIR));
 
-  // TODO: remove this?
-  // serve the index page, can be overridden by the public directory
-  app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/index.html");
-  });
-
   const router = createAPIRouter(logger);
 
   app.use("/api", router);
