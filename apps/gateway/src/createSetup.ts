@@ -101,7 +101,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
 }> {
   const app = express();
   const server = createServer(app);
-  const { PUBLIC_DIR, CORS_ORIGINS } = await import("./config");
+  const { PUBLIC_DIR, CORS_ORIGINS, NODE_ENV } = await import("./config");
   const anonClient = await createAnonClient();
 
   const allowedOrigins = CORS_ORIGINS ? CORS_ORIGINS.split(",") : [];
@@ -119,7 +119,8 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
                 op: "socket.io allowRequest",
                 origin: "no origin",
               });
-              cb(null, true);
+              // in production, we don't want to allow requests without an origin until we implement some other sort of authentication (headers)
+              cb(null, NODE_ENV !== "production");
               return;
             }
             const allowed = allowedOrigins.includes(origin);
@@ -139,6 +140,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   // serve the public directory
   app.get("/", express.static(PUBLIC_DIR));
 
+  // TODO: remove this?
   // serve the index page, can be overridden by the public directory
   app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
@@ -164,6 +166,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   io.on("connection", (socket) => {
     logger.info({ op: "socket connection", socket: socket.id });
 
+    // TODO: refactor that
     socket.on("join", async (chatId, cb = () => {}) => {
       const { data: chat, error } = await anonClient
         .from("chats")
@@ -247,6 +250,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
         });
     });
 
+    // TODO: refactor that
     socket.on(
       "start",
       async (

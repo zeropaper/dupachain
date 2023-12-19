@@ -15,6 +15,7 @@ export const {
   PORT,
   PUBLIC_DIR,
   CORS_ORIGINS,
+  NODE_ENV,
 } = parseEnv(process.env, {
   OPENAI_API_KEY: z.string(),
   SERPAPI_API_KEY: z.string(),
@@ -28,4 +29,5 @@ export const {
   PORT: z.string().default("3030"),
   PUBLIC_DIR: z.string().default(resolve(__dirname, "..", "public")),
   CORS_ORIGINS: z.string().optional(),
+  NODE_ENV: z.string().default("development"),
 });
