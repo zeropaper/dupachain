@@ -34,6 +34,7 @@ export async function runChain({
   callbacks?: Callbacks;
   tools: AgentExecutor["tools"];
 }) {
+  // TODO: create a supabase cache
   const cache = await LocalFileCache.create(
     resolve(__dirname, "../../../../.cache/langchain"),
   );
@@ -51,6 +52,7 @@ export async function runChain({
       callbacks,
       cache,
     }),
+    // TODO: chatHistory, in supabase
     maxTokenLimit: 20,
   });
 
@@ -72,6 +74,7 @@ export async function runChain({
       "system",
       `${systemPrompt}. You don't go off topic. Before recommending something you always search for it and give back the reference.`,
     ],
+    // TODO: look at chatHistory above
     ...(chatMessages.slice(-8, -2) || []).map((message) =>
       message.role === "user"
         ? new HumanMessage(message.content)
@@ -102,10 +105,12 @@ export async function runChain({
     new OpenAIFunctionsAgentOutputParser(),
   ]).withConfig({
     runName: "OpenAIFunctionsAgent",
+    callbacks,
   });
 
   const executor = AgentExecutor.fromAgentAndTools({
     agent: runnableAgent,
+    callbacks,
     memory,
     tools,
   });
