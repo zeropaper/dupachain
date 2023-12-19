@@ -11,7 +11,7 @@ import { Logger } from "pino";
 import { createNitroTools } from "../tools/nitroTools";
 import { Callbacks } from "langchain/callbacks";
 import { AgentExecutor } from "langchain/agents";
-import { ChatsRow } from "../types";
+import { ChatsRow, DatabaseTable } from "../types";
 
 export async function answerUser(chat: ChatsRow, logger: Logger) {
   const serviceClient = createServiceClient();
@@ -35,7 +35,9 @@ export async function answerUser(chat: ChatsRow, logger: Logger) {
       op: "answerUser validation",
       error: error instanceof Error ? error.message : error,
     });
-    return;
+    throw error instanceof Error
+      ? error
+      : new Error("Cannot retrieve messages");
   }
 
   const lastUserMessage = chatMessages.at(-2);
@@ -53,7 +55,9 @@ export async function answerUser(chat: ChatsRow, logger: Logger) {
       op: "answerUser validation",
       error: error instanceof Error ? error.message : error,
     });
-    return;
+    throw error instanceof Error
+      ? error
+      : new Error("Cannot retrieve last user message");
   }
 
   function saveAnswer(answer: string) {
@@ -71,7 +75,13 @@ export async function answerUser(chat: ChatsRow, logger: Logger) {
         if (error) {
           throw new Error(error.message);
         }
-        return data;
+        if (!data) {
+          throw new Error("Empty data");
+        }
+        return data as DatabaseTable<"chat_messages", "Row"> & {
+          role: "assistant";
+          finished: true;
+        };
       });
   }
 
