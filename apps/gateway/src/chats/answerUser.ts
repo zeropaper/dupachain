@@ -8,7 +8,7 @@ import {
   LANGFUSE_SECRET_KEY,
 } from "../config";
 import { Logger } from "pino";
-import { loadTools } from "../nitro/tools/nitroTools";
+import { loadTools } from "../../examples/nitro/tools/nitroTools";
 import { Callbacks } from "langchain/callbacks";
 import { AgentExecutor } from "langchain/agents";
 import { ChatsRow, DatabaseTable } from "../types";

@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { Json } from "./types";
+import { Database, DatabaseTable, Json } from "./types";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { AgentExecutor } from "langchain/agents";
+import { Callbacks } from "langchain/callbacks";
 
 export const literalSchema = z.union([
   z.string(),
@@ -49,4 +52,24 @@ export const agentSchema = z.object({
 
 export const chatsRowMetadataSchema = z.object({
   systemPrompt: z.string(),
+  tools: z.object({
+    loaders: z.array(z.string()),
+    allowedTools: z.array(z.string()),
+  }),
 });
+
+export type ChainRunner = (options: {
+  chatMessages: DatabaseTable<"chat_messages", "Row">[];
+  systemPrompt: string;
+  callbacks?: Callbacks;
+  tools: AgentExecutor["tools"];
+}) => Promise<string>;
+
+export type ToolsMap = Record<string, AgentExecutor["tools"][number]>;
+
+export type ToolLoader = (options: {
+  callbacks?: any;
+  client: SupabaseClient<Database>;
+}) => Promise<ToolsMap>;
+
+export type LogItems = [number, string, ...any[]][];

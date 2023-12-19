@@ -7,7 +7,7 @@ import { loadAgent } from "./loadAgent";
 
 config({ path: resolve(__dirname, "../../../.env") });
 
-import { getTesterCall } from "./getTesterCall";
+import { getTesterCall } from "./eval/getTesterCall";
 
 const agents = {
   default: loadAgent("default"),

@@ -2,6 +2,8 @@
   "name": "gateway",
   "private": true,
   "scripts": {
+    "eval": "tsx src/eval/index.ts",
+    "eval:dev": "tsx watch src/eval/index.ts",
     "test": "vitest",
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts"
