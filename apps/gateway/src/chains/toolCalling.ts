@@ -8,18 +8,17 @@ import {
   OpenAIFunctionsAgentOutputParser,
   type ToolsAgentStep,
 } from "langchain/agents/openai/output_parser";
-import { LocalFileCache } from "langchain/cache/file_system";
 
 import {
   AIMessage,
   AgentStep,
+  BaseCache,
   BaseMessage,
   FunctionMessage,
   HumanMessage,
 } from "langchain/schema";
 import { ConversationSummaryBufferMemory } from "langchain/memory";
 import { Callbacks } from "langchain/callbacks";
-import { resolve } from "path";
 
 import { ChatMessagesRow } from "../types";
 
@@ -28,17 +27,14 @@ export async function runChain({
   systemPrompt,
   callbacks,
   tools,
+  cache,
 }: {
   chatMessages: ChatMessagesRow[];
   systemPrompt: string;
   callbacks?: Callbacks;
+  cache?: BaseCache;
   tools: AgentExecutor["tools"];
 }) {
-  // TODO: create a supabase cache
-  const cache = await LocalFileCache.create(
-    resolve(__dirname, "../../../../.cache/langchain"),
-  );
-
   const lastUserMessage = chatMessages.at(-2);
   if (!lastUserMessage || lastUserMessage.role !== "user") {
     throw new Error("No last user message found");
