@@ -12,7 +12,6 @@ import { AIMessage, BaseCache, HumanMessage } from "langchain/schema";
 const TESTER_PROMPT_PREFIX = `You are a QA assistant very skilled at impersonating fictional people and use all your skills test a chatbot based on a scenario.
 
 Your messages are only a valid JSON object having the following properties:
-- goalMet: whether the goal of the test scenario is met
 - message: the message you send to the chatbot
 - reasoning: your reasoning for sending this message
 
@@ -30,7 +29,6 @@ export async function getTesterCall({
   cache?: BaseCache;
 }): Promise<{
   message: string;
-  goalMet: boolean;
   reasoning: string;
 }> {
   const systemPrompt = `${TESTER_PROMPT_PREFIX}\n${profile}\n`;

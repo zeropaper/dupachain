@@ -5,4 +5,6 @@ profile: |
   You are mostly doing park and freestyle riding.
   You need a wide board because you have big feet.
   You only give these information to the shop assistant if he asks for it.
+goal: |
+  The assistant should recommend a particular snowboard that fits the needs of the tester and the tester does not have further questions.
 maxCalls: 8

@@ -5,7 +5,8 @@ import { loadPersona } from "./loadPersonaFile";
 import { ChainRunner, ToolsMap } from "../schemas";
 import { BaseCache } from "langchain/schema";
 import CallbackHandler from "langfuse-langchain";
-import { EvalFileSchema, PersonaFileSchema, RunnerSchema } from "./schemas";
+import { EvalFileSchema } from "./schemas";
+import { testGoal } from "./testGoal";
 
 export interface EvalMessage {
   content: string;
@@ -59,16 +60,9 @@ export async function runPersona({
       role: "assistant",
       content: input.message,
     });
-    console.info(
-      "tester: (%s / %s)\n\t%s",
-      i,
-      maxCalls,
-      input.message,
-      input.goalMet,
-    );
-    if (input.goalMet) {
-      break;
-    }
+
+    console.info("tester: (%s / %s)\n\t%s", i, maxCalls, input.message);
+
     const output = await runChain({
       tools: Object.entries(allTools).reduce(
         (arr, [name, tool]) => {
@@ -92,6 +86,17 @@ export async function runPersona({
       content: output!,
     });
     console.info("chat bot\n\t%s", output);
+
+    const goalMet = await testGoal({
+      callbacks,
+      cache,
+      persona,
+      messages,
+    });
+    if (persona.goal) console.log("goal met? %s\n\t%s", goalMet, persona.goal);
+    if (goalMet) {
+      break;
+    }
   }
   await agentCallbackHandler.shutdownAsync().catch((err) => {
     console.warn(err);
