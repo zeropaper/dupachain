@@ -10,6 +10,10 @@ export type ToolsSchema = z.infer<typeof toolsSchema>;
 const runnerSchema = z.object({
   path: z.string().describe("Path to runner file"),
   tools: toolsSchema.optional(),
+  modelName: z
+    .enum(["gpt-3.5-turbo-1106", "gpt-4-1106-preview", "gpt-4-0314"])
+    .default("gpt-3.5-turbo-1106")
+    .describe("Model name to use"),
 });
 
 export type RunnerSchema = z.infer<typeof runnerSchema>;
