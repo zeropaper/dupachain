@@ -1,10 +1,11 @@
 import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
 import { getTesterCall } from "./getTesterCall";
-import { loadPersonaFile } from ".";
+import { loadPersona } from "./loadPersonaFile";
 import { ChainRunner, ToolsMap } from "../schemas";
 import { BaseCache } from "langchain/schema";
 import CallbackHandler from "langfuse-langchain";
+import { EvalFileSchema, PersonaFileSchema, RunnerSchema } from "./schemas";
 
 export interface EvalMessage {
   content: string;
@@ -13,21 +14,21 @@ export interface EvalMessage {
 }
 
 export async function runPersona({
-  personaPath,
+  personaOrPath,
   runChain,
   allTools,
   systemPrompt,
   callbacks,
   cache,
 }: {
-  personaPath: string;
+  personaOrPath: EvalFileSchema["personas"][number];
   runChain: ChainRunner;
   allTools: ToolsMap;
   systemPrompt: string;
   callbacks: Callbacks;
   cache?: BaseCache;
 }): Promise<EvalMessage[]> {
-  const persona = await loadPersonaFile(personaPath);
+  const persona = await loadPersona(personaOrPath);
   const { profile, maxCalls } = persona;
   const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
     await import("../config");
@@ -35,13 +36,14 @@ export async function runPersona({
     publicKey: LANGFUSE_PUBLIC_KEY,
     secretKey: LANGFUSE_SECRET_KEY,
     baseUrl: LANGFUSE_BASE_URL,
-    userId: `tester ${personaPath.replaceAll(
+    userId: `tester ${persona.name.replaceAll(
       /[^a-z0-9]+/gi,
       "_",
     )} ${Date.now()}`,
   });
 
   const messages: EvalMessage[] = [];
+
   for (let i = 0; i < maxCalls; i++) {
     const input = await getTesterCall({
       profile,
@@ -49,6 +51,7 @@ export async function runPersona({
       callbacks: [
         // @ts-expect-error - langfuse's version of langchain seems outdated
         agentCallbackHandler,
+        // ...(Array.isArray(callbacks) ? callbacks : []),
       ],
       cache,
     });

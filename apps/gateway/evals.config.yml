@@ -1,17 +1,15 @@
 name: Nitro
 prompts:
   - examples/nitro/prompts/reto-1.txt
-# TODO: make runners an array and tools a property of each runner
-runner: src/chains/toolCalling
-tools:
-  # TODO: determine the resources cost of the loadTools vs. the cost of the
-  #       loading tools individually
-  loaders:
-    - examples/nitro/tools/nitroTools
-  # TODO: enabled instead?
-  disabled:
-    - listBootsByCharacter
-    - listBindingsByCharacter
+runners:
+  - path: src/chains/toolCalling
+    tools:
+      loaders:
+        - examples/nitro/tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - listSnowboardByFits
+        - listSnowboardBySizes
 personas:
   - examples/nitro/personas/greg.yml
   - examples/nitro/personas/max.yml
