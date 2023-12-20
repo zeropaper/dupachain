@@ -9,6 +9,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, DatabaseTable } from "@local/supabase-types";
 import { EvalMessage, runPersona } from "./runPersona";
 import { LocalFileCache } from "langchain/cache/file_system";
+import CallbackHandler from "langfuse-langchain";
 
 config({ path: resolve(__dirname, "../../../../.env") });
 
@@ -233,7 +234,8 @@ async function main() {
   const cache = await LocalFileCache.create(
     resolve(__dirname, "../../../../.cache/langchain"),
   );
-
+  const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
+    await import("../config");
   const output: Record<
     string,
     Record<
@@ -251,32 +253,47 @@ async function main() {
     );
     output[promptPath] = {};
     for (const personaPath of setup.personas) {
-      const evalCallbacks = await createEvalCallbacks();
-      const callbacks: Callbacks = [evalCallbacks.handlers];
-      let allTools: ToolsMap = {};
-      for (const loaderPath of setup.tools.loaders) {
-        const loader = await import(resolve(defaultRoot, loaderPath));
-        if (typeof loader.loadTools !== "function") {
-          throw new Error(`Invalid loader: ${loaderPath}`);
-        }
-        const loadTools: ToolLoader = loader.loadTools;
-        const loadedTools = await loadTools({
-          callbacks,
-          client: serviceClient,
+      try {
+        const evalCallbacks = await createEvalCallbacks();
+        const agentCallbackHandler = new CallbackHandler({
+          publicKey: LANGFUSE_PUBLIC_KEY,
+          secretKey: LANGFUSE_SECRET_KEY,
+          baseUrl: LANGFUSE_BASE_URL,
         });
-        allTools = { ...allTools, ...loadedTools };
+        const callbacks: Callbacks = [evalCallbacks.handlers];
+        let allTools: ToolsMap = {};
+        for (const loaderPath of setup.tools.loaders) {
+          const loader = await import(resolve(defaultRoot, loaderPath));
+          if (typeof loader.loadTools !== "function") {
+            throw new Error(`Invalid loader: ${loaderPath}`);
+          }
+          const loadTools: ToolLoader = loader.loadTools;
+          const loadedTools = await loadTools({
+            callbacks,
+            client: serviceClient,
+          });
+          allTools = { ...allTools, ...loadedTools };
+        }
+        output[promptPath][personaPath] = {
+          messages: await runPersona({
+            personaPath,
+            runChain,
+            allTools,
+            systemPrompt,
+            callbacks,
+            cache,
+          }),
+          log: await evalCallbacks.teardown(),
+        };
+        await agentCallbackHandler.shutdownAsync().catch((err) => {
+          console.warn(err);
+        });
+      } catch (error) {
+        output[promptPath][personaPath] = {
+          messages: [],
+          log: [[Date.now(), "error", error]],
+        };
       }
-      output[promptPath][personaPath] = {
-        messages: await runPersona({
-          personaPath,
-          runChain,
-          allTools,
-          systemPrompt,
-          callbacks,
-          cache,
-        }),
-        log: await evalCallbacks.teardown(),
-      };
     }
   }
   await writeFile(
