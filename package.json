@@ -17,19 +17,19 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.7.1",
-    "@commitlint/config-conventional": "^17.7.0",
+    "@commitlint/cli": "^17.8.1",
+    "@commitlint/config-conventional": "^17.8.1",
     "@trivago/prettier-plugin-sort-imports": "latest",
     "eslint": "latest",
-    "eslint-config-turbo": "latest",
     "eslint-config-prettier": "latest",
+    "eslint-config-turbo": "latest",
     "husky": "^8.0.3",
     "lint-staged": "^13.3.0",
     "npm-run-all": "latest",
     "prettier": "latest",
     "rimraf": "^3.0.2",
     "supabase": "latest",
-    "turbo": "^1.10.16",
+    "turbo": "^1.11.2",
     "typescript": "latest"
   },
   "engines": {

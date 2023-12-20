@@ -7,9 +7,9 @@
     "rimraf": "latest"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "vitest": "latest",
-    "typescript": "latest"
+    "@types/node": "^20.10.5",
+    "typescript": "latest",
+    "vitest": "latest"
   },
   "scripts": {
     "test": "vitest --passWithNoTests"

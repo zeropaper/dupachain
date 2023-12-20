@@ -8,7 +8,7 @@
     "build": "supabase gen types typescript --project-id $VB_SUPABASE_PROJECT_ID --schema public > ./database.types.ts"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.32.0",
+    "@supabase/supabase-js": "^2.39.1",
     "supabase": "latest"
   }
 }
