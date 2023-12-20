@@ -32,7 +32,10 @@ export async function runPersona({
 
   const messages: EvalMessage[] = [];
   for (let i = 0; i < maxCalls; i++) {
-    const input = await getTesterCall(profile, messages);
+    const input = await getTesterCall({
+      profile,
+      messages,
+    });
     messages.push({
       role: "assistant",
       content: input.message,
