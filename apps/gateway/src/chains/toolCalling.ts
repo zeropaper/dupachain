@@ -17,7 +17,10 @@ import {
   FunctionMessage,
   HumanMessage,
 } from "langchain/schema";
-import { ConversationSummaryBufferMemory } from "langchain/memory";
+import {
+  ChatMessageHistory,
+  ConversationSummaryBufferMemory,
+} from "langchain/memory";
 import { Callbacks } from "langchain/callbacks";
 
 import { ChatMessagesRow } from "../types";
@@ -48,7 +51,11 @@ export async function runChain({
       callbacks,
       cache,
     }),
-    // TODO: chatHistory, in supabase
+    chatHistory: new ChatMessageHistory(
+      chatMessages.map(({ content, role }) =>
+        role === "user" ? new HumanMessage(content) : new AIMessage(content),
+      ),
+    ),
     maxTokenLimit: 20,
   });
 
@@ -70,12 +77,6 @@ export async function runChain({
       "system",
       `${systemPrompt}. You don't go off topic. Before recommending something you always search for it and give back the reference.`,
     ],
-    // TODO: look at chatHistory above
-    ...(chatMessages.slice(-8, -2) || []).map((message) =>
-      message.role === "user"
-        ? new HumanMessage(message.content)
-        : new AIMessage(message.content),
-    ),
     ["human", "{input}"],
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
