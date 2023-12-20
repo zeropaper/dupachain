@@ -1,10 +1,10 @@
 import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
-import { ChatMessageInfo } from "@local/client";
 import { getTesterCall } from "./getTesterCall";
 import { loadPersonaFile } from ".";
 import { ChainRunner, ToolsMap } from "../schemas";
 import { BaseCache } from "langchain/schema";
+import CallbackHandler from "langfuse-langchain";
 
 export interface EvalMessage {
   content: string;
@@ -29,12 +29,28 @@ export async function runPersona({
 }): Promise<EvalMessage[]> {
   const persona = await loadPersonaFile(personaPath);
   const { profile, maxCalls } = persona;
+  const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
+    await import("../config");
+  const agentCallbackHandler = new CallbackHandler({
+    publicKey: LANGFUSE_PUBLIC_KEY,
+    secretKey: LANGFUSE_SECRET_KEY,
+    baseUrl: LANGFUSE_BASE_URL,
+    userId: `tester ${personaPath.replaceAll(
+      /[^a-z0-9]+/gi,
+      "_",
+    )} ${Date.now()}`,
+  });
 
   const messages: EvalMessage[] = [];
   for (let i = 0; i < maxCalls; i++) {
     const input = await getTesterCall({
       profile,
       messages,
+      callbacks: [
+        // @ts-expect-error - langfuse's version of langchain seems outdated
+        agentCallbackHandler,
+      ],
+      cache,
     });
     messages.push({
       role: "assistant",
@@ -74,5 +90,8 @@ export async function runPersona({
     });
     console.info("chat bot\n\t%s", output);
   }
+  await agentCallbackHandler.shutdownAsync().catch((err) => {
+    console.warn(err);
+  });
   return messages;
 }
