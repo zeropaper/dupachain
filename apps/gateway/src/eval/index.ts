@@ -62,7 +62,9 @@ async function main() {
             evalId,
             basename(promptPath).split(".")[0],
             basename(personaPath).split(".")[0],
-          ].join("_");
+          ]
+            .join("_")
+            .replaceAll(/[^a-z0-9_]+/gi, "_");
           const evalCallbacks = await createEvalCallbacks();
           const agentCallbackHandler = new CallbackHandler({
             publicKey: LANGFUSE_PUBLIC_KEY,
