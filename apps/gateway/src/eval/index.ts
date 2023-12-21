@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { readFile, writeFile } from "fs/promises";
-import { resolve } from "path";
+import { basename, resolve } from "path";
 import { Callbacks } from "langchain/callbacks";
 import { EvalMessage, runPersona } from "./runPersona";
 import { LocalFileCache } from "langchain/cache/file_system";
@@ -58,7 +58,11 @@ async function main() {
             ? personaOrPath
             : personaOrPath.name;
         try {
-          const runId = [evalId, promptPath, personaPath].join("_");
+          const runId = [
+            evalId,
+            basename(promptPath).split(".")[0],
+            basename(personaPath).split(".")[0],
+          ].join("_");
           const evalCallbacks = await createEvalCallbacks();
           const agentCallbackHandler = new CallbackHandler({
             publicKey: LANGFUSE_PUBLIC_KEY,
