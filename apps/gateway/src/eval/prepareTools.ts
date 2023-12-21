@@ -28,5 +28,10 @@ export async function prepareTools({
     });
     allTools = { ...allTools, ...loadedTools };
   }
-  return allTools;
+  return Object.entries(allTools).reduce((obj, [name, tool]) => {
+    if (runner.tools.enabled.includes(name)) {
+      obj[name] = tool;
+    }
+    return obj;
+  }, {} as ToolsMap);
 }

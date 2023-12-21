@@ -66,7 +66,7 @@ async function main() {
           });
           const callbacks: Callbacks = [evalCallbacks.handlers];
 
-          let allTools: ToolsMap = isRunnerWithToolsInfo(runnerOrPath)
+          let toolsMap: ToolsMap = isRunnerWithToolsInfo(runnerOrPath)
             ? await prepareTools({
                 runner: runnerOrPath,
                 callbacks,
@@ -78,7 +78,7 @@ async function main() {
             messages: await runPersona({
               personaOrPath,
               runChain,
-              allTools,
+              toolsMap,
               systemPrompt,
               callbacks,
               cache,

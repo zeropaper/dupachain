@@ -17,14 +17,14 @@ export interface EvalMessage {
 export async function runPersona({
   personaOrPath,
   runChain,
-  allTools,
+  toolsMap,
   systemPrompt,
   callbacks,
   cache,
 }: {
   personaOrPath: EvalFileSchema["personas"][number];
   runChain: ChainRunner;
-  allTools: ToolsMap;
+  toolsMap: ToolsMap;
   systemPrompt: string;
   callbacks: Callbacks;
   cache?: BaseCache;
@@ -64,13 +64,7 @@ export async function runPersona({
     console.info("tester: (%s / %s)\n\t%s", i, maxCalls, input.message);
 
     const output = await runChain({
-      tools: Object.entries(allTools).reduce(
-        (arr, [name, tool]) => {
-          arr.push(tool);
-          return arr;
-        },
-        [] as AgentExecutor["tools"],
-      ),
+      tools: Object.values(toolsMap),
       systemPrompt,
       chatMessages: [...messages, { role: "assistant", content: "..." }].map(
         ({ role, ...rest }) => ({
