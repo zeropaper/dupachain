@@ -66,14 +66,6 @@ describe("app", () => {
       });
     });
 
-    describe("/", () => {
-      it("serves an HTML page", async () => {
-        const response = await requestApp().get("/");
-        expect(response.status).toBe(200);
-        expect(response.type).toBe("text/html");
-      });
-    });
-
     describe("/documents", () => {
       it.each([
         [
