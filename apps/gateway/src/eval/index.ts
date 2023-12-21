@@ -110,7 +110,7 @@ async function main() {
   }
   await writeFile(
     resolve(defaultRoot, `evals-output/${evalId}.json`),
-    JSON.stringify(output),
+    JSON.stringify({ setup, output }),
   );
 }
 
