@@ -1,11 +1,11 @@
 import { OpenAI } from "langchain/llms/openai";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { formatToOpenAITool } from "langchain/tools";
+import { formatToOpenAIFunction } from "langchain/tools";
 import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
 import { RunnableSequence } from "langchain/schema/runnable";
 import { AgentExecutor } from "langchain/agents";
 import {
-  OpenAIToolsAgentOutputParser,
+  OpenAIFunctionsAgentOutputParser,
   type ToolsAgentStep,
 } from "langchain/agents/openai/output_parser";
 
@@ -14,7 +14,7 @@ import {
   AgentStep,
   BaseCache,
   BaseMessage,
-  ToolMessage,
+  FunctionMessage,
   HumanMessage,
 } from "langchain/schema";
 import {
@@ -61,7 +61,7 @@ export async function runChain({
 
   const model = new ChatOpenAI({
     // https://platform.openai.com/docs/models/gpt-3-5
-    modelName: "gpt-3.5-turbo-1106",
+    modelName: "gpt-3.5-turbo-0613",
     temperature: 0.9,
     callbacks,
     cache,
@@ -69,7 +69,7 @@ export async function runChain({
 
   // Convert to OpenAI tool format
   const modelWithTools = model.bind({
-    tools: tools.map(formatToOpenAITool),
+    functions: tools.map(formatToOpenAIFunction),
   });
 
   const prompt = ChatPromptTemplate.fromMessages([
@@ -85,7 +85,7 @@ export async function runChain({
     steps.flatMap(({ action, observation }) => {
       if ("messageLog" in action && action.messageLog !== undefined) {
         const log = action.messageLog as BaseMessage[];
-        return log.concat(new ToolMessage(observation, action.tool));
+        return log.concat(new FunctionMessage(observation, action.tool));
       } else {
         return [new AIMessage(action.log)];
       }
@@ -99,9 +99,9 @@ export async function runChain({
     },
     prompt,
     modelWithTools,
-    new OpenAIToolsAgentOutputParser(),
+    new OpenAIFunctionsAgentOutputParser(),
   ]).withConfig({
-    runName: "OpenAIToolsAgent",
+    runName: "OpenAIFunctionsAgent",
     callbacks,
   });
 
