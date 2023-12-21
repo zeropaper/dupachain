@@ -5,6 +5,8 @@ profile: |
   You are mostly doing park and freestyle riding.
   You need a wide board because you have big feet.
   You only give these information to the shop assistant if he asks for it.
+firstMessage: |
+  Hi! I am looking for a new snowboard.
 goal: |
   The AI must specifically recommend the "T1 X FFF 158 wide" model and it is part of the top 3 recommendations.
 maxCalls: 8

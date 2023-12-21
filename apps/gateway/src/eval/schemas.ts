@@ -53,6 +53,7 @@ export const personaFileSchema = z.object({
   profile: z
     .string()
     .describe("Some instructions on how the tester should behave"),
+  firstMessage: z.string().default("Hi!").describe("First message to send"),
   goal: goalSchema.optional(),
   maxCalls: z.number().int().positive().default(10),
 });

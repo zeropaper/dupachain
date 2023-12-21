@@ -55,7 +55,7 @@ export async function runPersona({
   cache?: BaseCache;
 }): Promise<EvalMessage[]> {
   const persona = await loadPersona(personaOrPath);
-  const { profile, maxCalls } = persona;
+  const { profile, firstMessage, maxCalls } = persona;
   // in order to ease the reading/organization of data in/with langfuse
   // we create 3 different sessions
   const testerCallbacks = await prepareCallbacks(`${runId} tester`, callbacks);
@@ -70,6 +70,7 @@ export async function runPersona({
   for (let i = 0; i < maxCalls; i += 1) {
     const input = await getTesterCall({
       profile,
+      firstMessage,
       messages,
       callbacks: testerCallbacks.callbacks,
       cache,

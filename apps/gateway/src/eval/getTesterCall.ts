@@ -19,11 +19,13 @@ Here is the scenario you have to follow:`;
 
 export async function getTesterCall({
   profile,
+  firstMessage = "Hi!",
   messages,
   callbacks,
   cache,
 }: {
   profile: string;
+  firstMessage?: string;
   messages: Pick<ChatMessageInfo, "content" | "role">[];
   callbacks?: Callbacks;
   cache?: BaseCache;
@@ -73,7 +75,7 @@ export async function getTesterCall({
 
   const result = await chain.call(
     {
-      input: messages.at(-1)?.content || "Hi!",
+      input: messages.at(-1)?.content || firstMessage,
     },
     {
       callbacks,
