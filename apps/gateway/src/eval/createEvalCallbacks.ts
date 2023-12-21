@@ -9,6 +9,9 @@ export async function createEvalCallbacks(): Promise<{
   function write(eventName: string, ...args: any[]) {
     items.push([Date.now(), eventName, ...args]);
   }
+  // this may look convoluted, but having this like that makes it easier
+  // to maintain because it can rely on the TS types to make sure
+  // that all the events are handled with all the arguments
   return {
     async teardown() {
       return items;
