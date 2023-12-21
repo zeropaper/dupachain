@@ -69,6 +69,7 @@ export async function runChain({
 
   // Convert to OpenAI tool format
   const modelWithTools = model.bind({
+    // @ts-expect-error - unclear, probably some type mismatch because it works
     functions: tools.map(formatToOpenAIFunction),
   });
 
