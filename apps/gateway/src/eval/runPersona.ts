@@ -32,7 +32,7 @@ async function prepareCallbacks(
     ],
     teardown: () =>
       callbackHandler.shutdownAsync().catch((err) => {
-        console.warn(err);
+        console.warn("langfuse shutdown error", err);
       }),
   };
 }
