@@ -1,4 +1,3 @@
-import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
 import { getTesterCall } from "./getTesterCall";
 import { loadPersona } from "./loadPersonaFile";
@@ -14,7 +13,32 @@ export interface EvalMessage {
   metadata?: any;
 }
 
+async function prepareCallbacks(
+  sessionId: string,
+  callbacks?: Callbacks,
+): Promise<{ callbacks: Callbacks; teardown: () => Promise<void> }> {
+  const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
+    await import("../config");
+  const callbackHandler = new CallbackHandler({
+    publicKey: LANGFUSE_PUBLIC_KEY,
+    secretKey: LANGFUSE_SECRET_KEY,
+    baseUrl: LANGFUSE_BASE_URL,
+    sessionId,
+  });
+  return {
+    callbacks: [
+      callbackHandler,
+      ...(Array.isArray(callbacks) ? callbacks : []),
+    ],
+    teardown: () =>
+      callbackHandler.shutdownAsync().catch((err) => {
+        console.warn(err);
+      }),
+  };
+}
+
 export async function runPersona({
+  runId,
   personaOrPath,
   runChain,
   toolsMap,
@@ -22,6 +46,7 @@ export async function runPersona({
   callbacks,
   cache,
 }: {
+  runId: string;
   personaOrPath: EvalFileSchema["personas"][number];
   runChain: ChainRunner;
   toolsMap: ToolsMap;
@@ -31,29 +56,22 @@ export async function runPersona({
 }): Promise<EvalMessage[]> {
   const persona = await loadPersona(personaOrPath);
   const { profile, maxCalls } = persona;
-  const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
-    await import("../config");
-  const agentCallbackHandler = new CallbackHandler({
-    publicKey: LANGFUSE_PUBLIC_KEY,
-    secretKey: LANGFUSE_SECRET_KEY,
-    baseUrl: LANGFUSE_BASE_URL,
-    userId: `tester ${persona.name.replaceAll(
-      /[^a-z0-9]+/gi,
-      "_",
-    )} ${Date.now()}`,
-  });
+  // in order to ease the reading/organization of data in/with langfuse
+  // we create 3 different sessions
+  const testerCallbacks = await prepareCallbacks(`${runId} tester`, callbacks);
+  const goalTesterCallbacks = await prepareCallbacks(
+    `${runId} goal tester`,
+    callbacks,
+  );
+  const agentCallbacks = await prepareCallbacks(`${runId} agent`, callbacks);
 
   const messages: EvalMessage[] = [];
 
-  for (let i = 0; i < maxCalls; i++) {
+  for (let i = 0; i < maxCalls; i += 1) {
     const input = await getTesterCall({
       profile,
       messages,
-      callbacks: [
-        // @ts-expect-error - langfuse's version of langchain seems outdated
-        agentCallbackHandler,
-        // ...(Array.isArray(callbacks) ? callbacks : []),
-      ],
+      callbacks: testerCallbacks.callbacks,
       cache,
     });
     messages.push({
@@ -72,7 +90,7 @@ export async function runPersona({
           role: role === "assistant" ? "user" : "assistant",
         }),
       ) as any,
-      callbacks,
+      callbacks: agentCallbacks.callbacks,
     });
 
     messages.push({
@@ -82,7 +100,7 @@ export async function runPersona({
     console.info("chat bot\n\t%s", output);
 
     const goalMet = await testGoal({
-      callbacks,
+      callbacks: goalTesterCallbacks.callbacks,
       cache,
       persona,
       messages,
@@ -92,8 +110,11 @@ export async function runPersona({
       break;
     }
   }
-  await agentCallbackHandler.shutdownAsync().catch((err) => {
-    console.warn(err);
-  });
+  // teardown the langfuse managers
+  await Promise.allSettled([
+    testerCallbacks.teardown(),
+    goalTesterCallbacks.teardown(),
+    agentCallbacks.teardown(),
+  ]);
   return messages;
 }

@@ -58,12 +58,15 @@ async function main() {
             ? personaOrPath
             : personaOrPath.name;
         try {
+          const runId = [evalId, promptPath, personaPath].join("_");
           const evalCallbacks = await createEvalCallbacks();
           const agentCallbackHandler = new CallbackHandler({
             publicKey: LANGFUSE_PUBLIC_KEY,
             secretKey: LANGFUSE_SECRET_KEY,
             baseUrl: LANGFUSE_BASE_URL,
+            sessionId: `${runId} agent`,
           });
+
           const callbacks: Callbacks = [evalCallbacks.handlers];
 
           let toolsMap: ToolsMap = isRunnerWithToolsInfo(runnerOrPath)
@@ -76,6 +79,7 @@ async function main() {
 
           output[promptPath][personaPath] = {
             messages: await runPersona({
+              runId,
               personaOrPath,
               runChain,
               toolsMap,
