@@ -1,11 +1,9 @@
 import { Callbacks } from "langchain/callbacks";
 import { PersonaFileSchema } from "./schemas";
-import { OpenAI } from "langchain/llms/openai";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { EvalMessage } from "./runPersona";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { ChainRunner } from "./types";
 
 export const testerTemplate = `Based on the following chat.
 <<< chat description begin >>>
@@ -36,7 +34,7 @@ export async function testGoal({
     return true;
   }
   const promises: Array<(...args: any[]) => Promise<boolean>> = [];
-  if (typeof persona.goal === 'string') {
+  if (typeof persona.goal === "string") {
     promises.push(async () => {
       const goalTesterLLM = new ChatOpenAI({
         modelName: "gpt-3.5-turbo-1106",
@@ -78,13 +76,13 @@ export async function testGoal({
   } else {
     for (const goal of persona.goal) {
       switch (goal.type) {
-        case 'regex':
+        case "regex":
           promises.push(async () => {
             const regex = new RegExp(goal.regex);
             return regex.test(messages.slice(-1)[0].content);
           });
           break;
-        case 'text':
+        case "text":
           promises.push(async () => {
             const lastMessage = messages.slice(-1)[0].content;
             return goal.exact
@@ -96,5 +94,7 @@ export async function testGoal({
     }
   }
   const results = await Promise.allSettled(promises.map((p) => p()));
-  return results.every((result) => result.status === "fulfilled" && result.value);
+  return results.every(
+    (result) => result.status === "fulfilled" && result.value,
+  );
 }
