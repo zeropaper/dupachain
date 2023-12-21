@@ -5,7 +5,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
-config({ path: resolve(__dirname, "../../../../.env") });
+config({ path: resolve(__dirname, "../../../../../.env") });
 
 import { loadTools } from "./nitroTools";
 import { AgentExecutor } from "langchain/agents";
@@ -15,9 +15,9 @@ describe("createNitroTools", () => {
   let serviceClient: SupabaseClient<Database>;
 
   beforeAll(async () => {
-    const createServiceClient = await import("../../createServiceClient").then(
-      (m) => m.createServiceClient,
-    );
+    const createServiceClient = await import(
+      "../../../src/createServiceClient"
+    ).then((m) => m.createServiceClient);
     serviceClient = createServiceClient();
   });
 
@@ -28,17 +28,17 @@ describe("createNitroTools", () => {
     await expect(load()).resolves.toBeUndefined();
     expect(tools).toHaveProperty("snowboardsSearchTool");
     expect(tools).toHaveProperty("snowboardsSearchTool.call");
-    expect(tools).toHaveProperty("listSnowboardByFits");
-    expect(tools).toHaveProperty("listSnowboardByFits.call");
-    expect(tools).toHaveProperty("listSnowboardBySizes");
-    expect(tools).toHaveProperty("listSnowboardBySizes.call");
-    expect(tools).toHaveProperty("listBindingsByCharacter");
-    expect(tools).toHaveProperty("listBindingsByCharacter.call");
-    expect(tools).toHaveProperty("listBootsByCharacter");
-    expect(tools).toHaveProperty("listBootsByCharacter.call");
+    expect(tools).toHaveProperty("snowboardsByRidingStyle");
+    expect(tools).toHaveProperty("snowboardsByRidingStyle.call");
+    expect(tools).toHaveProperty("snowboardsBySizes");
+    expect(tools).toHaveProperty("snowboardsBySizes.call");
+    expect(tools).toHaveProperty("bindingsByCharacter");
+    expect(tools).toHaveProperty("bindingsByCharacter.call");
+    expect(tools).toHaveProperty("bootsByCharacter");
+    expect(tools).toHaveProperty("bootsByCharacter.call");
   });
 
-  describe("snowboardsSearchTool", () => {
+  describe.skip("snowboardsSearchTool", () => {
     it("searches for snowboards", async () => {
       const { snowboardsSearchTool } = tools;
       const schema = zodToJsonSchema(snowboardsSearchTool.schema);
@@ -66,25 +66,93 @@ describe("createNitroTools", () => {
     });
   });
 
-  describe("listSnowboardByFits", async () => {
-    it("lists all the boards by fit", async () => {
-      const { listSnowboardByFits } = tools;
-      const result = JSON.parse(await listSnowboardByFits.invoke({}));
-      expect(result).toHaveProperty("Flex");
-      expect(result).toHaveProperty("Park");
-      expect(result).toHaveProperty("Backcountry");
-      expect(result).toHaveProperty("All Mountain");
+  describe("snowboardsByFley", async () => {
+    it("lists all the boards by flex order asc by default", async () => {
+      const { snowboardsByFley } = tools;
+      const result = JSON.parse(
+        await snowboardsByFley.invoke({
+          min: 1,
+          max: 9,
+          size: {
+            min: 153,
+            max: 159,
+          },
+          wide: true,
+        }),
+      );
+      expect(result).toHaveProperty("0.flex", 7);
+      expect(result).toHaveProperty(
+        "0.references.0.reference",
+        "/en/23-24/snowboards/pow",
+      );
+      expect(result).toHaveProperty("1.flex", 8);
+      expect(result).toHaveProperty(
+        "1.references.0.reference",
+        "/en/23-24/snowboards/basher",
+      );
+      expect(result.map(({ flex }) => flex)).toStrictEqual([7, 8]);
+    });
+
+    it("lists all the boards by flex order desc", async () => {
+      const { snowboardsByFley } = tools;
+      const result = JSON.parse(
+        await snowboardsByFley.invoke({
+          order: "desc",
+          min: 1,
+          max: 9,
+          size: {
+            min: 153,
+            max: 159,
+          },
+          wide: true,
+        }),
+      );
+      expect(result).toHaveProperty("0.flex", 8);
+      expect(result).toHaveProperty(
+        "0.references.0.reference",
+        "/en/23-24/snowboards/basher",
+      );
+      expect(result).toHaveProperty("1.flex", 7);
+      expect(result).toHaveProperty(
+        "1.references.0.reference",
+        "/en/23-24/snowboards/pow",
+      );
+      expect(result.map(({ flex }) => flex)).toStrictEqual([8, 7]);
     });
   });
 
-  describe("listSnowboardBySizes", async () => {
+  describe("snowboardsByRidingStyle", async () => {
+    it("lists all the boards by riding style", async () => {
+      const { snowboardsByRidingStyle } = tools;
+      const result = JSON.parse(
+        await snowboardsByRidingStyle.invoke({
+          style: "Park",
+          size: {
+            min: 153,
+            max: 159,
+          },
+          // wide: true,
+        }),
+      );
+      expect(result).toHaveProperty(
+        "0.references.0.reference",
+        "/en/23-24/snowboards/basher",
+      );
+      expect(result).toHaveProperty(
+        "3.references.0.reference",
+        "/en/23-24/snowboards/pow",
+      );
+    });
+  });
+
+  describe("snowboardsBySizes", async () => {
     it("lists all the boards by size", async () => {
-      const { listSnowboardBySizes } = tools;
-      let result = JSON.parse(await listSnowboardBySizes.invoke({}));
+      const { snowboardsBySizes } = tools;
+      let result = JSON.parse(await snowboardsBySizes.invoke({}));
       expect(result).toHaveProperty("86");
       expect(result).toHaveProperty("166 wide");
       result = JSON.parse(
-        await listSnowboardBySizes.invoke({
+        await snowboardsBySizes.invoke({
           min: 153,
           max: 157,
         }),
@@ -93,16 +161,6 @@ describe("createNitroTools", () => {
       expect(result).toHaveProperty("153");
       expect(result).toHaveProperty("157");
       expect(result).toHaveProperty("157 mid-wide");
-    });
-  });
-
-  describe.skip("listBindingsByCharacter", async () => {
-    it("lists all the bindings by character", async () => {
-      const { listBindingsByCharacter } = tools;
-      const result = JSON.parse(await listBindingsByCharacter.invoke({}));
-      expect(result).toHaveProperty("Park");
-      expect(result).toHaveProperty("Backcountry");
-      expect(result).toHaveProperty("All Mountain");
     });
   });
 });

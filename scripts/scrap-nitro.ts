@@ -471,6 +471,7 @@ async function processScrap(documents: DocumentBase[]) {
             obj[p.reference] = {
               characteristics: p.metadata.characteristics,
               fit: p.metadata.fit,
+              sizes: Object.keys(p.metadata.specs),
               features: p.metadata.features.map((feature: any) => feature.id),
             };
             p.metadata.features.forEach((feature: any) => {

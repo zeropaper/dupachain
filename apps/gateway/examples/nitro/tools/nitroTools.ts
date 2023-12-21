@@ -28,7 +28,7 @@ export async function loadTools({
 
   const snowboardsData = await loadDataFromDocument<{
     snowboardsByFits: Record<string, Record<string, string[]>>;
-    snowboardsBySizes: Record<string, Record<string, string[]>>;
+    snowboardsBySizes: Record<string, string[]>;
     features: Record<
       string,
       {
@@ -44,6 +44,7 @@ export async function loadTools({
         fit: Record<string, string>;
         characteristics: Record<string, string>;
         features: number[];
+        sizes: string[];
       }
     >;
   }>("snowboards data en");
@@ -107,7 +108,7 @@ export async function loadTools({
       };
       const { data, error } = await serviceClient
         .from("documents")
-        .select("reference, metadata, content")
+        .select("reference, metadata")
         .contains("metadata", filter)
         .limit(3);
 
@@ -115,8 +116,7 @@ export async function loadTools({
         return "Error";
       }
       return JSON.stringify(
-        data.map(({ content, reference, metadata }) => ({
-          content,
+        data.map(({ reference, metadata }) => ({
           reference,
           // @ts-expect-error - supabase Json
           sizes: Object.keys(metadata.specs),
@@ -126,19 +126,177 @@ export async function loadTools({
     callbacks,
   });
 
-  const listSnowboardByFits = new DynamicStructuredTool({
-    name: "list_snowboards_by_fits",
-    description: "List of snowboards by fits",
-    schema: z.object({}),
-    func: async () =>
-      JSON.stringify(snowboardsData.snowboardsByFits).replaceAll(
+  function matchSize(
+    boardSizes: string[],
+    min?: number,
+    max?: number,
+    wide?: boolean,
+  ) {
+    for (const boardSize of boardSizes) {
+      const [cmString, wideString] = boardSize.split(" ");
+      const cm = parseInt(cmString);
+      if (wide && wideString !== "wide") {
+        return false;
+      }
+      if (min && cm < min) {
+        return false;
+      }
+      if (max && cm > max) {
+        return false;
+      }
+    }
+    return true;
+  }
+  const snowboardsByFley = new DynamicStructuredTool({
+    name: "list_snowboards_by_flex",
+    description: "List of snowboards by flex",
+    schema: z.object({
+      order: z.enum(["asc", "desc"]).default("asc"),
+      size: z
+        .object({
+          min: z.number().optional(),
+          max: z.number().optional(),
+        })
+        .optional(),
+      wide: z.boolean().optional(),
+      min: z.number().min(1).max(9).describe("flex minimum value"),
+      max: z.number().min(1).max(9).describe("flex max value"),
+    }),
+    func: async ({ order, size, max, min, wide }) => {
+      const subset: Record<
+        string,
+        {
+          reference: string;
+          fit: {
+            Park: string;
+            "All Mountain": string;
+            Backcountry: string;
+          };
+          sizes: string[];
+        }[]
+      > = {};
+      for (const [
+        reference,
+        {
+          fit: { Flex, ...fit },
+          sizes,
+        },
+      ] of Object.entries(snowboardsData.characteristics)) {
+        const flex = parseInt(Flex);
+        if (min && flex < min) {
+          continue;
+        }
+        if (max && flex > max) {
+          continue;
+        }
+        if (!matchSize(sizes, size?.min, size?.max, wide)) {
+          continue;
+        }
+        subset[Flex] = subset[Flex] || [];
+        subset[Flex].push({
+          reference,
+          fit: fit as any,
+          sizes,
+        });
+      }
+      const sorted = Object.entries(subset)
+        .reduce(
+          (acc, [flexString, references]) => {
+            const flex = parseInt(flexString);
+            acc.push({
+              flex,
+              references,
+            });
+            return acc;
+          },
+          [] as { flex: number; references: any[] }[],
+        )
+        .sort((a, b) => {
+          if (order === "asc") {
+            return a.flex - b.flex;
+          }
+          return b.flex - a.flex;
+        });
+      return JSON.stringify(sorted).replaceAll(
         "https://nitrosnowboards.com",
         "",
-      ),
+      );
+    },
     callbacks,
   });
 
-  const listSnowboardBySizes = new DynamicStructuredTool({
+  const snowboardsByRidingStyle = new DynamicStructuredTool({
+    name: "list_snowboards_by_riding_style",
+    description: "List of snowboards by riding style",
+    schema: z.object({
+      style: z.enum(["All Mountain", "Backcountry", "Park"]),
+      order: z.enum(["asc", "desc"]).default("desc"),
+      size: z
+        .object({
+          min: z.number().optional(),
+          max: z.number().optional(),
+        })
+        .optional(),
+      wide: z.boolean().optional().describe("look for wide boards"),
+    }),
+    func: async ({ style, order, size, wide }) => {
+      const subset: Record<
+        string,
+        {
+          reference: string;
+          value: number | string;
+          fit: {
+            Flex: string;
+            Park: string;
+            "All Mountain": string;
+            Backcountry: string;
+          };
+          sizes: string[];
+        }[]
+      > = {};
+      for (const [reference, { fit, sizes }] of Object.entries(
+        snowboardsData.characteristics,
+      )) {
+        const raw = fit[style];
+        const value = parseInt(raw);
+        if (!matchSize(sizes, size?.min, size?.max, wide)) {
+          continue;
+        }
+        subset[raw] = subset[raw] || [];
+        subset[raw].push({
+          reference,
+          value,
+          fit: fit as any,
+          sizes,
+        });
+      }
+      const sorted = Object.entries(subset)
+        .reduce(
+          (acc, [raw, references]) => {
+            const value = parseInt(raw);
+            acc.push({
+              value,
+              references,
+            });
+            return acc;
+          },
+          [] as { value: number; references: any[] }[],
+        )
+        .sort((a, b) => {
+          if (order === "asc") {
+            return a.value - b.value;
+          }
+          return b.value - a.value;
+        });
+      return JSON.stringify(sorted).replaceAll(
+        "https://nitrosnowboards.com",
+        "",
+      );
+    },
+    callbacks,
+  });
+
+  const snowboardsBySizes = new DynamicStructuredTool({
     name: "list_snowboards_by_sizes",
     description: "List of snowboards by sizes",
     schema: z.object({
@@ -146,7 +304,7 @@ export async function loadTools({
       max: z.number().optional().describe("snowboard maximum size in cm"),
     }),
     func: async ({ min, max }) => {
-      const filtered: Record<string, Record<string, string[]>> = {};
+      const filtered: Record<string, string[]> = {};
       for (const [key, value] of Object.entries(
         snowboardsData.snowboardsBySizes,
       )) {
@@ -174,7 +332,7 @@ export async function loadTools({
     callbacks,
   });
 
-  const listBootsByCharacter = new DynamicStructuredTool({
+  const bootsByCharacter = new DynamicStructuredTool({
     name: "list_boots_by_character",
     description: "List of boots by character",
     schema: z.object({}),
@@ -186,7 +344,7 @@ export async function loadTools({
     callbacks,
   });
 
-  const listBindingsByCharacter = new DynamicStructuredTool({
+  const bindingsByCharacter = new DynamicStructuredTool({
     name: "list_bindings_by_character",
     description: "List of bindings by character",
     schema: z.object({}),
@@ -200,9 +358,11 @@ export async function loadTools({
 
   return {
     snowboardsSearchTool,
-    listSnowboardByFits,
-    listSnowboardBySizes,
-    listBootsByCharacter,
-    listBindingsByCharacter,
+    snowboardsByFley,
+    snowboardsByRidingStyle,
+    snowboardsBySizes,
+
+    bootsByCharacter,
+    bindingsByCharacter,
   };
 }
