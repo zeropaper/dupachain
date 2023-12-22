@@ -1,9 +1,10 @@
 import { Callbacks } from "langchain/callbacks";
-import { getTesterCall } from "./getTesterCall";
-import { loadPersona } from "./loadPersonaFile";
-import { ChainRunner, ToolsMap } from "../schemas";
 import { BaseCache } from "langchain/schema";
 import CallbackHandler from "langfuse-langchain";
+import { log } from "@local/cli";
+import { ChainRunner, ToolsMap } from "../schemas";
+import { getTesterCall } from "./getTesterCall";
+import { loadPersona } from "./loadPersonaFile";
 import { EvalFileSchema } from "./schemas";
 import { testGoal } from "./testGoal";
 
@@ -80,7 +81,7 @@ export async function runPersona({
       content: input.message,
     });
 
-    console.info("tester: (%s / %s)\n\t%s", i, maxCalls, input.message);
+    log.blue("test bot (%s / %s):\n\t%s", i, maxCalls, input.message);
 
     const output = await runChain({
       tools: Object.values(toolsMap),
@@ -98,7 +99,7 @@ export async function runPersona({
       role: "user",
       content: output!,
     });
-    console.info("chat bot\n\t%s", output);
+    log.cyan("chat bot (%s / %s):\n\t%s", i, maxCalls, output);
 
     if (persona.goal && messages.length > 1) {
       const goalMet = await testGoal({
@@ -107,7 +108,11 @@ export async function runPersona({
         persona,
         messages,
       });
-      console.log("goal met? %s\n\t%s", goalMet, persona.goal);
+      log[goalMet ? "green" : "magenta"](
+        "goal met? %s\n\t%s",
+        goalMet,
+        persona.goal,
+      );
       if (goalMet) {
         break;
       }
