@@ -100,15 +100,17 @@ export async function runPersona({
     });
     console.info("chat bot\n\t%s", output);
 
-    const goalMet = await testGoal({
-      callbacks: goalTesterCallbacks.callbacks,
-      cache,
-      persona,
-      messages,
-    });
-    if (persona.goal) console.log("goal met? %s\n\t%s", goalMet, persona.goal);
-    if (goalMet) {
-      break;
+    if (persona.goal && messages.length > 1) {
+      const goalMet = await testGoal({
+        callbacks: goalTesterCallbacks.callbacks,
+        cache,
+        persona,
+        messages,
+      });
+      console.log("goal met? %s\n\t%s", goalMet, persona.goal);
+      if (goalMet) {
+        break;
+      }
     }
   }
   // teardown the langfuse managers
