@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@local/cache": "workspace:*",
+    "@local/cli": "workspace:*",
     "@local/supabase-types": "workspace:*",
     "@supabase/supabase-js": "^2.39.1",
     "@xenova/transformers": "^2.12.1",
