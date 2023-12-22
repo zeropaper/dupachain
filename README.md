@@ -26,7 +26,8 @@ In order to run supabase locally, you also need to ensure
 ### Langfuse
 
 Is used log LLM and chat model calls. You can run it locally or use their hosted version.
-The integration is done through the [`langfuse-langchain` package](https://langfuse.com/docs/langchain/typescript).
+The integration is done through the
+[`langfuse-langchain` package](https://langfuse.com/docs/langchain/typescript).
 
 ## Setup
 
@@ -59,8 +60,8 @@ SUPABASE_ANON_KEY="<the anon key>"
 SUPABASE_SERVICE_ROLE_KEY="<the service key>"
 
 LANGFUSE_BASE_URL="http://localhost:8000"
-LANGFUSE_PUBLIC_KEY="pk-lf-79ac5ed4-08c8-4998-befa-5aaa859e0bca"
-LANGFUSE_SECRET_KEY="sk-lf-ab3c17f2-1541-4512-bb0e-05e36cc3f740"
+LANGFUSE_PUBLIC_KEY="<starts with pk-lf->"
+LANGFUSE_SECRET_KEY="<starts with sk-lf->"
 
 CORS_ORIGINS="http://localhost:3030,http://localhost:5173"
 ```
@@ -98,7 +99,25 @@ environment variable.
 
 ## Evaluations
 
-The gateway app has a `npm` script to run evaluations based on the [evals.config.yml file](./apps/gateway/evals.config.yml) in the app directory.
+The gateway app has a `npm` script to run evaluations based on the
+[evals.config.yml file](./apps/gateway/evals.config.yml) in the app directory.
 
 You can run the script with `pnpm eval` from the app directory (`app/gateway`)
 or from the root directory with `pnpm -C apps/gateway eval`.
+
+## Work in progress
+
+This is an early stage prototype and there are a lot of things that are not yet ideal.
+
+### TODOs
+
+The code contains a lot of TODOs that need attention.
+
+### Bigger changes
+
+- re-organize the scaffolding so that the "eval" folder in the "gateway" app becomes a separate (CLI) app
+- move the "examples" folder in the "gateway" app to the root of the project
+- move the Nitro scraper to the "nitro" example
+- figure a way to render the "eval" results in a more readable way
+- make a JSON schema for the "eval" config file
+- deeper integration with langfuse (user feedback / scores) and supabase (langchain caching / memory)
