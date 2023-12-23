@@ -73,10 +73,34 @@ export class ChatElement extends LitElement {
         li.classList.add(message.role === "assistant" ? "assistant" : "user");
         li.innerHTML = `
             <div class="avatar">${
-              message.role === "assistant" ? "AI" : "you"
+              message.role === "assistant" ? "🤖" : "🙂"
             }</div>
             <div class="content"></div>
+            ${
+              message.role === "assistant"
+                ? `<div class="feedback">
+              <button type="button" title="Good answer" name="feedback-good">👍</button>
+              <button type="button" title="Poor answer" name="feedback-poor">👎</button>
+              <button type="button" title="Report" name="feedback-comment-open">📝</button>
+            </div>`
+                : ""
+            }
           `;
+        li
+          .querySelector("button[name=feedback-good]")
+          ?.addEventListener("click", () => {
+            alert("Not implemented");
+          });
+        li
+          .querySelector("button[name=feedback-poor]")
+          ?.addEventListener("click", () => {
+            alert("Not implemented");
+          });
+        li
+          .querySelector("button[name=feedback-comment-open]")
+          ?.addEventListener("click", () => {
+            alert("Not implemented");
+          });
         return li;
       }),
     );
