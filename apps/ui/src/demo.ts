@@ -1,7 +1,8 @@
 import { getClient } from "@local/client";
 
-let chatId: string | null = null;
-async function init() {
+let chatId: string | undefined = window.location.hash.slice(1);
+export async function init() {
+  console.log("init", chatId);
   const chatEl = document.querySelector("dc-chat")!;
 
   // look at the window url hash for a chat id
@@ -16,7 +17,8 @@ async function init() {
     console.info("element", chatEl);
 
     if (chatId) {
-      client.join(chatId).catch((error) => console.error(error));
+      await client.join(chatId).catch((error) => console.error(error));
+      window.location.hash = chatId;
     }
 
     client.subscribe((messages) => {
