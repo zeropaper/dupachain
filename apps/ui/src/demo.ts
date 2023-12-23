@@ -40,3 +40,11 @@ async function init() {
 }
 
 window.addEventListener("DOMContentLoaded", init);
+
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule) => {
+    if (newModule) {
+      newModule.init();
+    }
+  });
+}
