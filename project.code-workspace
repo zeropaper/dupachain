@@ -9,6 +9,10 @@
       "path": "./apps/ui"
     },
     {
+      "name": "evals-viewer",
+      "path": "./apps/evals-viewer"
+    },
+    {
       "name": "client",
       "path": "./packages/client"
     },
