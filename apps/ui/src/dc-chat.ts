@@ -1,8 +1,8 @@
 import { LitElement, css, html } from "lit";
 import { marked } from "marked";
-import DOMPurify from "dompurify";
-import { customElement, property, query, state } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 import { ChatMessageInfo } from "./types";
+import { ChatMessageElement } from "./dc-chat-message";
 
 /**
  * Chat component
@@ -36,8 +36,11 @@ export class ChatElement extends LitElement {
   @query(".disclaimer")
   disclaimer!: HTMLDivElement;
 
-  @query("main>ul")
-  messages!: HTMLUListElement;
+  @query("main")
+  main!: HTMLDivElement;
+
+  @query("main>.messages")
+  messages!: HTMLDivElement;
 
   @query("textarea")
   textarea!: HTMLTextAreaElement;
@@ -45,8 +48,8 @@ export class ChatElement extends LitElement {
   @query("footer button")
   sendButton!: HTMLButtonElement;
 
-  @state()
-  private _messages: ChatMessageInfo[] = [];
+  @query(".messages > dc-chat-message")
+  messageElements!: ChatMessageElement[];
 
   clearInput(focus = true) {
     this.textarea.value = "";
@@ -55,55 +58,47 @@ export class ChatElement extends LitElement {
     }
   }
 
-  setMessages(messages: ChatMessageInfo[]) {
-    this._messages = messages;
-    this.renderMessages();
+  protected messageElementPresent(message: ChatMessageInfo) {
+    return Array.from(this.messageElements).find(
+      (messageElement) => messageElement.getAttribute("data-id") === message.id,
+    );
   }
 
-  renderMessages() {
-    const ul = this.messages;
-    ul.innerHTML = "";
-    ul.append(
-      ...this._messages.map((message) => {
-        const li = document.createElement("li");
-        const markdown = message.content;
-        marked.parse(markdown, { async: true }).then((html) => {
-          li.querySelector(".content")!.innerHTML = DOMPurify.sanitize(html);
-        });
-        li.classList.add(message.role === "assistant" ? "assistant" : "user");
-        li.innerHTML = `
-            <div class="avatar">${
-              message.role === "assistant" ? "🤖" : "🙂"
-            }</div>
-            <div class="content"></div>
-            ${
-              message.role === "assistant"
-                ? `<div class="feedback">
-              <button type="button" title="Good answer" name="feedback-good">👍</button>
-              <button type="button" title="Poor answer" name="feedback-poor">👎</button>
-              <button type="button" title="Report" name="feedback-comment-open">📝</button>
-            </div>`
-                : ""
-            }
-          `;
-        li
-          .querySelector("button[name=feedback-good]")
-          ?.addEventListener("click", () => {
-            alert("Not implemented");
-          });
-        li
-          .querySelector("button[name=feedback-poor]")
-          ?.addEventListener("click", () => {
-            alert("Not implemented");
-          });
-        li
-          .querySelector("button[name=feedback-comment-open]")
-          ?.addEventListener("click", () => {
-            alert("Not implemented");
-          });
-        return li;
-      }),
-    );
+  setMessages(messages: ChatMessageInfo[]) {
+    const presentIds: string[] = [];
+    const currentMessageEls = this.messageElements;
+
+    (currentMessageEls || []).forEach((messageElement) => {
+      const elId = messageElement.getAttribute("data-id");
+      const update = messages.find((msg) => msg.id === elId);
+      if (!update || this.messageElementPresent(update)) {
+        messageElement.remove();
+        return;
+      }
+      presentIds.push(update.id);
+    });
+
+    messages.forEach((message) => {
+      if (presentIds.includes(message.id)) {
+        return;
+      }
+
+      const el = new ChatMessageElement();
+      el.setAttribute("data-id", message.id);
+      el.role = message.role as any;
+      const markdown = message.content;
+      const html = marked.parse(markdown, { async: false });
+      el.innerHTML = typeof html === "string" ? html : "";
+      this.main.appendChild(el);
+    });
+
+    this.scrollDown();
+  }
+
+  scrollDown() {
+    requestAnimationFrame(() => {
+      this.main.scrollTop = this.main.scrollHeight;
+    });
   }
 
   render() {
@@ -114,7 +109,7 @@ export class ChatElement extends LitElement {
           <button @click=${this._onClose}>Close</button>
         </header>
         <main>
-          <ul></ul>
+          <div class="messages"></div>
         </main>
         <footer>
           <div class="disclaimer">
@@ -168,11 +163,13 @@ export class ChatElement extends LitElement {
 
   static styles = css`
     :host {
+      --spacing: calc(0.5 * var(--dc-spacing, 0.5rem));
+      --radius: var(--dc-radius, 0.15rem);
     }
     dialog {
       padding: 0;
       border: 1px solid black;
-      border-radius: 0.35rem;
+      border-radius: var(--radius);
       flex-direction: column;
       min-width: max(65%, 300px);
       min-height: max(65%, 300px);
@@ -183,57 +180,31 @@ export class ChatElement extends LitElement {
     header {
       display: flex;
       justify-content: flex-end;
-      padding: 0.35rem;
+      padding: calc(0.5 * var(--dc-spacing, 0.5rem));
       border-bottom: 1px solid black;
     }
     main {
       flex-grow: 1;
       overflow-y: auto;
     }
-    main > ul {
+    .messages {
       min-height: 120px;
       list-style: none;
       margin: 0;
-      padding: 0.35rem;
-    }
-    li {
-      margin: 0.35rem;
-      display: flex;
-      align-items: flex-end;
-      gap: 0.35rem;
-    }
-    li.user {
-      flex-direction: row-reverse;
-    }
-    li .avatar {
-      height: 1.5rem;
-      width: 1.5rem;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      padding: 0.35rem;
-      border: 1px solid #ccc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    li .content {
-      max-width: 80%;
-      padding: 0.65rem 1rem;
-      border-radius: 0.35rem;
-      border: 1px solid #ccc;
+      padding: calc(0.5 * var(--dc-spacing, 0.5rem));
     }
     footer {
       border-top: 1px solid black;
     }
     .disclaimer {
-      padding: 0.35rem;
+      padding: calc(0.5 * var(--dc-spacing, 0.5rem));
       font-size: 0.8em;
       text-align: center;
     }
     .input {
       display: flex;
-      padding: 0.35rem;
-      gap: 0.35rem;
+      padding: calc(0.5 * var(--dc-spacing, 0.5rem));
+      gap: calc(0.5 * var(--dc-spacing, 0.5rem));
     }
     .input textarea {
       flex-grow: 1;

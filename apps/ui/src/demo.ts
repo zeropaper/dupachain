@@ -16,13 +16,12 @@ export async function init() {
 
     console.info("element", chatEl);
 
-    if (chatId) {
-      await client.join(chatId).catch((error) => console.error(error));
-      window.location.hash = chatId;
-    }
-
     client.subscribe((messages) => {
       chatEl.setMessages(messages);
+    });
+
+    chatEl.addEventListener("sendfeedback", async (e) => {
+      console.info("sendfeedback", e.detail.feedback);
     });
 
     chatEl.addEventListener("send", async (e) => {
@@ -36,6 +35,13 @@ export async function init() {
       chatEl.loading = false;
       chatEl.clearInput();
     });
+
+    if (chatId) {
+      chatEl.loading = true;
+      await client.join(chatId).catch((error) => console.error(error));
+      chatEl.loading = false;
+      window.location.hash = chatId;
+    }
   });
 
   chatEl.openChat();

@@ -39,7 +39,12 @@ body {
 }
 
 dc-chat {
-  background-color: lime;
+  --dc-spacing: 1rem;
+  --dc-radius: 0.3rem;
+  --dc-assistant-background-color: #f5f5f5;
+  --dc-asistant-color: #213547;
+  --dc-user-background-color: #646cff;
+  --dc-user-color: #ffffff;
   position: fixed;
   bottom: 2rem;
   right: 2rem;
