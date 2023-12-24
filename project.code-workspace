@@ -1,24 +1,12 @@
 {
   "folders": [
     {
-      "name": "app",
-      "path": "./apps/gateway"
+      "name": "apps",
+      "path": "./apps"
     },
     {
-      "name": "ui",
-      "path": "./apps/ui"
-    },
-    {
-      "name": "evals-viewer",
-      "path": "./apps/evals-viewer"
-    },
-    {
-      "name": "client",
-      "path": "./packages/client"
-    },
-    {
-      "name": "scripts",
-      "path": "./scripts"
+      "name": "packages",
+      "path": "./packages"
     },
     {
       "name": "supabase",
@@ -32,8 +20,6 @@
   "settings": {
     "files.exclude": {
       "**/node_modules": true,
-      "scripts/": true,
-      "chains/": true,
       "packages/": true,
       "apps/": true,
       "supabase/": true
