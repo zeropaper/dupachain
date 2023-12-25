@@ -1,6 +1,6 @@
 import { resolve } from "path";
 import { writeFile } from "fs/promises";
-import { evalFileSchema } from "../src/eval/schemas";
+import { evalFileSchema } from "../src/schemas";
 import zodToJsonSchema from "zod-to-json-schema";
 
 async function main() {
