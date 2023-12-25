@@ -4,6 +4,8 @@
   "scripts": {
     "eval": "tsx src/eval/index.ts",
     "eval:dev": "tsx watch src/eval/index.ts",
+    "gen:eval:jsonschema": "tsx ./scripts/generate-json-schema.ts",
+    "postinstall": "pnpm run gen:eval:jsonschema",
     "test": "vitest",
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts"
@@ -28,7 +30,8 @@
     "socket.io": "^4.7.2",
     "yaml": "^2.3.4",
     "znv": "^0.4.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zod-to-json-schema": "^3.22.3"
   },
   "devDependencies": {
     "@local/client": "workspace:*",

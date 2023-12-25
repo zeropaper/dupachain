@@ -27,5 +27,8 @@
     "files.watcherExclude": {},
     "search.exclude": {},
     "typescript.tsdk": "project-root/node_modules/typescript/lib",
+    "yaml.schemas": {
+      "gateway/eval-json-schema.json": "*.evalsconfig.yml",
+    },
   }
 }

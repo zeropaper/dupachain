@@ -4,8 +4,7 @@ import CallbackHandler from "langfuse-langchain";
 import { log } from "@local/cli";
 import { ChainRunner, ToolsMap } from "../schemas";
 import { getTesterCall } from "./getTesterCall";
-import { loadPersona } from "./loadPersonaFile";
-import { EvalFileSchema } from "./schemas";
+import { PersonaFileSchema } from "./schemas";
 import { testGoal } from "./testGoal";
 
 export interface EvalMessage {
@@ -40,7 +39,7 @@ async function prepareCallbacks(
 
 export async function runPersona({
   runId,
-  personaOrPath,
+  persona,
   runChain,
   toolsMap,
   systemPrompt,
@@ -48,14 +47,13 @@ export async function runPersona({
   cache,
 }: {
   runId: string;
-  personaOrPath: EvalFileSchema["personas"][number];
+  persona: PersonaFileSchema;
   runChain: ChainRunner;
   toolsMap: ToolsMap;
   systemPrompt: string;
   callbacks: Callbacks;
   cache?: BaseCache;
 }): Promise<EvalMessage[]> {
-  const persona = await loadPersona(personaOrPath);
   const { profile, firstMessage, maxCalls } = persona;
   // in order to ease the reading/organization of data in/with langfuse
   // we create 3 different sessions

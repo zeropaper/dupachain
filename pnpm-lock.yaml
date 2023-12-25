@@ -141,6 +141,9 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
+      zod-to-json-schema:
+        specifier: ^3.22.3
+        version: 3.22.3(zod@3.22.4)
     devDependencies:
       '@local/client':
         specifier: workspace:*
@@ -184,9 +187,6 @@ importers:
       dompurify:
         specifier: ^3.0.6
         version: 3.0.6
-      express:
-        specifier: ^4.18.2
-        version: 4.18.2
       lit:
         specifier: ^3.1.0
         version: 3.1.0
@@ -197,12 +197,6 @@ importers:
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.0.5
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.21
-      tsx:
-        specifier: ^4.7.0
-        version: 4.7.0
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -6722,6 +6716,14 @@ packages:
     resolution: {integrity: sha512-/Q3wnyxAfCt94ZcrGiXXoiAfRqasxl9CX64LZ9fj+4dKH68zulUtU0uk1WMxQPfAxQ0ZI70dKzcoW7hHj+DwSQ==}
     peerDependencies:
       zod: ^3.20.0
+    dependencies:
+      zod: 3.22.4
+    dev: false
+
+  /zod-to-json-schema@3.22.3(zod@3.22.4):
+    resolution: {integrity: sha512-9isG8SqRe07p+Aio2ruBZmLm2Q6Sq4EqmXOiNpDxp+7f0LV6Q/LX65fs5Nn+FV/CzfF3NLBoksXbS2jNYIfpKw==}
+    peerDependencies:
+      zod: ^3.22.4
     dependencies:
       zod: 3.22.4
     dev: false

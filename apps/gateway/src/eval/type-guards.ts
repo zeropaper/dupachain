@@ -5,7 +5,9 @@ export function isRunnerWithToolsInfo(
 ): runner is RunnerSchema & { tools: ToolsSchema } {
   return (
     typeof runner !== "string" &&
-    Array.isArray(runner.tools.loaders) &&
-    Array.isArray(runner.tools.enabled)
+    // TODO: Keep that? Add default tools?
+    // Array.isArray(runner.tools.loaders) &&
+    Array.isArray(runner.tools.enabled) &&
+    runner.tools.enabled.length > 0
   );
 }

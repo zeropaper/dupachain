@@ -9,7 +9,10 @@ export type ToolsSchema = z.infer<typeof toolsSchema>;
 
 const runnerSchema = z.object({
   path: z.string().describe("Path to runner file"),
-  tools: toolsSchema.optional(),
+  tools: toolsSchema.default({
+    loaders: [],
+    enabled: [],
+  }),
   modelName: z
     .enum(["gpt-3.5-turbo-1106", "gpt-4-1106-preview", "gpt-4-0314"])
     .default("gpt-3.5-turbo-1106")
@@ -61,11 +64,28 @@ export const personaFileSchema = z.object({
 export type PersonaFileSchema = z.infer<typeof personaFileSchema>;
 
 export const evalFileSchema = z.object({
+  name: z.string().describe("Name of the evaluation"),
+  rootDir: z.string().optional().describe("Root directory of the eval"),
   prompts: z.array(z.string()).describe("File paths to prompts"),
   runners: runnersSchema,
-  personas: z.array(
-    z.string().describe("File paths to personas").or(personaFileSchema),
-  ),
+  personas: z
+    .array(
+      z
+        .string()
+        .describe("File paths to personas")
+        .or(personaFileSchema.describe("Persona object")),
+    )
+    .describe("An array of either file paths to YAML files or persona objects"),
 });
 
 export type EvalFileSchema = z.infer<typeof evalFileSchema>;
+
+export const configSchema = z.object({
+  rootDir: z.string(),
+  filename: z.string(),
+  prompts: z.array(z.string()).describe("File paths to prompts"),
+  runners: z.array(runnerSchema),
+  personas: z.array(personaFileSchema),
+});
+
+export type ConfigSchema = z.infer<typeof configSchema>;

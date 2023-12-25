@@ -2,10 +2,7 @@ import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, DatabaseTable } from "@local/supabase-types";
-
-// TODO: make this a "bin" script (that you can invoke with `npx aival`)
-// TODO: allow passing in a custom config file
-// TODO: make loading relative to the config file
+import { EvalMessage } from "./runPersona";
 
 export type ChainRunner = (options: {
   chatMessages: DatabaseTable<"chat_messages", "Row">[];
@@ -21,3 +18,13 @@ export type ToolLoader = (options: {
   client: SupabaseClient<Database>;
 }) => Promise<ToolsMap>;
 export type LogItems = [number, string, ...any[]][];
+export type EvalOutput = Record<
+  string,
+  Record<
+    string,
+    {
+      messages: EvalMessage[];
+      log: LogItems;
+    }
+  >
+>;

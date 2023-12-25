@@ -100,7 +100,7 @@ environment variable.
 ## Evaluations
 
 The gateway app has a `npm` script to run evaluations based on the
-[evals.config.yml file](./apps/gateway/evals.config.yml) in the app directory.
+[default.evalsconfig.yml file](./apps/gateway/default.evalsconfig.yml) in the app directory.
 
 You can run the script with `pnpm eval` from the app directory (`app/gateway`)
 or from the root directory with `pnpm -C apps/gateway eval`.
