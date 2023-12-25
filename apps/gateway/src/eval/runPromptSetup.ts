@@ -1,8 +1,6 @@
 import { readFile } from "fs/promises";
 import { basename, resolve } from "path";
 import { Callbacks } from "langchain/callbacks";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@local/supabase-types";
 import { LocalFileCache } from "langchain/cache/file_system";
 import CallbackHandler from "langfuse-langchain";
 
@@ -20,7 +18,6 @@ export async function runPromptSetup({
   runner,
   promptPath,
   persona,
-  serviceClient,
   output,
 }: {
   evalId: string;
@@ -28,7 +25,6 @@ export async function runPromptSetup({
   runner: RunnerSchema;
   promptPath: EvalFileSchema["prompts"][number];
   persona: PersonaFileSchema;
-  serviceClient: SupabaseClient<Database>;
   output: EvalOutput;
 }) {
   const systemPrompt = await readFile(
@@ -62,9 +58,8 @@ export async function runPromptSetup({
 
     let toolsMap: ToolsMap = isRunnerWithToolsInfo(runner)
       ? await prepareTools({
-          runner: runner,
+          runner,
           callbacks,
-          serviceClient,
         })
       : {};
 

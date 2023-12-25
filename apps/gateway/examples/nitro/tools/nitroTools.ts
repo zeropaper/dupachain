@@ -4,13 +4,10 @@ import { Callbacks } from "langchain/callbacks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
 
-export async function loadTools({
-  callbacks,
-  client: serviceClient,
-}: {
-  callbacks?: Callbacks;
-  client: SupabaseClient<Database>;
-}) {
+export async function loadTools({ callbacks }: { callbacks?: Callbacks }) {
+  const serviceClient = await import("../../../src/createServiceClient").then(
+    ({ createServiceClient }) => createServiceClient(),
+  );
   async function loadDataFromDocument<T = any>(reference: string) {
     const { data, error } = await serviceClient
       .from("documents")

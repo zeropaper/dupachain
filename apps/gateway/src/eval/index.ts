@@ -11,9 +11,6 @@ config({ path: resolve(__dirname, "../../../../.env") });
 // TODO: allow passing in a custom config file
 
 async function main() {
-  const serviceClient = await import("../createServiceClient").then(
-    ({ createServiceClient }) => createServiceClient(),
-  );
   const setup = await loadEvalFile();
   const evalId = Date.now().toString();
   const output: EvalOutput = {};
@@ -34,10 +31,9 @@ async function main() {
           runPromptSetup({
             evalId,
             runChain,
-            runner: runner,
+            runner,
             promptPath,
             persona,
-            serviceClient,
             output,
           }),
         );

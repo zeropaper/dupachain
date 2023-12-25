@@ -1,7 +1,6 @@
 import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, DatabaseTable } from "@local/supabase-types";
+import { DatabaseTable } from "@local/supabase-types";
 import { EvalMessage } from "./runPersona";
 
 export type ChainRunner = (options: {
@@ -13,10 +12,7 @@ export type ChainRunner = (options: {
 
 export type ToolsMap = Record<string, AgentExecutor["tools"][number]>;
 
-export type ToolLoader = (options: {
-  callbacks?: any;
-  client: SupabaseClient<Database>;
-}) => Promise<ToolsMap>;
+export type ToolLoader = (options: { callbacks?: any }) => Promise<ToolsMap>;
 export type LogItems = [number, string, ...any[]][];
 export type EvalOutput = Record<
   string,
