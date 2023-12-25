@@ -1,10 +1,13 @@
 import fs from "node:fs/promises";
 import express from "express";
+import { basename, resolve } from "node:path";
+import { glob } from "glob";
 
 // Constants
 const isProduction = process.env.NODE_ENV === "production";
-const port = process.env.PORT || 5173;
+const port = process.env.PORT || 5172;
 const base = process.env.BASE || "/";
+const evalsOutput = process.env.EVALS_OUTPUT || "../gateway/evals-output";
 
 // Cached production assets
 const templateHtml = isProduction
@@ -33,6 +36,32 @@ if (!isProduction) {
   app.use(compression());
   app.use(base, sirv("./dist/client", { extensions: [] }));
 }
+
+app.get("/api/evals", async (req, res, next) => {
+  try {
+    const files = await glob(resolve(process.cwd(), evalsOutput, "*.json"));
+    res.send(
+      JSON.stringify({
+        files: files.map((file) => basename(file, ".json")),
+      }),
+    );
+  } catch (e) {
+    next(e);
+  }
+});
+
+app.get("/api/evals/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const file = await fs.readFile(
+      resolve(process.cwd(), evalsOutput, `${id}.json`),
+      "utf-8",
+    );
+    res.send(file);
+  } catch (e) {
+    next(e);
+  }
+});
 
 // Serve HTML
 app.use("*", async (req, res) => {
