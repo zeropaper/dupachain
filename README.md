@@ -102,8 +102,7 @@ environment variable.
 The gateway app has a `npm` script to run evaluations based on the
 [default.evalsconfig.yml file](./apps/gateway/default.evalsconfig.yml) in the app directory.
 
-You can run the script with `pnpm eval` from the app directory (`app/gateway`)
-or from the root directory with `pnpm -C apps/gateway eval`.
+You can run the script with `pnpm eval`.
 
 ## Work in progress
 
@@ -111,13 +110,10 @@ This is an early stage prototype and there are a lot of things that are not yet 
 
 ### TODOs
 
-The code contains a lot of TODOs that need attention.
+The code contains a lot of `TODO`s that need attention.
 
 ### Bigger changes
 
-- re-organize the scaffolding so that the "eval" folder in the "gateway" app becomes a separate (CLI) app
-- move the "examples" folder in the "gateway" app to the root of the project
-- move the Nitro scraper to the "nitro" example
 - figure a way to render the "eval" results in a more readable way
 - make a JSON schema for the "eval" config file
 - deeper integration with langfuse (user feedback / scores) and supabase (langchain caching / memory)
