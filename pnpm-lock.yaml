@@ -108,9 +108,6 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.18.2
-      glob:
-        specifier: ^10.3.10
-        version: 10.3.10
       sirv:
         specifier: ^2.0.4
         version: 2.0.4
@@ -222,31 +219,6 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(@types/node@20.10.5)
 
-  apps/ui:
-    dependencies:
-      '@local/client':
-        specifier: workspace:*
-        version: link:../../packages/client
-      dompurify:
-        specifier: ^3.0.6
-        version: 3.0.6
-      lit:
-        specifier: ^3.1.0
-        version: 3.1.0
-      marked:
-        specifier: ^11.1.0
-        version: 11.1.0
-    devDependencies:
-      '@types/dompurify':
-        specifier: ^3.0.5
-        version: 3.0.5
-      typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
-      vite:
-        specifier: ^5.0.10
-        version: 5.0.10(@types/node@20.5.1)
-
   packages/cache:
     dependencies:
       rimraf:
@@ -324,6 +296,31 @@ importers:
       supabase:
         specifier: latest
         version: 1.123.4
+
+  packages/ui:
+    dependencies:
+      '@local/client':
+        specifier: workspace:*
+        version: link:../client
+      dompurify:
+        specifier: ^3.0.6
+        version: 3.0.6
+      lit:
+        specifier: ^3.1.0
+        version: 3.1.0
+      marked:
+        specifier: ^11.1.0
+        version: 11.1.0
+    devDependencies:
+      '@types/dompurify':
+        specifier: ^3.0.5
+        version: 3.0.5
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+      vite:
+        specifier: ^5.0.10
+        version: 5.0.10(@types/node@20.5.1)
 
 packages:
 
