@@ -17,6 +17,17 @@ Your messages are only a valid JSON object having the following properties:
 
 Here is the scenario you have to follow:`;
 
+/**
+ * Retrieves a tester call for a given profile and conversation.
+ *
+ * @param {Object} options - The options for the tester call.
+ * @param {string} options.profile - The profile to use for the tester call.
+ * @param {string} [options.firstMessage="Hi!"] - The first message to send in the conversation.
+ * @param {Array<ChatMessageInfo>} options.messages - The messages in the conversation.
+ * @param {Callbacks} [options.callbacks] - The callbacks to use for the tester call.
+ * @param {BaseCache} [options.cache] - The cache to use for the tester call.
+ * @returns {Promise<{ message: string; reasoning: string; }>} The result of the tester call.
+ */
 export async function getTesterCall({
   profile,
   firstMessage = "Hi!",

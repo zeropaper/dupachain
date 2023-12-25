@@ -37,6 +37,18 @@ async function prepareCallbacks(
   };
 }
 
+/**
+ * Runs the persona evaluation process.
+ *
+ * @param runId - The ID of the run.
+ * @param persona - The persona file schema.
+ * @param runChain - The chain runner.
+ * @param toolsMap - The map of tools.
+ * @param systemPrompt - The system prompt.
+ * @param callbacks - The callbacks.
+ * @param cache - The optional cache.
+ * @returns A promise that resolves to an array of evaluation messages.
+ */
 export async function runPersona({
   runId,
   persona,

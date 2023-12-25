@@ -6,6 +6,13 @@ import { loadPersona } from "./loadPersonaFile";
 
 export const defaultRoot = resolve(__dirname, "../..");
 
+/**
+ * Loads the evaluation file and returns the setup configuration.
+ *
+ * @param filepath The path to the evaluation file. Defaults to "default.evalsconfig.yml" in the current working directory.
+ * @returns The setup configuration object.
+ * @throws Error if an invalid runner is encountered.
+ */
 export async function loadEvalFile(
   filepath = resolve(process.cwd(), "default.evalsconfig.yml"),
 ) {

@@ -1,6 +1,10 @@
 import { CallbackHandlerMethods } from "langchain/callbacks";
 import { LogItems } from "./types";
 
+/**
+ * Creates evaluation callbacks.
+ * @returns A promise that resolves to an object containing the teardown function and the handlers.
+ */
 export async function createEvalCallbacks(): Promise<{
   teardown: () => Promise<LogItems>;
   handlers: CallbackHandlerMethods;

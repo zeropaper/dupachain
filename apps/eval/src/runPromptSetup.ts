@@ -12,6 +12,16 @@ import { ChainRunner, ToolsMap, EvalOutput } from "./types";
 import { createEvalCallbacks } from "./createEvalCallbacks";
 import { EvalFileSchema, PersonaFileSchema, RunnerSchema } from "./schemas";
 
+/**
+ * Runs the prompt setup for evaluation.
+ *
+ * @param evalId - The evaluation ID.
+ * @param runChain - The chain runner.
+ * @param runner - The runner schema.
+ * @param promptPath - The path to the prompt file.
+ * @param persona - The persona file schema.
+ * @param output - The evaluation output.
+ */
 export async function runPromptSetup({
   evalId,
   runChain,

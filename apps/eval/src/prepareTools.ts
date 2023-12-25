@@ -4,6 +4,15 @@ import { defaultRoot } from "./loadEvalFile";
 import { ToolsMap, ToolLoader } from "./types";
 import { RunnerSchema, ToolsSchema } from "./schemas";
 
+/**
+ * Prepares the tools by loading them using the provided runner and callbacks.
+ *
+ * @param {Object} options - The options object.
+ * @param {RunnerSchema & { tools: ToolsSchema }} options.runner - The runner object containing the tools schema.
+ * @param {Callbacks} options.callbacks - The callbacks object.
+ * @returns {ToolsMap} - The map of loaded tools.
+ * @throws {Error} - If an invalid loader is encountered.
+ */
 export async function prepareTools({
   runner,
   callbacks,

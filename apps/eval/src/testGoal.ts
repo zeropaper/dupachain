@@ -5,6 +5,28 @@ import { LLMChain } from "langchain/chains";
 import { EvalMessage } from "./runPersona";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 
+/**
+ * Represents a template for testing a goal based on a chat.
+ * @remarks
+ * The template includes placeholders for the chat description, goal description, and the expected answer.
+ * The expected answer must be a valid JSON object with the properties "answer" and "reasoning".
+ * @example
+ * ```
+ * Based on the following chat.
+ * <<< chat description begin >>>
+ * {messages}
+ * <<< chat description end >>>
+ *
+ * Did the AI meet the following goal?
+ * <<< goal description begin >>>
+ * {goal}
+ * <<< goal description end >>>
+ *
+ * Your answer must be a valid JSON with the following properties:
+ * - answer: "yes" or "no"
+ * - reasoning: a description of your reasoning, be succinct and clear
+ * ```
+ */
 export const testerTemplate = `Based on the following chat.
 <<< chat description begin >>>
 {messages}
@@ -19,6 +41,14 @@ Your answer must be a valid JSON with the following properties:
 - answer: "yes" or "no"
 - reasoning: a description of your reasoning, be succint and clear`;
 
+/**
+ * Tests the goal of a persona by evaluating the provided messages.
+ * @param callbacks - The callbacks object.
+ * @param cache - The cache object.
+ * @param persona - The persona file schema.
+ * @param messages - The array of evaluation messages.
+ * @returns A promise that resolves to a boolean indicating whether the goal is achieved.
+ */
 export async function testGoal({
   callbacks,
   cache,
