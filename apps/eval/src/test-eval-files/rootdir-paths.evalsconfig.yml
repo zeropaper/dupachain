@@ -1,5 +1,5 @@
 name: rootDir paths test
-rootDir: ../../..
+rootDir: ../../../gateway
 prompts:
   - examples/nitro/prompts/reto-1.txt
   - examples/nitro/prompts/reto-2.txt

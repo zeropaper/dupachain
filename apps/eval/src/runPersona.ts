@@ -2,10 +2,10 @@ import { Callbacks } from "langchain/callbacks";
 import { BaseCache } from "langchain/schema";
 import CallbackHandler from "langfuse-langchain";
 import { log } from "@local/cli";
-import { ChainRunner, ToolsMap } from "../schemas";
-import { getTesterCall } from "./getTesterCall";
-import { PersonaFileSchema } from "./schemas";
+import { ChainRunner, ToolsMap } from "./types";
 import { testGoal } from "./testGoal";
+import { PersonaFileSchema } from "./schemas";
+import { getTesterCall } from "./getTesterCall";
 
 export interface EvalMessage {
   content: string;
@@ -18,7 +18,7 @@ async function prepareCallbacks(
   callbacks?: Callbacks,
 ): Promise<{ callbacks: Callbacks; teardown: () => Promise<void> }> {
   const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
-    await import("../config");
+    await import("./config");
   const callbackHandler = new CallbackHandler({
     publicKey: LANGFUSE_PUBLIC_KEY,
     secretKey: LANGFUSE_SECRET_KEY,

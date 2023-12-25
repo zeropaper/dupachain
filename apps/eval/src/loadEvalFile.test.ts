@@ -4,8 +4,8 @@ import { loadEvalFile } from "./loadEvalFile";
 
 describe.each([
   [
-    resolve(__dirname, "../../default.evalsconfig.yml"),
-    resolve(__dirname, "../.."),
+    resolve(__dirname, "../../gateway/default.evalsconfig.yml"),
+    resolve(__dirname, "../../gateway"),
   ],
   [
     resolve(__dirname, "test-eval-files/relative-paths.evalsconfig.yml"),
@@ -13,7 +13,7 @@ describe.each([
   ],
   [
     resolve(__dirname, "test-eval-files/rootdir-paths.evalsconfig.yml"),
-    resolve(__dirname, "../.."),
+    resolve(__dirname, "../../gateway"),
   ],
 ])("loadEvalFile %s", (filepath, rootDir) => {
   let loaded: any;

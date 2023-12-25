@@ -12,9 +12,9 @@
     "clean": "turbo run clean --parallel",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
-    "test": "turbo run test",
+    "test": "CI=1 turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,mdx,css,scss}\"",
-    "eval": "pnpm -C apps/gateway run eval",
+    "eval": "pnpm -C apps/eval run eval",
     "prepare": "husky install"
   },
   "devDependencies": {

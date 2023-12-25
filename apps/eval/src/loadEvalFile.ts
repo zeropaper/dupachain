@@ -12,12 +12,13 @@ export async function loadEvalFile(
   const file = await readFile(filepath, "utf-8");
   const data = YAML.parse(file);
   const raw = evalFileSchema.parse(data);
+  const rootDir = raw.rootDir
+    ? resolve(dirname(filepath), raw.rootDir)
+    : dirname(filepath);
   const setup: ConfigSchema = {
-    rootDir: raw.rootDir
-      ? resolve(dirname(filepath), raw.rootDir)
-      : dirname(filepath),
+    rootDir,
     filename: basename(filepath),
-    prompts: raw.prompts,
+    prompts: raw.prompts.map((prompt) => resolve(rootDir, prompt)),
     runners: [],
     personas: [],
   };

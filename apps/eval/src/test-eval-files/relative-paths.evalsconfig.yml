@@ -1,0 +1,16 @@
+name: Relative paths test
+prompts:
+  - ../../../gateway/examples/nitro/prompts/reto-1.txt
+  - ../../../gateway/examples/nitro/prompts/reto-2.txt
+runners:
+  - path: ../../../gateway/src/chains/toolCalling
+    tools:
+      loaders:
+        - ../../../gateway/examples/nitro/tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - listSnowboardByFits
+        - listSnowboardBySizes
+personas:
+  - ../../../gateway/examples/nitro/personas/greg.yml
+  - ../../../gateway/examples/nitro/personas/max.yml

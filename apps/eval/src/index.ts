@@ -5,13 +5,16 @@ import { loadEvalFile, defaultRoot } from "./loadEvalFile";
 import { runPromptSetup } from "./runPromptSetup";
 import { ChainRunner, EvalOutput } from "./types";
 
-config({ path: resolve(__dirname, "../../../../.env") });
+config({ path: resolve(__dirname, "../../../.env") });
 
 // TODO: make this a "bin" script (that you can invoke with `npx aival`)
 // TODO: allow passing in a custom config file
 
 async function main() {
-  const setup = await loadEvalFile();
+  const { EVALFILE } = await import("./config");
+  const filepath = EVALFILE ? resolve(__dirname, "..", EVALFILE) : undefined;
+  const setup = await loadEvalFile(filepath);
+  console.log("filepath", filepath, setup);
   const evalId = Date.now().toString();
   const output: EvalOutput = {};
 
@@ -44,7 +47,7 @@ async function main() {
   await Promise.allSettled(promises);
 
   await writeFile(
-    resolve(defaultRoot, `evals-output/${evalId}.json`),
+    resolve(setup.rootDir, `evals-output/${evalId}.json`),
     JSON.stringify({ setup, output }),
   );
 }

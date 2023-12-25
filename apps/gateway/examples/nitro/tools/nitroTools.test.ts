@@ -23,7 +23,7 @@ describe("createNitroTools", () => {
 
   it("creates a set of tools", async () => {
     const load = async () => {
-      tools = await loadTools({ client: serviceClient });
+      tools = await loadTools({});
     };
     await expect(load()).resolves.toBeUndefined();
     expect(tools).toHaveProperty("snowboardsSearchTool");

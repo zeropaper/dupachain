@@ -36,7 +36,7 @@ export async function runPromptSetup({
     resolve(__dirname, "../../../../.cache/langchain"),
   );
   const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
-    await import("../config");
+    await import("./config");
   const personaPath = persona.name;
   try {
     const runId = [
