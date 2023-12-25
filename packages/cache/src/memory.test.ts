@@ -1,5 +1,5 @@
+import { describe, it, expect } from "vitest";
 import MemoryCache from "./memory";
-import { rimraf } from "rimraf";
 
 let cache: MemoryCache<{
   test: string;

@@ -1,10 +1,12 @@
+import { describe, it, expect, beforeAll } from "vitest";
 import { mkdir } from "fs/promises";
 import FileSystemCache from "./fs";
 import { rimraf } from "rimraf";
+import { resolve } from "path";
 
 beforeAll(async () => {
-  await rimraf("./test-files").catch((e) => {});
-  await mkdir("./test-files");
+  await rimraf(resolve(__dirname, "./test-files")).catch((e) => {});
+  await mkdir(resolve(__dirname, "./test-files"));
 });
 
 let cache: FileSystemCache<{
@@ -16,7 +18,7 @@ describe("FileSystemCache", () => {
   it("creates a cache directory", () => {
     expect(() => {
       cache = new FileSystemCache({
-        path: "./test-files/whtvr",
+        path: resolve(__dirname, "./test-files/whtvr"),
       });
     }).not.toThrow();
     expect(cache).toBeInstanceOf(FileSystemCache);
