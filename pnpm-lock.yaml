@@ -102,12 +102,21 @@ importers:
 
   apps/evals-viewer:
     dependencies:
+      '@local/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       compression:
         specifier: ^1.7.4
         version: 1.7.4
       express:
         specifier: ^4.18.2
         version: 4.18.2
+      glob:
+        specifier: ^10.3.10
+        version: 10.3.10
+      lit:
+        specifier: ^3.1.0
+        version: 3.1.0
       sirv:
         specifier: ^2.0.4
         version: 2.0.4

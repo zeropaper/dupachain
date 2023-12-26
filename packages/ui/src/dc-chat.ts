@@ -1,8 +1,6 @@
 import { LitElement, css, html } from "lit";
-import { marked } from "marked";
 import { customElement, property, query } from "lit/decorators.js";
-import { ChatMessageInfo } from "./types";
-import { ChatMessageElement } from "./dc-chat-message";
+import { ChatMessagesElement } from "./dc-chat-messages";
 
 /**
  * Chat component
@@ -12,20 +10,14 @@ import { ChatMessageElement } from "./dc-chat-message";
  */
 @customElement("dc-chat")
 export class ChatElement extends LitElement {
-  /**
-   * Mode in which the component is.
-   */
   @property({ type: String })
   mode = "minimized";
 
   @property({ type: String })
-  chatId = "";
-
-  @property({ type: String })
   buttonLabel = "Chat";
 
-  @property({ type: Boolean })
-  disabled = false;
+  @property({ type: String })
+  sendLabel = "Send";
 
   @property({ type: Boolean })
   loading = false;
@@ -36,11 +28,8 @@ export class ChatElement extends LitElement {
   @query(".disclaimer")
   disclaimer!: HTMLDivElement;
 
-  @query("main")
-  main!: HTMLDivElement;
-
-  @query("main>.messages")
-  messages!: HTMLDivElement;
+  @query("dc-chat-messages")
+  main!: ChatMessagesElement;
 
   @query("textarea")
   textarea!: HTMLTextAreaElement;
@@ -48,57 +37,21 @@ export class ChatElement extends LitElement {
   @query("footer button")
   sendButton!: HTMLButtonElement;
 
-  @query(".messages > dc-chat-message")
-  messageElements!: ChatMessageElement[];
+  setMessages(messages: Parameters<ChatMessagesElement["setMessages"]>[0]) {
+    if (!this.main || !(this.main instanceof ChatMessagesElement)) {
+      requestAnimationFrame(() => {
+        this.setMessages(messages);
+      });
+      return;
+    }
+    this.main.setMessages(messages);
+  }
 
   clearInput(focus = true) {
     this.textarea.value = "";
     if (focus) {
       this.textarea.focus();
     }
-  }
-
-  protected messageElementPresent(message: ChatMessageInfo) {
-    return Array.from(this.messageElements).find(
-      (messageElement) => messageElement.getAttribute("data-id") === message.id,
-    );
-  }
-
-  setMessages(messages: ChatMessageInfo[]) {
-    const presentIds: string[] = [];
-    const currentMessageEls = this.messageElements;
-
-    (currentMessageEls || []).forEach((messageElement) => {
-      const elId = messageElement.getAttribute("data-id");
-      const update = messages.find((msg) => msg.id === elId);
-      if (!update || this.messageElementPresent(update)) {
-        messageElement.remove();
-        return;
-      }
-      presentIds.push(update.id);
-    });
-
-    messages.forEach((message) => {
-      if (presentIds.includes(message.id)) {
-        return;
-      }
-
-      const el = new ChatMessageElement();
-      el.setAttribute("data-id", message.id);
-      el.role = message.role as any;
-      const markdown = message.content;
-      const html = marked.parse(markdown, { async: false });
-      el.innerHTML = typeof html === "string" ? html : "";
-      this.main.appendChild(el);
-    });
-
-    this.scrollDown();
-  }
-
-  scrollDown() {
-    requestAnimationFrame(() => {
-      this.main.scrollTop = this.main.scrollHeight;
-    });
   }
 
   render() {
@@ -108,16 +61,14 @@ export class ChatElement extends LitElement {
         <header>
           <button @click=${this._onClose}>Close</button>
         </header>
-        <main>
-          <div class="messages"></div>
-        </main>
+        <dc-chat-messages></dc-chat-messages>
         <footer>
           <div class="disclaimer">
             <slot></slot>
           </div>
           <div class="input">
             <textarea></textarea>
-            <button @click=${this._onSend}>Send</button>
+            <button @click=${this._onSend}>${this.sendLabel}</button>
           </div>
         </footer>
       </dialog>
@@ -183,7 +134,7 @@ export class ChatElement extends LitElement {
       padding: calc(0.5 * var(--dc-spacing, 0.5rem));
       border-bottom: 1px solid black;
     }
-    main {
+    dc-chat-messages {
       flex-grow: 1;
       overflow-y: auto;
     }
@@ -210,21 +161,6 @@ export class ChatElement extends LitElement {
       flex-grow: 1;
     }
   `;
-
-  private _handleResize = () => {
-    // const { innerWidth, innerHeight } = window;
-    // this.dialog.style.width = `${innerWidth}px`;
-    // this.dialog.style.height = `${innerHeight}px`;
-  };
-
-  connectedCallback() {
-    super.connectedCallback();
-    window.addEventListener("resize", this._handleResize);
-  }
-  disconnectedCallback() {
-    window.removeEventListener("resize", this._handleResize);
-    super.disconnectedCallback();
-  }
 }
 
 declare global {
