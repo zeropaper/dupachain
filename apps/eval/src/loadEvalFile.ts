@@ -22,10 +22,16 @@ export async function loadEvalFile(
   const rootDir = raw.rootDir
     ? resolve(dirname(filepath), raw.rootDir)
     : dirname(filepath);
+  const prompts: { path: string; prompt: string }[] = [];
+  for (const promptPath of raw.prompts) {
+    const path = resolve(rootDir, promptPath);
+    const prompt = await readFile(path, "utf-8");
+    prompts.push({ path, prompt });
+  }
   const setup: ConfigSchema = {
     rootDir,
     filename: basename(filepath),
-    prompts: raw.prompts.map((prompt) => resolve(rootDir, prompt)),
+    prompts,
     runners: [],
     personas: [],
   };

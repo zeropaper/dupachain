@@ -29,7 +29,12 @@ describe.each([
   it("has prompts", async () => {
     expect(loaded).toMatchObject(
       expect.objectContaining({
-        prompts: expect.arrayContaining([expect.any(String)]),
+        prompts: expect.arrayContaining([
+          expect.objectContaining({
+            path: expect.any(String),
+            prompt: expect.any(String),
+          }),
+        ]),
       }),
     );
   });

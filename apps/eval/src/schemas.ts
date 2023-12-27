@@ -83,7 +83,12 @@ export type EvalFileSchema = z.infer<typeof evalFileSchema>;
 export const configSchema = z.object({
   rootDir: z.string(),
   filename: z.string(),
-  prompts: z.array(z.string()).describe("File paths to prompts"),
+  prompts: z.array(
+    z.object({
+      path: z.string().describe("Path to prompt file"),
+      prompt: z.string().describe("Prompt to use"),
+    }),
+  ),
   runners: z.array(runnerSchema),
   personas: z.array(personaFileSchema),
 });
