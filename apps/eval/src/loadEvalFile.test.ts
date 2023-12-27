@@ -27,15 +27,13 @@ describe.each([
   });
 
   it("has prompts", async () => {
-    expect(loaded).toMatchObject(
-      expect.objectContaining({
-        prompts: expect.arrayContaining([
-          expect.objectContaining({
-            path: expect.any(String),
-            prompt: expect.any(String),
-          }),
-        ]),
-      }),
+    expect(loaded.prompts).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: expect.any(String),
+          prompt: expect.any(String),
+        }),
+      ]),
     );
   });
 
@@ -55,18 +53,16 @@ describe.each([
   });
 
   it("has personas", async () => {
-    expect(loaded).toMatchObject(
-      expect.objectContaining({
-        personas: expect.arrayContaining([
-          expect.objectContaining({
-            name: expect.any(String),
-            profile: expect.any(String),
-            firstMessage: expect.any(String),
-            goal: expect.any(String),
-            maxCalls: expect.any(Number),
-          }),
-        ]),
-      }),
+    expect(loaded.personas).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: expect.any(String),
+          profile: expect.any(String),
+          firstMessage: expect.any(String),
+          goal: expect.any(String),
+          maxCalls: expect.any(Number),
+        }),
+      ]),
     );
   });
 });
