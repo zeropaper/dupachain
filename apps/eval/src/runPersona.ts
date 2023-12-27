@@ -1,40 +1,15 @@
-import { Callbacks } from "langchain/callbacks";
 import { BaseCache } from "langchain/schema";
-import CallbackHandler from "langfuse-langchain";
 import { log } from "@local/cli";
-import { ChainRunner, ToolsMap } from "./types";
+import { ChainRunner, LogItems, ToolsMap } from "./types";
 import { testGoal } from "./testGoal";
 import { PersonaSchema } from "./schemas";
 import { getTesterCall } from "./getTesterCall";
+import { prepareCallbacks } from "./createEvalCallbacks";
 
 export interface EvalMessage {
   content: string;
   role: "user" | "assistant";
   metadata?: any;
-}
-
-async function prepareCallbacks(
-  sessionId: string,
-  callbacks?: Callbacks,
-): Promise<{ callbacks: Callbacks; teardown: () => Promise<void> }> {
-  const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
-    await import("./config");
-  const callbackHandler = new CallbackHandler({
-    publicKey: LANGFUSE_PUBLIC_KEY,
-    secretKey: LANGFUSE_SECRET_KEY,
-    baseUrl: LANGFUSE_BASE_URL,
-    sessionId,
-  });
-  return {
-    callbacks: [
-      callbackHandler,
-      ...(Array.isArray(callbacks) ? callbacks : []),
-    ],
-    teardown: () =>
-      callbackHandler.shutdownAsync().catch((err) => {
-        console.warn("langfuse shutdown error", err);
-      }),
-  };
 }
 
 /**
@@ -45,7 +20,6 @@ async function prepareCallbacks(
  * @param runChain - The chain runner.
  * @param toolsMap - The map of tools.
  * @param systemPrompt - The system prompt.
- * @param callbacks - The callbacks.
  * @param cache - The optional cache.
  * @returns A promise that resolves to an array of evaluation messages.
  */
@@ -55,7 +29,6 @@ export async function runPersona({
   runChain,
   toolsMap,
   systemPrompt,
-  callbacks,
   cache,
 }: {
   runId: string;
@@ -63,18 +36,14 @@ export async function runPersona({
   runChain: ChainRunner;
   toolsMap: ToolsMap;
   systemPrompt: string;
-  callbacks: Callbacks;
   cache?: BaseCache;
-}): Promise<EvalMessage[]> {
+}): Promise<{ messages: EvalMessage[]; log: LogItems }> {
   const { profile, firstMessage, maxCalls } = persona;
   // in order to ease the reading/organization of data in/with langfuse
   // we create 3 different sessions
-  const testerCallbacks = await prepareCallbacks(`${runId} tester`, callbacks);
-  const goalTesterCallbacks = await prepareCallbacks(
-    `${runId} goal tester`,
-    callbacks,
-  );
-  const agentCallbacks = await prepareCallbacks(`${runId} agent`, callbacks);
+  const testerCallbacks = await prepareCallbacks(`${runId} tester`);
+  const goalTesterCallbacks = await prepareCallbacks(`${runId} goal tester`);
+  const agentCallbacks = await prepareCallbacks(`${runId} agent`);
 
   const messages: EvalMessage[] = [];
 
@@ -128,11 +97,20 @@ export async function runPersona({
       }
     }
   }
-  // teardown the langfuse managers
-  await Promise.allSettled([
+  // teardown the langfuse managers and get the results
+  const logResults = await Promise.allSettled([
     testerCallbacks.teardown(),
     goalTesterCallbacks.teardown(),
     agentCallbacks.teardown(),
   ]);
-  return messages;
+  return {
+    messages,
+    log: logResults
+      .map((r) =>
+        r.status === "fulfilled"
+          ? r.value
+          : ([[Date.now(), runId, "error", r.reason]] satisfies LogItems),
+      )
+      .reduce((acc, val) => acc.concat(val), []),
+  };
 }

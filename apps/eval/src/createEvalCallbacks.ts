@@ -1,17 +1,18 @@
-import { CallbackHandlerMethods } from "langchain/callbacks";
+import { CallbackHandlerMethods, Callbacks } from "langchain/callbacks";
 import { LogItems } from "./types";
+import CallbackHandler from "langfuse-langchain";
 
 /**
  * Creates evaluation callbacks.
  * @returns A promise that resolves to an object containing the teardown function and the handlers.
  */
-export async function createEvalCallbacks(): Promise<{
+async function createEvalCallbacks(scope: string): Promise<{
   teardown: () => Promise<LogItems>;
   handlers: CallbackHandlerMethods;
 }> {
   const items: LogItems = [];
   function write(eventName: string, ...args: any[]) {
-    items.push([Date.now(), eventName, ...args]);
+    items.push([Date.now(), scope, eventName, ...args]);
   }
   // this may look convoluted, but having this like that makes it easier
   // to maintain because it can rely on the TS types to make sure
@@ -161,6 +162,30 @@ export async function createEvalCallbacks(): Promise<{
           name,
         );
       },
+    },
+  };
+}
+
+export async function prepareCallbacks(
+  sessionId: string,
+): Promise<{ callbacks: Callbacks; teardown: () => Promise<LogItems> }> {
+  // TODO: make langfuse optional
+  const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
+    await import("./config");
+  const callbackHandler = new CallbackHandler({
+    publicKey: LANGFUSE_PUBLIC_KEY,
+    secretKey: LANGFUSE_SECRET_KEY,
+    baseUrl: LANGFUSE_BASE_URL,
+    sessionId,
+  });
+  const { handlers, teardown } = await createEvalCallbacks(sessionId);
+  return {
+    callbacks: [callbackHandler, handlers],
+    teardown: () => {
+      callbackHandler.shutdownAsync().catch((err) => {
+        console.warn("langfuse shutdown error", err);
+      });
+      return teardown();
     },
   };
 }
