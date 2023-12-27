@@ -14,28 +14,20 @@ async function main() {
   const { EVALFILE } = await import("./config");
   const filepath = EVALFILE ? resolve(__dirname, "..", EVALFILE) : undefined;
   const setup = await loadEvalFile(filepath);
-  console.log("filepath", filepath, setup);
   const evalId = Date.now().toString();
   const output: EvalOutput = {};
 
   const promises: Promise<void>[] = [];
   for (const runner of setup.runners) {
     const runnerPath = runner.path;
-    const runnerScript = await import(resolve(defaultRoot, runnerPath));
-    if (typeof runnerScript.runChain !== "function") {
-      throw new Error(`Invalid runner: ${runnerPath}}`);
-    }
-    const runChain: ChainRunner = runnerScript.runChain;
-
-    for (const promptPath of setup.prompts) {
-      output[promptPath] = {};
+    for (const { path, prompt } of setup.prompts) {
+      output[path] = {};
       for (const persona of setup.personas) {
         promises.push(
           runPromptSetup({
             evalId,
-            runChain,
             runner,
-            promptPath,
+            prompt,
             persona,
             output,
           }),
@@ -44,7 +36,9 @@ async function main() {
     }
   }
 
-  await Promise.allSettled(promises);
+  console.log("Waiting for all prompts to finish...", promises.length);
+  const result = await Promise.allSettled(promises);
+  console.log("Done!", result);
 
   await writeFile(
     resolve(setup.rootDir, `evals-output/${evalId}.json`),

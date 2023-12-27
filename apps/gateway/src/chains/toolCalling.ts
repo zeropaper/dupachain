@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { OpenAI } from "langchain/llms/openai";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { formatToOpenAIFunction } from "langchain/tools";
@@ -12,7 +13,6 @@ import {
 import {
   AIMessage,
   AgentStep,
-  BaseCache,
   BaseMessage,
   FunctionMessage,
   HumanMessage,
@@ -21,9 +21,36 @@ import {
   ChatMessageHistory,
   ConversationSummaryBufferMemory,
 } from "langchain/memory";
-import { Callbacks } from "langchain/callbacks";
 
-import { ChatMessagesRow } from "../types";
+import {
+  ChainRunner,
+  chatModelNameSchema,
+  instructModelNameSchema,
+} from "../schemas";
+
+const toolCallingConfigSchema = z.object({
+  memory: z
+    .object({
+      maxTokenLimit: z.number().default(20),
+      llm: z
+        .object({
+          modelName: instructModelNameSchema,
+          temperature: z.number().positive().max(1).default(0),
+        })
+        .optional(),
+    })
+    .optional(),
+  model: z
+    .object({
+      modelName: chatModelNameSchema,
+      temperature: z.number().positive().max(1).default(0.9),
+    })
+    .optional(),
+});
+
+export function validateConfig(obj: unknown) {
+  return toolCallingConfigSchema.parse(obj);
+}
 
 export async function runChain({
   chatMessages,
@@ -31,13 +58,7 @@ export async function runChain({
   callbacks,
   tools,
   cache,
-}: {
-  chatMessages: ChatMessagesRow[];
-  systemPrompt: string;
-  callbacks?: Callbacks;
-  cache?: BaseCache;
-  tools: AgentExecutor["tools"];
-}) {
+}: Parameters<ChainRunner>[0]) {
   const lastUserMessage = chatMessages.at(-2);
   if (!lastUserMessage || lastUserMessage.role !== "user") {
     throw new Error("No last user message found");
@@ -60,7 +81,6 @@ export async function runChain({
   });
 
   const model = new ChatOpenAI({
-    // https://platform.openai.com/docs/models/gpt-3-5
     modelName: "gpt-3.5-turbo-0613",
     temperature: 0.9,
     callbacks,
@@ -74,10 +94,7 @@ export async function runChain({
   });
 
   const prompt = ChatPromptTemplate.fromMessages([
-    [
-      "system",
-      `${systemPrompt}. You don't go off topic. Before recommending something you always search for it and give back the reference.`,
-    ],
+    ["system", systemPrompt],
     ["human", "{input}"],
     new MessagesPlaceholder("agent_scratchpad"),
   ]);

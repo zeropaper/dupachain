@@ -10,37 +10,30 @@ import { defaultRoot } from "./loadEvalFile";
 import { isRunnerWithToolsInfo } from "./type-guards";
 import { ChainRunner, ToolsMap, EvalOutput } from "./types";
 import { createEvalCallbacks } from "./createEvalCallbacks";
-import { EvalFileSchema, PersonaFileSchema, RunnerSchema } from "./schemas";
+import { EvalFileSchema, PersonaSchema, RunnerSchema } from "./schemas";
 
 /**
  * Runs the prompt setup for evaluation.
  *
  * @param evalId - The evaluation ID.
- * @param runChain - The chain runner.
  * @param runner - The runner schema.
- * @param promptPath - The path to the prompt file.
+ * @param prompt - Content of a prompt file.
  * @param persona - The persona file schema.
  * @param output - The evaluation output.
  */
 export async function runPromptSetup({
   evalId,
-  runChain,
   runner,
-  promptPath,
+  prompt,
   persona,
   output,
 }: {
   evalId: string;
-  runChain: ChainRunner;
   runner: RunnerSchema;
-  promptPath: EvalFileSchema["prompts"][number];
-  persona: PersonaFileSchema;
+  prompt: string;
+  persona: PersonaSchema;
   output: EvalOutput;
 }) {
-  const systemPrompt = await readFile(
-    resolve(defaultRoot, promptPath),
-    "utf-8",
-  );
   // TODO: create a supabase cache
   const cache = await LocalFileCache.create(
     resolve(__dirname, "../../../../.cache/langchain"),
@@ -49,9 +42,14 @@ export async function runPromptSetup({
     await import("./config");
   const personaPath = persona.name;
   try {
+    const runnerScript = await import(resolve(defaultRoot, runner.path));
+    if (typeof runnerScript.runChain !== "function") {
+      throw new Error(`Invalid runner: ${runner.path}}`);
+    }
+    const runChain: ChainRunner = runnerScript.runChain;
     const runId = [
       evalId,
-      basename(promptPath).split(".")[0],
+      basename(prompt).split(".")[0],
       basename(personaPath).split(".")[0],
     ]
       .join("_")
@@ -73,13 +71,13 @@ export async function runPromptSetup({
         })
       : {};
 
-    output[promptPath][personaPath] = {
+    output[prompt][personaPath] = {
       messages: await runPersona({
         runId,
-        persona: persona,
+        persona,
         runChain,
         toolsMap,
-        systemPrompt,
+        systemPrompt: prompt,
         callbacks,
         cache,
       }),
@@ -90,7 +88,7 @@ export async function runPromptSetup({
     });
   } catch (error) {
     console.error(error);
-    output[promptPath][personaPath] = {
+    output[prompt][personaPath] = {
       messages: [],
       log: [[Date.now(), "error", error]],
     };

@@ -4,7 +4,7 @@ import CallbackHandler from "langfuse-langchain";
 import { log } from "@local/cli";
 import { ChainRunner, ToolsMap } from "./types";
 import { testGoal } from "./testGoal";
-import { PersonaFileSchema } from "./schemas";
+import { PersonaSchema } from "./schemas";
 import { getTesterCall } from "./getTesterCall";
 
 export interface EvalMessage {
@@ -59,7 +59,7 @@ export async function runPersona({
   cache,
 }: {
   runId: string;
-  persona: PersonaFileSchema;
+  persona: PersonaSchema;
   runChain: ChainRunner;
   toolsMap: ToolsMap;
   systemPrompt: string;

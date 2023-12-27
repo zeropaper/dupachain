@@ -7,6 +7,21 @@ const toolsSchema = z.object({
 
 export type ToolsSchema = z.infer<typeof toolsSchema>;
 
+const partialRunnerSchema = z.object({
+  path: z.string().describe("Path to runner file"),
+  tools: toolsSchema
+    .default({
+      loaders: [],
+      enabled: [],
+    })
+    .optional(),
+  modelName: z
+    .enum(["gpt-3.5-turbo-1106", "gpt-4-1106-preview", "gpt-4-0314"])
+    .default("gpt-3.5-turbo-1106")
+    .optional()
+    .describe("Model name to use"),
+});
+
 const runnerSchema = z.object({
   path: z.string().describe("Path to runner file"),
   tools: toolsSchema.default({
@@ -51,7 +66,7 @@ export const goalSchema = yesNoInstructionSchema.or(z.array(goalTestSchema));
 
 export type GoalSchema = z.infer<typeof goalSchema>;
 
-export const personaFileSchema = z.object({
+export const personaSchema = z.object({
   name: z.string().describe("Name of the persona"),
   profile: z
     .string()
@@ -61,19 +76,19 @@ export const personaFileSchema = z.object({
   maxCalls: z.number().int().positive().default(10),
 });
 
-export type PersonaFileSchema = z.infer<typeof personaFileSchema>;
+export type PersonaSchema = z.infer<typeof personaSchema>;
 
 export const evalFileSchema = z.object({
   name: z.string().describe("Name of the evaluation"),
   rootDir: z.string().optional().describe("Root directory of the eval"),
-  prompts: z.array(z.string()).describe("File paths to prompts"),
-  runners: runnersSchema,
+  prompts: z.array(z.string()).describe("Paths to prompt files"),
+  runners: z.array(partialRunnerSchema),
   personas: z
     .array(
       z
         .string()
-        .describe("File paths to personas")
-        .or(personaFileSchema.describe("Persona object")),
+        .describe("Path to persona file")
+        .or(personaSchema.describe("Persona object")),
     )
     .describe("An array of either file paths to YAML files or persona objects"),
 });
@@ -90,7 +105,7 @@ export const configSchema = z.object({
     }),
   ),
   runners: z.array(runnerSchema),
-  personas: z.array(personaFileSchema),
+  personas: z.array(personaSchema),
 });
 
 export type ConfigSchema = z.infer<typeof configSchema>;

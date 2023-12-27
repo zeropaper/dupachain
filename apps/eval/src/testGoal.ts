@@ -1,5 +1,5 @@
 import { Callbacks } from "langchain/callbacks";
-import { PersonaFileSchema } from "./schemas";
+import { PersonaSchema } from "./schemas";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { EvalMessage } from "./runPersona";
@@ -57,7 +57,7 @@ export async function testGoal({
 }: {
   callbacks: Callbacks;
   cache: any;
-  persona: PersonaFileSchema;
+  persona: PersonaSchema;
   messages: EvalMessage[];
 }): Promise<boolean> {
   if (!persona.goal) {

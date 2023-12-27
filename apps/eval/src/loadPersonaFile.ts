@@ -1,7 +1,7 @@
 import YAML from "yaml";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
-import { EvalFileSchema, personaFileSchema } from "./schemas";
+import { EvalFileSchema, personaSchema } from "./schemas";
 import { defaultRoot } from "./loadEvalFile";
 
 /**
@@ -21,5 +21,5 @@ export async function loadPersona(
   }
   const file = await readFile(resolve(root, info), "utf-8");
   const data = YAML.parse(file);
-  return personaFileSchema.parse(data);
+  return personaSchema.parse(data);
 }

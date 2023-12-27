@@ -14,69 +14,60 @@
       "items": {
         "type": "string"
       },
-      "description": "File paths to prompts"
+      "description": "Paths to prompt files"
     },
     "runners": {
       "type": "array",
       "items": {
-        "anyOf": [
-          {
+        "type": "object",
+        "properties": {
+          "path": {
             "type": "string",
             "description": "Path to runner file"
           },
-          {
+          "tools": {
             "type": "object",
             "properties": {
-              "path": {
-                "type": "string",
-                "description": "Path to runner file"
-              },
-              "tools": {
-                "type": "object",
-                "properties": {
-                  "loaders": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "File paths to tool loaders"
-                  },
-                  "enabled": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Names of tools to enable"
-                  }
+              "loaders": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 },
-                "required": [
-                  "loaders",
-                  "enabled"
-                ],
-                "additionalProperties": false,
-                "default": {
-                  "loaders": [],
-                  "enabled": []
-                }
+                "description": "File paths to tool loaders"
               },
-              "modelName": {
-                "type": "string",
-                "enum": [
-                  "gpt-3.5-turbo-1106",
-                  "gpt-4-1106-preview",
-                  "gpt-4-0314"
-                ],
-                "default": "gpt-3.5-turbo-1106",
-                "description": "Model name to use"
+              "enabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Names of tools to enable"
               }
             },
             "required": [
-              "path"
+              "loaders",
+              "enabled"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "default": {
+              "loaders": [],
+              "enabled": []
+            }
+          },
+          "modelName": {
+            "type": "string",
+            "enum": [
+              "gpt-3.5-turbo-1106",
+              "gpt-4-1106-preview",
+              "gpt-4-0314"
+            ],
+            "default": "gpt-3.5-turbo-1106",
+            "description": "Model name to use"
           }
+        },
+        "required": [
+          "path"
         ],
-        "description": "Path to runner file"
+        "additionalProperties": false
       }
     },
     "personas": {
@@ -85,7 +76,7 @@
         "anyOf": [
           {
             "type": "string",
-            "description": "File paths to personas"
+            "description": "Path to persona file"
           },
           {
             "type": "object",
@@ -176,7 +167,7 @@
             "description": "Persona object"
           }
         ],
-        "description": "File paths to personas"
+        "description": "Path to persona file"
       },
       "description": "An array of either file paths to YAML files or persona objects"
     }

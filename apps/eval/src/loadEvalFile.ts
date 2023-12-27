@@ -6,6 +6,8 @@ import { loadPersona } from "./loadPersonaFile";
 
 export const defaultRoot = resolve(__dirname, "../..");
 
+export const defaultChatModelName = "gpt-3.5-turbo-1106";
+
 /**
  * Loads the evaluation file and returns the setup configuration.
  *
@@ -25,7 +27,7 @@ export async function loadEvalFile(
   const prompts: { path: string; prompt: string }[] = [];
   for (const promptPath of raw.prompts) {
     const path = resolve(rootDir, promptPath);
-    const prompt = await readFile(path, "utf-8");
+    const prompt = (await readFile(path, "utf-8")).trim();
     prompts.push({ path, prompt });
   }
   const setup: ConfigSchema = {
@@ -51,16 +53,18 @@ export async function loadEvalFile(
           loaders: [],
           enabled: [],
         },
-        modelName: "gpt-3.5-turbo-1106",
+        modelName: defaultChatModelName,
       });
     } else {
       setup.runners.push({
         ...runnerOrPath,
+        modelName: runnerOrPath.modelName || defaultChatModelName,
         tools: {
-          ...runnerOrPath.tools,
-          loaders: runnerOrPath.tools.loaders.map((loader) =>
-            resolve(setup.rootDir, loader),
-          ),
+          ...(runnerOrPath.tools || { loaders: [], enabled: [] }),
+          loaders:
+            runnerOrPath.tools?.loaders.map((loader) =>
+              resolve(setup.rootDir, loader),
+            ) || [],
         },
         path: absRunnerPath,
       });
