@@ -57,12 +57,13 @@ export const chatsRowMetadataSchema = z.object({
   }),
 });
 
-export type ChainRunner = (options: {
+export type ChainRunner<O = any> = (options: {
   chatMessages: DatabaseTable<"chat_messages", "Row">[];
   systemPrompt: string;
   callbacks?: Callbacks;
   tools: AgentExecutor["tools"];
   cache?: BaseCache;
+  runnerOptions: any;
 }) => Promise<string>;
 
 export type ToolsMap = Record<string, AgentExecutor["tools"][number]>;
