@@ -54,9 +54,11 @@ export async function getTesterCall({
       cache,
     }),
     chatHistory: new ChatMessageHistory(
-      messages.map(({ content, role }) =>
-        role === "user" ? new HumanMessage(content) : new AIMessage(content),
-      ),
+      messages
+        .slice(-3)
+        .map(({ content, role }) =>
+          role === "user" ? new HumanMessage(content) : new AIMessage(content),
+        ),
     ),
   });
 
