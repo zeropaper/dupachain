@@ -9,7 +9,7 @@ runners:
         - examples/nitro/tools/nitroTools
       enabled:
         - snowboardsSearchTool
-        - listSnowboardByFits
+        - snowboardsByRidingStyle
         - listSnowboardBySizes
 personas:
   - examples/nitro/personas/greg.yml
