@@ -2,7 +2,11 @@ import { z } from "zod";
 import { OpenAI } from "langchain/llms/openai";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { formatToOpenAIFunction } from "langchain/tools";
-import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+  PromptTemplate,
+} from "langchain/prompts";
 import { RunnableSequence } from "langchain/schema/runnable";
 import { AgentExecutor } from "langchain/agents";
 import {
@@ -28,15 +32,44 @@ import {
   instructModelNameSchema,
 } from "../schemas";
 
-const toolCallingConfigSchema = z.object({
+const summaryPromptTemplate = `Progressively summarize the lines of conversation provided, adding onto the previous summary returning a new summary.
+
+EXAMPLE
+Current summary:
+The human asks for guidance to find the right snowboard.
+
+New lines of conversation:
+AI: In order to find the right size for your snowboard, I need to know your height and weight.
+Human: I'm 1.8m tall for about 80kg.
+
+New summary:
+The human, who's 1.8m tall for 80kg, asks for guidance to find the right snowboard.
+END OF EXAMPLE
+
+Current summary:
+{summary}
+
+New lines of conversation:
+{new_lines}
+
+New summary:`;
+
+const toolCallingOptionsSchema = z.object({
   memory: z
     .object({
+      messagesCount: z.number().default(5),
       maxTokenLimit: z.number().default(20),
       llm: z
         .object({
           modelName: instructModelNameSchema,
           temperature: z.number().positive().max(1).default(0),
         })
+        .optional(),
+      summaryPrompt: z
+        .string()
+        .includes("{summary}")
+        .includes("{new_lines}")
+        .default(summaryPromptTemplate)
         .optional(),
     })
     .optional(),
@@ -49,7 +82,7 @@ const toolCallingConfigSchema = z.object({
 });
 
 export function validateConfig(obj: unknown) {
-  return toolCallingConfigSchema.parse(obj);
+  return toolCallingOptionsSchema.parse(obj);
 }
 
 function findLast<T>(
@@ -64,37 +97,64 @@ function findLast<T>(
   return undefined;
 }
 
+type ToolCallingOptions = z.infer<typeof toolCallingOptionsSchema>;
+
 export async function runChain({
   chatMessages,
   systemPrompt,
   callbacks,
   tools,
   cache,
-}: Parameters<ChainRunner>[0]) {
+  runnerOptions,
+}: Parameters<ChainRunner<ToolCallingOptions>>[0]) {
   const lastUserMessage = findLast(chatMessages, ({ role }) => role === "user");
   if (!lastUserMessage) {
     throw new Error("No last user message found");
   }
 
+  console.log("runnerOptions", runnerOptions);
+  const {
+    memory: memoryOptions = {
+      messagesCount: 5,
+      maxTokenLimit: 20,
+      llm: {
+        modelName: "gpt-3.5-turbo-instruct",
+        temperature: 0,
+      },
+      summaryPrompt: summaryPromptTemplate,
+    },
+    model: modelOptions = {
+      modelName: "gpt-3.5-turbo-0613",
+      temperature: 0.9,
+    },
+  } = validateConfig(runnerOptions || {});
+
+  const chatHistory = new ChatMessageHistory(
+    chatMessages
+      .slice(memoryOptions.messagesCount * -1)
+      .map(({ content, role }) =>
+        role === "user" ? new HumanMessage(content) : new AIMessage(content),
+      ),
+  );
+
   // Initialize the memory with a specific model and token limit
   const memory = new ConversationSummaryBufferMemory({
+    ...memoryOptions,
     llm: new OpenAI({
       modelName: "gpt-3.5-turbo-instruct",
       temperature: 0,
+      ...memoryOptions.llm,
       callbacks,
       cache,
     }),
-    chatHistory: new ChatMessageHistory(
-      chatMessages.map(({ content, role }) =>
-        role === "user" ? new HumanMessage(content) : new AIMessage(content),
-      ),
-    ),
-    maxTokenLimit: 20,
+    prompt: memoryOptions.summaryPrompt
+      ? PromptTemplate.fromTemplate(memoryOptions.summaryPrompt)
+      : undefined,
+    chatHistory,
   });
 
   const model = new ChatOpenAI({
-    modelName: "gpt-3.5-turbo-0613",
-    temperature: 0.9,
+    ...modelOptions,
     callbacks,
     cache,
   });
