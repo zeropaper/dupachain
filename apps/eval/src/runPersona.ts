@@ -65,12 +65,13 @@ export async function runPersona({
     const output = await runChain({
       tools: Object.values(toolsMap),
       systemPrompt,
-      chatMessages: [...messages, { role: "assistant", content: "..." }].map(
-        ({ role, ...rest }) => ({
-          ...rest,
-          role: role === "assistant" ? "user" : "assistant",
-        }),
-      ) as any,
+      chatMessages: [
+        ...messages,
+        // { role: "assistant", content: "..." }
+      ].map(({ role, ...rest }) => ({
+        ...rest,
+        role: role === "assistant" ? "user" : "assistant",
+      })) as any,
       callbacks: agentCallbacks.callbacks,
     });
 

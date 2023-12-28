@@ -52,6 +52,18 @@ export function validateConfig(obj: unknown) {
   return toolCallingConfigSchema.parse(obj);
 }
 
+function findLast<T>(
+  array: T[],
+  callback: (item: T) => boolean,
+): T | undefined {
+  for (let i = array.length - 1; i >= 0; i--) {
+    if (callback(array[i])) {
+      return array[i];
+    }
+  }
+  return undefined;
+}
+
 export async function runChain({
   chatMessages,
   systemPrompt,
@@ -59,8 +71,8 @@ export async function runChain({
   tools,
   cache,
 }: Parameters<ChainRunner>[0]) {
-  const lastUserMessage = chatMessages.at(-2);
-  if (!lastUserMessage || lastUserMessage.role !== "user") {
+  const lastUserMessage = findLast(chatMessages, ({ role }) => role === "user");
+  if (!lastUserMessage) {
     throw new Error("No last user message found");
   }
 
