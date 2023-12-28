@@ -1,48 +1,38 @@
-import { basename, resolve } from "path";
+import { resolve } from "path";
 import { LocalFileCache } from "langchain/cache/file_system";
 
 import { runPersona } from "./runPersona";
 import { prepareTools } from "./prepareTools";
 import { defaultRoot } from "./loadEvalFile";
 import { isRunnerWithToolsInfo } from "./type-guards";
-import { ChainRunner, ToolsMap, EvalOutput } from "./types";
+import { ChainRunner, ToolsMap, EvalPersonaResult } from "./types";
 import { prepareCallbacks } from "./createEvalCallbacks";
 import { PersonaSchema, RunnerSchema } from "./schemas";
 
 /**
- * Runs the prompt setup for evaluation.
+ * Runs the prompt setup for a given run.
  *
- * @param evalId - The evaluation ID.
+ * @param runId - The ID of the run.
  * @param runner - The runner schema.
- * @param prompt - Content of a prompt file.
- * @param persona - The persona file schema<.
- * @param output - The evaluation output.
+ * @param prompt - The prompt string.
+ * @param persona - The persona schema.
+ * @returns A promise that resolves to an Output object containing the messages and log.
  */
 export async function runPromptSetup({
-  evalId,
+  runId,
   runner,
   prompt,
   persona,
-  output,
 }: {
-  evalId: string;
+  runId: string;
   runner: RunnerSchema;
   prompt: string;
   persona: PersonaSchema;
-  output: EvalOutput;
-}) {
+}): Promise<EvalPersonaResult> {
   // TODO: create a supabase cache
   const cache = await LocalFileCache.create(
-    resolve(__dirname, "../../../../.cache/langchain"),
+    resolve(__dirname, "../../../.cache/langchain"),
   );
-  const personaPath = persona.name;
-  const runId = [
-    evalId,
-    basename(prompt).split(".")[0],
-    basename(personaPath).split(".")[0],
-  ]
-    .join("_")
-    .replaceAll(/[^a-z0-9_]+/gi, "_");
   try {
     const runnerScript = await import(resolve(defaultRoot, runner.path));
     if (typeof runnerScript.runChain !== "function") {
@@ -70,13 +60,30 @@ export async function runPromptSetup({
       systemPrompt: prompt,
       cache,
     });
-    output[prompt][personaPath] = {
+    return {
       messages,
-      log: log.concat(await teardown()).sort(([a], [b]) => a - b),
+      log: log
+        .concat(await teardown())
+        // remove duplicates
+        .reduce(
+          (acc, val) => {
+            if (
+              acc.find(
+                ([timestamp, id]) => val[0] === timestamp && val[1] === id,
+              )
+            ) {
+              return acc;
+            }
+            acc.push(val);
+            return acc;
+          },
+          [] as EvalPersonaResult["log"],
+        )
+        .sort(([a], [b]) => a - b),
     };
   } catch (error) {
     console.error(error);
-    output[prompt][personaPath] = {
+    return {
       messages: [],
       log: [[Date.now(), runId, "error", error]],
     };

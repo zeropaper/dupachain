@@ -22,13 +22,24 @@ export type LogItems = [
   ...any[],
 ][];
 
-export type EvalOutput = Record<
-  string,
-  Record<
-    string,
-    {
-      messages: EvalMessage[];
-      log: LogItems;
-    }
-  >
+export type EvalPersonaResult = {
+  messages: EvalMessage[];
+  log: LogItems;
+};
+
+export type EvalPersonaMap = Record<
+  string, // persona hash
+  EvalPersonaResult
 >;
+
+export type EvalPromptMap = Record<
+  string, // prompt hash
+  EvalPersonaMap
+>;
+
+export type EvalRunnerMap = Record<
+  string, // runner body hash
+  EvalPromptMap
+>;
+
+export type EvalOutput = EvalRunnerMap;
