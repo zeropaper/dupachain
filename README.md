@@ -115,5 +115,6 @@ The code contains a lot of `TODO`s that need attention.
 ### Bigger changes
 
 - figure a way to render the "eval" results in a more readable way
-- make a JSON schema for the "eval" config file
 - deeper integration with langfuse (user feedback / scores) and supabase (langchain caching / memory)
+- add options to the eval files to allow for more flexibility
+- re-organize code scaffolding to allow better sharing of types
