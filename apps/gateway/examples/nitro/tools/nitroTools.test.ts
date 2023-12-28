@@ -66,11 +66,11 @@ describe("createNitroTools", () => {
     });
   });
 
-  describe("snowboardsByFley", async () => {
+  describe("snowboardsByFlex", async () => {
     it("lists all the boards by flex order asc by default", async () => {
-      const { snowboardsByFley } = tools;
+      const { snowboardsByFlex } = tools;
       const result = JSON.parse(
-        await snowboardsByFley.invoke({
+        await snowboardsByFlex.invoke({
           min: 1,
           max: 9,
           size: {
@@ -94,9 +94,9 @@ describe("createNitroTools", () => {
     });
 
     it("lists all the boards by flex order desc", async () => {
-      const { snowboardsByFley } = tools;
+      const { snowboardsByFlex } = tools;
       const result = JSON.parse(
-        await snowboardsByFley.invoke({
+        await snowboardsByFlex.invoke({
           order: "desc",
           min: 1,
           max: 9,

@@ -144,7 +144,7 @@ export async function loadTools({ callbacks }: { callbacks?: Callbacks }) {
     }
     return true;
   }
-  const snowboardsByFley = new DynamicStructuredTool({
+  const snowboardsByFlex = new DynamicStructuredTool({
     name: "list_snowboards_by_flex",
     description: "List of snowboards by flex",
     schema: z.object({
@@ -355,7 +355,7 @@ export async function loadTools({ callbacks }: { callbacks?: Callbacks }) {
 
   return {
     snowboardsSearchTool,
-    snowboardsByFley,
+    snowboardsByFlex,
     snowboardsByRidingStyle,
     snowboardsBySizes,
 
