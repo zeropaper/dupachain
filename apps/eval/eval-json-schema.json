@@ -109,12 +109,12 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "const": "text",
-                              "description": "Text goal"
+                              "const": "includes",
+                              "description": "Text includes goal"
                             },
-                            "text": {
+                            "includes": {
                               "type": "string",
-                              "description": "Text to match"
+                              "description": "Text to find"
                             },
                             "exact": {
                               "type": "boolean",
@@ -124,7 +124,7 @@
                           },
                           "required": [
                             "type",
-                            "text"
+                            "includes"
                           ],
                           "additionalProperties": false
                         },
@@ -133,17 +133,46 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "const": "regex",
-                              "description": "Regex goal"
+                              "const": "equals",
+                              "description": "Text equals goal"
                             },
-                            "regex": {
+                            "equals": {
                               "type": "string",
-                              "description": "Regex to match"
+                              "description": "Text to be equal to"
+                            },
+                            "exact": {
+                              "type": "boolean",
+                              "default": false,
+                              "description": "Whether to match exactly"
                             }
                           },
                           "required": [
                             "type",
-                            "regex"
+                            "equals"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "matches",
+                              "description": "Regex goal"
+                            },
+                            "matches": {
+                              "type": "string",
+                              "description": "Regex to match"
+                            },
+                            "flags": {
+                              "type": "string",
+                              "default": "",
+                              "description": "Regex flags"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "matches"
                           ],
                           "additionalProperties": false
                         }

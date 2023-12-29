@@ -86,11 +86,7 @@ export async function runPersona({
           persona,
           messages,
         });
-        log[goalMet ? "green" : "magenta"](
-          "goal met? %s\n\t%s",
-          goalMet,
-          persona.goal,
-        );
+        log[goalMet ? "green" : "magenta"]("goal met? %s", goalMet);
         if (goalMet) {
           break;
         }

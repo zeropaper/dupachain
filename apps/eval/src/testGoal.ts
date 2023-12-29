@@ -4,6 +4,7 @@ import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { EvalMessage } from "./runPersona";
 import { ChatOpenAI } from "langchain/chat_models/openai";
+import { BaseCache } from "langchain/schema";
 
 /**
  * Represents a template for testing a goal based on a chat.
@@ -55,8 +56,8 @@ export async function testGoal({
   persona,
   messages,
 }: {
-  callbacks: Callbacks;
-  cache: any;
+  callbacks?: Callbacks;
+  cache?: BaseCache;
   persona: PersonaSchema;
   messages: EvalMessage[];
 }): Promise<boolean> {
@@ -104,20 +105,27 @@ export async function testGoal({
         });
     });
   } else {
+    const lastMessage = messages.at(-1)?.content ?? "";
     for (const goal of persona.goal) {
       switch (goal.type) {
-        case "regex":
+        case "matches":
           promises.push(async () => {
-            const regex = new RegExp(goal.regex);
-            return regex.test(messages.slice(-1)[0].content);
+            const matches = new RegExp(goal.matches, goal.flags);
+            return matches.test(lastMessage);
           });
           break;
-        case "text":
+        case "includes":
           promises.push(async () => {
-            const lastMessage = messages.slice(-1)[0].content;
             return goal.exact
-              ? lastMessage === goal.text
-              : lastMessage.includes(goal.text);
+              ? lastMessage.includes(goal.includes)
+              : lastMessage.toLowerCase().includes(goal.includes.toLowerCase());
+          });
+          break;
+        case "equals":
+          promises.push(async () => {
+            return goal.exact
+              ? lastMessage === goal.equals
+              : lastMessage.toLowerCase() === goal.equals.toLowerCase();
           });
           break;
       }

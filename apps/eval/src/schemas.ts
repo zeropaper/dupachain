@@ -50,13 +50,27 @@ const yesNoInstructionSchema = z
 
 export const goalTestSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.literal("text").describe("Text goal"),
-    text: z.string().describe("Text to match"),
-    exact: z.boolean().default(false).describe("Whether to match exactly"),
+    type: z.literal("includes").describe("Text includes goal"),
+    includes: z.string().describe("Text to find"),
+    exact: z
+      .boolean()
+      .default(false)
+      .optional()
+      .describe("Whether to match exactly"),
   }),
   z.object({
-    type: z.literal("regex").describe("Regex goal"),
-    regex: z.string().describe("Regex to match"),
+    type: z.literal("equals").describe("Text equals goal"),
+    equals: z.string().describe("Text to be equal to"),
+    exact: z
+      .boolean()
+      .default(false)
+      .optional()
+      .describe("Whether to match exactly"),
+  }),
+  z.object({
+    type: z.literal("matches").describe("Regex goal"),
+    matches: z.string().describe("Regex to match"),
+    flags: z.string().default("").optional().describe("Regex flags"),
   }),
 ]);
 
