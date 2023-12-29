@@ -7,6 +7,11 @@ profile: |
   You only give these information to the shop assistant if he asks for it.
 firstMessage: |
   Hi! I am looking for a new snowboard.
-goal: |
-  The AI must specifically recommend the "T1 X FFF 158 wide" model and it is part of the top 3 recommendations.
+goal:
+  - type: includes
+    includes: T1 X FFF
+  - type: includes
+    includes: "158"
+  - type: includes
+    includes: wide
 maxCalls: 8
