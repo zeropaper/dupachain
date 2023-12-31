@@ -5,14 +5,6 @@ import { ChatMessageInfo } from "./types";
 import { ChatMessageElement } from "./dc-chat-message";
 import DOMPurify from "dompurify";
 
-// customElements.define('dc-chat-message', ChatMessageElement);
-
-/**
- * Chat component
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
 @customElement("dc-chat-messages")
 export class ChatMessagesElement extends LitElement {
   @query("main")
