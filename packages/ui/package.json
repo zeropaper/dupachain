@@ -9,8 +9,8 @@
     "build:chatmessage:dev": "esbuild --bundle src/dc-chat-message.ts --outfile=dist/dc-chat-message.js",
     "build:chat": "esbuild --bundle src/dc-chat.ts --minify --outfile=dist/dc-chat.min.js",
     "build:chatmessage": "esbuild --bundle src/dc-chat-message.ts --minify --outfile=dist/dc-chat-message.min.js",
-    "build:dev": "pnpm run build:chat:dev && pnpm run build:chatmessage:dev && tsc --emit",
-    "build": "pnpm run build:chat && pnpm run build:chatmessage && tsc --emit",
+    "build:dev": "pnpm run build:chat:dev && pnpm run build:chatmessage:dev",
+    "build": "pnpm run build:chat && pnpm run build:chatmessage",
     "vite:build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
+    "esbuild": "^0.19.11",
     "typescript": "^5.3.3",
     "vite": "^5.0.10"
   }
