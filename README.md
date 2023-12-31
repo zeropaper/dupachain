@@ -118,3 +118,23 @@ The code contains a lot of `TODO`s that need attention.
 - deeper integration with langfuse (user feedback / scores) and supabase (langchain caching / memory)
 - add options to the eval files to allow for more flexibility
 - re-organize code scaffolding to allow better sharing of types
+
+## Docker
+
+### Build
+
+```sh
+DOCKER_BUILDKIT=1 docker build . --target gateway --tag gateway:latest
+```
+
+### Run
+
+```sh
+docker run -it \
+-p 3050:3040 \
+--env-file .env \
+-e SUPABASE_URL="http://host.docker.internal:54321" \
+docker.io/library/gateway:latest
+```
+
+http://localhost:3050
