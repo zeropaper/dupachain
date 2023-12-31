@@ -36,7 +36,6 @@
   "engines": {
     "node": ">=20.10.0"
   },
-  "packageManager": "pnpm@^8.12.0",
   "lint-staged": {
     "*.{ts,tsx,js,jsx,md,mdx,scss,css}": [
       "pnpm run format"
