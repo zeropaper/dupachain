@@ -1,16 +1,10 @@
 import { BaseCache } from "langchain/schema";
 import { log } from "@local/cli";
-import { ChainRunner, LogItems, ToolsMap } from "./types";
+import { EvalMessage, ChainRunner, LogItems, ToolsMap } from "./types";
 import { testGoal } from "./testGoal";
 import { PersonaSchema } from "@local/schemas";
 import { getTesterCall } from "./getTesterCall";
 import { prepareCallbacks } from "./createEvalCallbacks";
-
-export interface EvalMessage {
-  content: string;
-  role: "user" | "assistant";
-  metadata?: any;
-}
 
 /**
  * Runs the persona evaluation process.

@@ -2,7 +2,7 @@ import { Callbacks } from "langchain/callbacks";
 import { PersonaSchema } from "@local/schemas";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
-import { EvalMessage } from "./runPersona";
+import { EvalMessage } from "./types";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { BaseCache } from "langchain/schema";
 

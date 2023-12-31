@@ -1,7 +1,12 @@
 import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
 import { DatabaseTable } from "@local/supabase-types";
-import { EvalMessage } from "./runPersona";
+
+export interface EvalMessage {
+  content: string;
+  role: "user" | "assistant";
+  metadata?: any;
+}
 
 export type ChainRunner = (options: {
   chatMessages: DatabaseTable<"chat_messages", "Row">[];
