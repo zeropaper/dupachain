@@ -37,14 +37,29 @@ if (!isProduction) {
   app.use(base, sirv("./dist/client", { extensions: [] }));
 }
 
+async function getEvals() {
+  const files = await glob(resolve(process.cwd(), evalsOutput, "*.json"));
+  const info = await Promise.all(
+    files.map(async (file) => {
+      const id = basename(file, ".json");
+      const json = JSON.parse(await fs.readFile(file, "utf-8"));
+      return {
+        id,
+        summary: {
+          runners: json?.setup?.runners?.length,
+          prompts: json?.setup?.prompts?.length,
+          personas: json?.setup?.personas?.length,
+        },
+      };
+    }),
+  );
+  return info;
+}
+
 app.get("/api/evals", async (req, res, next) => {
   try {
     const files = await glob(resolve(process.cwd(), evalsOutput, "*.json"));
-    res.send(
-      JSON.stringify({
-        files: files.map((file) => basename(file, ".json")),
-      }),
-    );
+    res.send(JSON.stringify(await getEvals()));
   } catch (e) {
     next(e);
   }

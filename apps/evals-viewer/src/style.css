@@ -1,11 +1,25 @@
 :root {
+  --color: rgba(255, 255, 255, 0.87);
+  --background-color: #242424;
+
+  --link-color: #646cff;
+  --link-color-hover: #535bf2;
+
+  --button-color: #ffffff;
+  --button-background-color: #646cff;
+  --button-color-hover: #ffffff;
+  --button-background-color-hover: #535bf2;
+
+  --invert-color: #1d1b1bf6;
+  --invert-background-color: #dfc8c8e3;
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--color);
+  background-color: var(--background-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,26 +29,33 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--link-color);
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  color: var(--link-color-hover);
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
 }
 
 #app {
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 0;
+  padding: 1rem;
   overflow: hidden;
+  display: flex;
+  gap: 1rem;
+}
+
+#app > nav {
+  min-width: 300px;
+}
+
+#app > main {
+  flex-grow: 1;
 }
 
 button {
@@ -44,7 +65,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  color: var(--button-color);
+  background-color: var(--button-background-color);
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -60,36 +82,71 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
+    --color: #213547;
+    --background-color: #ffffff;
 
-  a:hover {
-    color: #747bff;
-  }
+    --link-color: #646cff;
+    --link-hover-color: #747bff;
 
-  button {
-    background-color: #f9f9f9;
+    --button-color: #ffffff;
+    --button-background-color: #646cff;
+    --button-color-hover: #ffffff;
+    --button-background-color-hover: #535bf2;
+
+    --invert-color: #dfc8c8e3;
+    --invert-background-color: #1d1b1bf6;
   }
 }
 
-.prompt-container {
-}
-
-.prompt {
+pre {
+  font-family:
+    SFMono-Regular,
+    Consolas,
+    Liberation Mono,
+    Menlo,
+    monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+  padding: 1em;
+  overflow: auto;
+  border-radius: 8px;
+  background-color: var(--invert-background-color);
+  color: var(--invert-color);
   white-space: break-spaces;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
 }
 
-.personas-container {
-  padding: 0.5rem;
+.runners,
+.prompts,
+.personas {
+  overflow: hidden;
+}
+
+.prompts,
+.personas {
+  overflow: hidden;
+  margin-left: 2rem;
+}
+
+.runners {
+  padding: 1rem;
+}
+
+.prompts {
+}
+
+.personas {
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 1rem;
 }
 
-.personas-container > * {
-  flex: 1;
+.persona {
+  flex-grow: 1;
+}
+
+dc-chat-messages {
+  display: block;
+  max-height: 450px;
+  overflow-y: auto;
+  border: 1px solid var(--color);
+  padding: 1rem;
 }
