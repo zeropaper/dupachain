@@ -1,7 +1,7 @@
 import YAML from "yaml";
 import { readFile } from "fs/promises";
 import { basename, dirname, resolve } from "path";
-import { ConfigSchema, evalFileSchema } from "./schemas";
+import { ConfigSchema, evalFileSchema } from "@local/schemas";
 import { loadPersona } from "./loadPersonaFile";
 
 export const defaultRoot = resolve(__dirname, "../..");
@@ -17,7 +17,7 @@ export const defaultChatModelName = "gpt-3.5-turbo-1106";
  */
 export async function loadEvalFile(
   filepath = resolve(process.cwd(), "default.evalsconfig.yml"),
-) {
+): Promise<ConfigSchema> {
   const file = await readFile(filepath, "utf-8");
   const data = YAML.parse(file);
   const raw = evalFileSchema.parse(data);

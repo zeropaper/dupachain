@@ -7,7 +7,7 @@ import { defaultRoot } from "./loadEvalFile";
 import { isRunnerWithToolsInfo } from "./type-guards";
 import { ChainRunner, ToolsMap, EvalPersonaResult } from "./types";
 import { prepareCallbacks } from "./createEvalCallbacks";
-import { PersonaSchema, RunnerSchema } from "./schemas";
+import { PersonaSchema, RunnerSchema } from "@local/schemas";
 
 /**
  * Runs the prompt setup for a given run.

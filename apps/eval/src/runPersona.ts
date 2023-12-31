@@ -2,7 +2,7 @@ import { BaseCache } from "langchain/schema";
 import { log } from "@local/cli";
 import { ChainRunner, LogItems, ToolsMap } from "./types";
 import { testGoal } from "./testGoal";
-import { PersonaSchema } from "./schemas";
+import { PersonaSchema } from "@local/schemas";
 import { getTesterCall } from "./getTesterCall";
 import { prepareCallbacks } from "./createEvalCallbacks";
 

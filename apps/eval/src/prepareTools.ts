@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { Callbacks } from "langchain/callbacks";
 import { defaultRoot } from "./loadEvalFile";
 import { ToolsMap, ToolLoader } from "./types";
-import { RunnerSchema, ToolsSchema } from "./schemas";
+import { RunnerSchema, ToolsSchema } from "@local/schemas";
 
 /**
  * Prepares the tools by loading them using the provided runner and callbacks.

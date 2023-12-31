@@ -1,5 +1,5 @@
 import { Callbacks } from "langchain/callbacks";
-import { PersonaSchema } from "./schemas";
+import { PersonaSchema } from "@local/schemas";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { EvalMessage } from "./runPersona";

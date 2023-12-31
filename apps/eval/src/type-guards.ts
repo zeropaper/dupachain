@@ -1,4 +1,4 @@
-import { RunnerSchema, ToolsSchema } from "./schemas";
+import { RunnerSchema, ToolsSchema } from "@local/schemas";
 
 /**
  * Checks if the provided runner object is of type RunnerSchema with tools information.

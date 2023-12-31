@@ -6,7 +6,7 @@ import { loadEvalFile } from "./loadEvalFile";
 import { runPromptSetup } from "./runPromptSetup";
 import { EvalOutput, EvalPersonaResult } from "./types";
 import { FileSystemCache } from "@local/cache/src";
-import { RunnerSchema } from "./schemas";
+import { RunnerSchema } from "@local/schemas";
 
 config({ path: resolve(__dirname, "../../../.env") });
 

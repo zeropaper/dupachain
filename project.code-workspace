@@ -28,7 +28,7 @@
     "search.exclude": {},
     "typescript.tsdk": "project-root/node_modules/typescript/lib",
     "yaml.schemas": {
-      "eval/eval-json-schema.json": "*.evalsconfig.yml",
+      "../packages/schemas/eval-json-schema.json": "*.evalsconfig.yml",
     },
   }
 }

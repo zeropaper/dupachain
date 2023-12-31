@@ -1,7 +1,7 @@
 import YAML from "yaml";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
-import { EvalFileSchema, personaSchema } from "./schemas";
+import { EvalFileSchema, personaSchema } from "@local/schemas";
 import { defaultRoot } from "./loadEvalFile";
 
 /**

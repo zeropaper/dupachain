@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { testGoal } from "./testGoal";
-import { GoalTestSchema } from "./schemas";
+import { GoalTestSchema } from "@local/schemas";
 
 const runs: Array<[string, Array<[GoalTestSchema[], boolean]>]> = [
   [
