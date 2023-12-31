@@ -59,7 +59,11 @@ describe.each([
           name: expect.any(String),
           profile: expect.any(String),
           firstMessage: expect.any(String),
-          goal: expect.any(String),
+          goal: expect.arrayContaining([
+            expect.objectContaining({
+              type: expect.any(String),
+            }),
+          ]),
           maxCalls: expect.any(Number),
         }),
       ]),
