@@ -97,12 +97,8 @@ export async function answerUser(chat: ChatsRow, logger: Logger) {
       baseUrl: LANGFUSE_BASE_URL,
       userId: chat.id,
     });
-    const callbacks: Callbacks = [
-      // @ts-expect-error - langfuse's version of langchain seems outdated
-      agentCallbackHandler,
-    ];
+    const callbacks: Callbacks = [agentCallbackHandler];
     const nitroTools = await loadTools({
-      client: serviceClient,
       callbacks,
     });
     const tools: AgentExecutor["tools"] = [...Object.values(nitroTools)];
@@ -111,6 +107,7 @@ export async function answerUser(chat: ChatsRow, logger: Logger) {
       systemPrompt: chat.metadata!.systemPrompt as string,
       callbacks,
       tools,
+      runnerOptions: {},
     });
 
     await agentCallbackHandler.shutdownAsync();
