@@ -39,7 +39,7 @@ export async function ingestDocument(options: {
   }
 
   if (format !== "html" && format !== "markdown") {
-    return;
+    throw new Error(`Unsupported format ${format}`);
   }
 
   let store: SupabaseVectorStore;
