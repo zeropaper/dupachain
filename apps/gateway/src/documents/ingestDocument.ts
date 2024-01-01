@@ -17,7 +17,7 @@ export async function ingestDocument(options: {
     content,
     metadata,
     reference,
-    embeddingType = "hft",
+    embeddingType = "openai",
   } = options;
 
   const supabase = createServiceClient();
