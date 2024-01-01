@@ -20,6 +20,8 @@ import { isChatsRow } from "./type-guards";
 
 const DEFAULT_AGENT_ID = "default";
 
+const noop = () => {};
+
 // for getting updates
 const subscribers = new Map<string, Set<Socket>>();
 async function subscribeToChat({
@@ -46,7 +48,7 @@ async function subscribeToChat({
     subscribersCount: chatSubscribers.size,
   });
 
-  socket.on("user message", async (data, cb = () => {}) => {
+  socket.on("user message", async (data, cb = noop) => {
     logger.info({ op: "user message", socket: socket.id, data });
     addUserMessage(anonClient, data, chat, logger)
       .then(({ data, error }) => {
@@ -161,7 +163,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
     logger.info({ op: "socket connection", socket: socket.id });
 
     // TODO: refactor that
-    socket.on("join", async (chatId, cb = () => {}) => {
+    socket.on("join", async (chatId, cb = noop) => {
       const { data: chat, error } = await anonClient
         .from("chats")
         .select()
@@ -249,7 +251,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
       "start",
       async (
         { agentId = DEFAULT_AGENT_ID }: { agentId?: string } = {},
-        cb = () => {},
+        cb = noop,
       ) => {
         try {
           const agentDescription = loadAgent(agentId);
