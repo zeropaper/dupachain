@@ -140,7 +140,7 @@ export default async function createSetup(logger: Logger = pino()): Promise<{
   // serve the public directory
   app.get("/", express.static(PUBLIC_DIR));
 
-  const router = createAPIRouter(logger);
+  const router = createAPIRouter({ logger });
 
   app.use("/api", router);
 

@@ -3,7 +3,6 @@ import { vi, describe, it, expect, beforeAll, afterAll } from "vitest";
 
 import { resolve } from "node:path";
 import request from "supertest";
-import io from "socket.io-client";
 
 config({ path: resolve(__dirname, "../../../.env") });
 
@@ -66,7 +65,14 @@ describe("app", () => {
       });
     });
 
-    describe("/documents", () => {
+    describe("/api/health", () => {
+      it("returns a 200", async () => {
+        const response = await requestApp().get("/api/health");
+        expect(response.status).toBe(200);
+      });
+    });
+
+    describe("/api/documents", () => {
       it.each([
         [
           "html",
@@ -91,11 +97,6 @@ describe("app", () => {
         },
       );
       it.todo("does not create a document with an invalid format");
-    });
-
-    describe("/messages", () => {
-      it.todo("allows users to send messages");
-      it.todo("does not accept invalid messages");
     });
   });
 });

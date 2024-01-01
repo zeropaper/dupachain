@@ -6,8 +6,11 @@ import { ingestDocument } from "./documents/ingestDocument";
 import { createAnonClient } from "./createAnonClient";
 import { ChatsRow } from "./types";
 
-export function createAPIRouter(logger: Logger) {
+export function createAPIRouter({ logger }: { logger: Logger }) {
   const router = express.Router();
+  router.get("/health", (req, res) => {
+    res.status(200).send("ok");
+  });
 
   // for vector store ingestion
   router.post("/documents", express.json(), async (req, res, next) => {
@@ -17,10 +20,10 @@ export function createAPIRouter(logger: Logger) {
       await ingestDocument(document);
 
       res.status(204).end();
-    } catch (err) {
+    } catch (error) {
       logger.error({
         message: "Document ingestion error",
-        error: err,
+        error,
       });
       next(new Error("Document ingestion error"));
     }
