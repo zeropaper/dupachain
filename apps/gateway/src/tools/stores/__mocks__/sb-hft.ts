@@ -16,10 +16,10 @@ Error: Module did not self-register: '/home/vale/Repos/visitberlin/node_modules/
 */
 export const getHftStore = vi.fn(() => {
   return {
-    addDocuments: vi.fn(() => []),
-    addVectors: vi.fn(() => {}),
-    delete: vi.fn(() => {}),
-    similaritySearchVectorWithScore: vi.fn(() => {}),
+    addDocuments: vi.fn(async () => []),
+    addVectors: vi.fn(async () => []),
+    delete: vi.fn(async () => {}),
+    similaritySearchVectorWithScore: vi.fn(async () => {}),
   };
 });
 
