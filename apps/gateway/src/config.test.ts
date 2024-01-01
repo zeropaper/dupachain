@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { resolve } from "path";
 
 process.env.OPENAI_API_KEY = "test";
-process.env.SERPAPI_API_KEY = "test";
 process.env.SUPABASE_URL = "test";
 process.env.SUPABASE_ANON_KEY = "test";
 process.env.SUPABASE_SERVICE_ROLE_KEY = "test";
@@ -14,7 +13,6 @@ describe("config", () => {
   it("processes the environment variables", async () => {
     const vars = await import("./config");
     expect(vars.OPENAI_API_KEY).toBe("test");
-    expect(vars.SERPAPI_API_KEY).toBe("test");
     expect(vars.SUPABASE_URL).toBe("test");
     expect(vars.SUPABASE_ANON_KEY).toBe("test");
     expect(vars.SUPABASE_SERVICE_ROLE_KEY).toBe("test");
