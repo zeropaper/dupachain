@@ -5,7 +5,7 @@
   "scripts": {
     "gen:eval:jsonschema": "tsx ./scripts/generate-json-schema.ts",
     "postinstall": "pnpm run gen:eval:jsonschema",
-    "test": "vitest"
+    "test": "vitest --passWithNoTests"
   },
   "dependencies": {
     "zod": "^3.22.4",
