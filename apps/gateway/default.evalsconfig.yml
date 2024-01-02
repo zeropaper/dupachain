@@ -3,14 +3,14 @@ prompts:
   - examples/nitro/prompts/reto-1.txt
   - examples/nitro/prompts/reto-2.txt
 runners:
-  - path: src/chains/toolCalling
+  - path: src/chains/summaryBufferMemoryWithTools
     tools:
       loaders:
         - examples/nitro/tools/nitroTools
       enabled:
         - snowboardsSearchTool
         - listSnowboardBySizes
-  - path: src/chains/toolCalling
+  - path: src/chains/summaryBufferMemoryWithTools
     tools:
       loaders:
         - examples/nitro/tools/nitroTools

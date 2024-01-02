@@ -55,7 +55,7 @@ New lines of conversation:
 
 New summary:`;
 
-const toolCallingOptionsSchema = z.object({
+const summaryBufferMemoryWithToolsOptionsSchema = z.object({
   memory: z
     .object({
       messagesCount: z.number().default(5),
@@ -83,10 +83,12 @@ const toolCallingOptionsSchema = z.object({
 });
 
 export function validateConfig(obj: unknown) {
-  return toolCallingOptionsSchema.parse(obj);
+  return summaryBufferMemoryWithToolsOptionsSchema.parse(obj);
 }
 
-type ToolCallingOptions = z.infer<typeof toolCallingOptionsSchema>;
+type SummaryBufferMemoryWithToolsOptions = z.infer<
+  typeof summaryBufferMemoryWithToolsOptionsSchema
+>;
 
 export async function runChain({
   chatMessages,
@@ -95,7 +97,7 @@ export async function runChain({
   tools,
   cache,
   runnerOptions,
-}: Parameters<ChainRunner<ToolCallingOptions>>[0]) {
+}: Parameters<ChainRunner<SummaryBufferMemoryWithToolsOptions>>[0]) {
   const lastUserMessage = findLast(chatMessages, ({ role }) => role === "user");
   if (!lastUserMessage) {
     throw new Error("No last user message found");

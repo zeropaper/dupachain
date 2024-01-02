@@ -1,5 +1,5 @@
 import { handleModeration } from "./handleModeration";
-import { runChain } from "../chains/toolCalling";
+import { runChain } from "../chains/summaryBufferMemoryWithTools";
 import { createServiceClient } from "../createServiceClient";
 import { CallbackHandler } from "langfuse-langchain";
 import {
