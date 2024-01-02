@@ -30,7 +30,7 @@ export function createAPIRouter({ logger }: { logger: Logger }) {
     }
   });
 
-  // for starting a chat - TODO: consider all chat interactions over sockets
+  // for starting a chat - TODO: consider removing
   router.post("/chats", express.json(), async (req, res, next) => {
     const supabase = createAnonClient();
     const insertChat = await supabase
@@ -49,7 +49,7 @@ export function createAPIRouter({ logger }: { logger: Logger }) {
     res.status(insertChat.status).send(JSON.stringify(insertChat.data));
   });
 
-  // for sending a message - TODO: consider all chat interactions over sockets
+  // for sending a message - TODO: consider removing
   router.post("/messages", express.json(), async (req, res, next) => {
     const supabase = createAnonClient();
     const { chat_id, content } = postMessageBodySchema.parse(req.body);
