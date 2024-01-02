@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { config } from "dotenv";
-import { writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
 import { loadEvalFile } from "./loadEvalFile";
 import { runPromptSetup } from "./runPromptSetup";
@@ -23,10 +23,8 @@ function getPromptHash(prompt: string) {
 }
 
 async function getRunnerHash(runner: RunnerSchema) {
-  const functionBody = await import(runner.path).then((m) =>
-    m.runChain.toString(),
-  );
-  return md5(JSON.stringify({ ...runner, functionBody }));
+  const fileContent = await readFile(runner.path, "utf-8");
+  return md5(JSON.stringify({ ...runner, fileContent }));
 }
 
 function getPersonaHash(persona: any) {
