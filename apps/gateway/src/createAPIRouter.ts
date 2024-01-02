@@ -7,6 +7,7 @@ import { createAnonClient } from "./createAnonClient";
 import { ChatsRow } from "./types";
 
 export function createAPIRouter({ logger }: { logger: Logger }) {
+  // when mounted on the server, this router will be available at /api
   const router = express.Router();
   router.get("/health", (req, res) => {
     res.status(200).send("ok");
