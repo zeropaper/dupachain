@@ -4,7 +4,6 @@ import { resolve } from "path";
 
 export const {
   OPENAI_API_KEY,
-  SERPAPI_API_KEY,
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY,
@@ -17,7 +16,6 @@ export const {
   NODE_ENV,
 } = parseEnv(process.env, {
   OPENAI_API_KEY: z.string(),
-  SERPAPI_API_KEY: z.string(),
   SUPABASE_URL: z.string(),
   SUPABASE_ANON_KEY: z.string(),
   SUPABASE_SERVICE_ROLE_KEY: z.string(),
