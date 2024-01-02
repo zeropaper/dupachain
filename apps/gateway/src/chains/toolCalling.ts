@@ -31,6 +31,7 @@ import {
   chatModelNameSchema,
   instructModelNameSchema,
 } from "../schemas";
+import { findLast } from "../findLast";
 
 const summaryPromptTemplate = `Progressively summarize the lines of conversation provided, adding onto the previous summary returning a new summary.
 
@@ -83,18 +84,6 @@ const toolCallingOptionsSchema = z.object({
 
 export function validateConfig(obj: unknown) {
   return toolCallingOptionsSchema.parse(obj);
-}
-
-function findLast<T>(
-  array: T[],
-  callback: (item: T) => boolean,
-): T | undefined {
-  for (let i = array.length - 1; i >= 0; i--) {
-    if (callback(array[i])) {
-      return array[i];
-    }
-  }
-  return undefined;
 }
 
 type ToolCallingOptions = z.infer<typeof toolCallingOptionsSchema>;
