@@ -20,6 +20,7 @@ const partialRunnerSchema = z.object({
     .default("gpt-3.5-turbo-1106")
     .optional()
     .describe("Model name to use"),
+  runnerOptions: z.any().optional(),
 });
 
 const runnerSchema = z.object({
@@ -32,6 +33,7 @@ const runnerSchema = z.object({
     .enum(["gpt-3.5-turbo-1106", "gpt-4-1106-preview", "gpt-4-0314"])
     .default("gpt-3.5-turbo-1106")
     .describe("Model name to use"),
+  runnerOptions: z.any(),
 });
 
 export type RunnerSchema = z.infer<typeof runnerSchema>;

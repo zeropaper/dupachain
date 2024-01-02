@@ -62,7 +62,8 @@
             ],
             "default": "gpt-3.5-turbo-1106",
             "description": "Model name to use"
-          }
+          },
+          "runnerOptions": {}
         },
         "required": [
           "path"
