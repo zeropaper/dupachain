@@ -8,7 +8,26 @@ a stack of open-source tools that can help developing LangChain chains, tools an
 It considers the usual deterministic approach of engineering and tries to provide a set of tools
 that allow assessing the quality of the chain and its tools.
 
+One of the goals is to provide a lightweight Web Socket server that can handle chats with an AI based agent.
+The other goal is to provide a way to evaluate the quality of the AI agent and the chain with variety of settings
+and spot weaknesses in development stages.
+
 [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com)
+
+## Work in progress
+
+This is an early stage prototype and there are a lot of things that are not yet ideal.
+
+### TODOs
+
+The code contains a lot of `TODO`s that need attention.
+
+### Bigger changes
+
+- figure a way to render the "eval" results in a more readable way
+- deeper integration with langfuse (user feedback / scores) and supabase (langchain caching / memory)
+- add options to the eval files to allow for more flexibility
+- re-organize code scaffolding to allow better sharing of types
 
 ## Prerequisites
 
@@ -52,35 +71,41 @@ The integration is done through the
 You will need to create a `.env` in the root directory and should look like:
 
 ```txt
-OPENAI_API_KEY="<no i'm not giving you mine>"
+OPENAI_API_KEY=<no i'm not giving you mine>
 
 # get the values from running `npm supabase status`
-SUPABASE_URL="<usually: http://127.0.0.1:54321>"
-SUPABASE_ANON_KEY="<the anon key>"
-SUPABASE_SERVICE_ROLE_KEY="<the service key>"
+SUPABASE_URL=<usually: http://127.0.0.1:54321>
+SUPABASE_ANON_KEY=<the anon key>
+SUPABASE_SERVICE_ROLE_KEY=<the service key>
 
-LANGFUSE_BASE_URL="http://localhost:8000"
-LANGFUSE_PUBLIC_KEY="<starts with pk-lf->"
-LANGFUSE_SECRET_KEY="<starts with sk-lf->"
+LANGFUSE_BASE_URL=http://localhost:8000
+LANGFUSE_PUBLIC_KEY=<starts with pk-lf->
+LANGFUSE_SECRET_KEY=<starts with sk-lf->
 
-CORS_ORIGINS="http://localhost:3030,http://localhost:5173"
+CORS_ORIGINS=http://localhost:3030,http://localhost:5173
 ```
+
+**Note:** if you are using the `.env` with Docker (see below), you will need to
+ensure that the values are NOT quoted.
 
 ## Structure
 
-The "server" part of the app is in the ["gateway" app](./apps/gateway) directory.
+### Gateway app
+
+The "server" part of the project and the stuff you may want to make public
+is in the ["gateway" app](./apps/gateway) directory.
 
 It is made of a very simple [ExpressJS](https://expressjs.com/) server that
 utilizes [supabase-js](https://www.npmjs.com/package/@supabase/supabase-js)
-and [socket.io](https://www.npmjs.com/package/socket.io) to provide a simple API and
-realtime communication.
+and [socket.io](https://www.npmjs.com/package/socket.io) to provide an
+API for realtime communication.
 
 The most interesting bits are probably located in the
 [`answerUser.ts`](./apps/gateway/src/chats/answerUser.ts) file and the
-[POST `/documents` handler](./apps/gateway/src/index.ts).
+[POST `/api/documents` handler](./apps/gateway/src/createAPIRouter.ts).
 
 The "ingestion" of the content is done by sending "POST" requests to the
-`/documents` endpoint. The body of the request should be a JSON object with
+`/api/documents` endpoint. The body of the request should be a JSON object with
 the following structure:
 
 ```json
@@ -92,32 +117,20 @@ the following structure:
 }
 ```
 
-The whole front-end is in the [index.html](./apps/gateway/src/index.html) file
-of the ["gateway" app](./apps/gateway) but it can be overriden by adding a
-`index.html` file in the public of the app or by setting the `PUBLIC_DIR`
-environment variable.
+### Local chat
 
-## Evaluations
+You can chat locally with the "gateway" app by running the
+the `dev` npm script of the `@local/ui` package with `pnpm -C packages/ui dev`
+(if you are in the root directory).
 
-The gateway app has a `npm` script to run evaluations based on the
+You will also need to run the `pnpm -C dev` script in the "gateway" app.
+
+### Evaluations
+
+In order to evaluate the quality of a chat agent, you can run
 [default.evalsconfig.yml file](./apps/gateway/default.evalsconfig.yml) in the app directory.
 
 You can run the script with `pnpm eval`.
-
-## Work in progress
-
-This is an early stage prototype and there are a lot of things that are not yet ideal.
-
-### TODOs
-
-The code contains a lot of `TODO`s that need attention.
-
-### Bigger changes
-
-- figure a way to render the "eval" results in a more readable way
-- deeper integration with langfuse (user feedback / scores) and supabase (langchain caching / memory)
-- add options to the eval files to allow for more flexibility
-- re-organize code scaffolding to allow better sharing of types
 
 ## Docker
 
