@@ -103,7 +103,9 @@ export async function runChain({
     throw new Error("No last user message found");
   }
 
-  console.log("runnerOptions", runnerOptions);
+  if (!tools.length) {
+    throw new Error("No tools passed to chain runner");
+  }
   const {
     memory: memoryOptions = {
       messagesCount: 5,
