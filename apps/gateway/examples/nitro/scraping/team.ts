@@ -1,0 +1,56 @@
+import { productsExtractor } from "./productsExtractor";
+import { Extractor } from "./types";
+
+export const pages = [
+  "/en/team/alexis-roland",
+  "/en/team/andre-hoflich",
+  "/en/team/benny-urban",
+  "/en/team/brantley-mullins",
+  "/en/team/bryan-fox",
+  "/en/team/cai-xuetong",
+  "/en/team/celia-petrig",
+  "/en/team/chae-un-lee",
+  "/en/team/christy-prior",
+  "/en/team/cool-wakushima",
+  "/en/team/davide-boggio",
+  "/en/team/dominik-wagner",
+  "/en/team/eero-ettala",
+  "/en/team/elias-elhardt",
+  "/en/team/gabriel-almqvist",
+  "/en/team/griffin-siebert",
+  "/en/team/hailey-langland",
+  "/en/team/hunter-goulet",
+  "/en/team/jan-scherrer",
+  "/en/team/jared-elston",
+  "/en/team/jia-xin",
+  "/en/team/jordan-morse",
+  "/en/team/laurie-blouin",
+  "/en/team/lucas-baume",
+  "/en/team/ludvig-billtoft",
+  "/en/team/marcus-kleveland",
+  "/en/team/markus-keller",
+  "/en/team/mateo-massitti",
+  "/en/team/max-dai",
+  "/en/team/minsik",
+  "/en/team/miyabi-onitsuka",
+  "/en/team/moritz-boll",
+  "/en/team/nils-arvidsson",
+  "/en/team/patrick-hofmann",
+  "/en/team/sam-taxwood",
+  "/en/team/sean-miskiman",
+  "/en/team/seth-huot",
+  "/en/team/simon-gschaider",
+  "/en/team/thomas-feurstein",
+  "/en/team/tom-tramnitz",
+  "/en/team/torgeir-bergrem",
+  "/en/team/vladislav-khadarin",
+  "/en/team/yanneck-konda",
+  "/en/team/yuto-yamada",
+  "/en/team/zenja-potapov",
+];
+
+export const extractors: Record<string, Extractor> = {
+  favorites: productsExtractor(".field--name-field-products"),
+};
+
+export const bodySelector = ".node__content";

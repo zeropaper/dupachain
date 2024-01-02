@@ -1,8 +1,20 @@
 import { resolve } from "node:path";
 import { FileSystemCache } from "@local/cache";
 import { load } from "cheerio";
-import { scrapMap } from "./scrapMap";
-import { ScrapMap, PageType } from "./scrapMap";
+import { ScrapMap, PageType } from "./types";
+import * as snowboards from "./snowboards";
+import * as boots from "./boots";
+import * as bindings from "./bindings";
+import * as pages from "./pages";
+import * as team from "./team";
+
+const scrapMap: ScrapMap = {
+  snowboards,
+  bindings,
+  boots,
+  pages,
+  team,
+};
 
 // Disclaimer: this is a quick and dirty script to scrape the website,
 // however, the author of the website made it very pleasant to scrape
@@ -74,12 +86,10 @@ async function scrapePage(
   return document;
 }
 
-type Root = Root2[];
-
-interface Root2 {
+type Root = {
   status: string;
   value: Value[];
-}
+}[];
 
 interface Value {
   status: string;
@@ -90,7 +100,6 @@ interface DocumentBase {
   format: string;
   reference: string;
   content: string;
-  // metadata: Metadata
   metadata: {
     title: string;
     language: string;
@@ -99,6 +108,10 @@ interface DocumentBase {
     [key: string]: any;
   };
 }
+
+const cache = new FileSystemCache<DocumentBase[]>({
+  path: resolve(__dirname, ".cache"),
+});
 
 async function postDocument(document: DocumentBase) {
   return fetch("http://localhost:3030/api/documents", {
@@ -121,6 +134,7 @@ async function processScrap(documents: DocumentBase[]) {
     const link = (product: DocumentBase) =>
       `[${product.metadata.title}](${product.reference})`;
 
+    // TODO: move that to a relevant imports
     let content = "";
     switch (productType) {
       case "snowboards":
@@ -291,10 +305,6 @@ ${product.content}`,
     });
   }
 }
-
-const cache = new FileSystemCache<DocumentBase[]>({
-  path: resolve(__dirname, ".cache"),
-});
 
 async function main() {
   const cached = await cache.get("scrap-nitro");
