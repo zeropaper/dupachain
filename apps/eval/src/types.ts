@@ -1,6 +1,7 @@
 import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
 import { DatabaseTable } from "@local/supabase-types";
+import { BaseCache } from "langchain/schema";
 
 export interface EvalMessage {
   content: string;
@@ -12,6 +13,7 @@ export type ChainRunner = (options: {
   chatMessages: DatabaseTable<"chat_messages", "Row">[];
   systemPrompt: string;
   callbacks?: Callbacks;
+  cache?: BaseCache;
   tools: AgentExecutor["tools"];
 }) => Promise<string>;
 
