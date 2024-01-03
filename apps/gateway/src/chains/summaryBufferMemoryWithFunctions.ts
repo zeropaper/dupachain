@@ -124,7 +124,7 @@ export async function runChain({
 
   const chatHistory = new ChatMessageHistory(
     chatMessages
-      .slice(memoryOptions.messagesCount * -1)
+      // .slice(memoryOptions.messagesCount * -2)
       .map(({ content, role }) =>
         role === "user" ? new HumanMessage(content) : new AIMessage(content),
       ),
@@ -158,8 +158,15 @@ export async function runChain({
     functions: tools.map(formatToOpenAIFunction),
   });
 
+  // const messages: [string, string][] = (await chatHistory.getMessages())
+  //   .slice(-memoryOptions.messagesCount * 2, -1)
+  //   .map((m: any) => {
+  //     return [m._getType(), m.content];
+  //   });
+
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", systemPrompt],
+    // ...messages,
     ["human", "{input}"],
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
