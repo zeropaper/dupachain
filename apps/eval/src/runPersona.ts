@@ -78,6 +78,7 @@ export async function runPersona({
           role: role === "assistant" ? "user" : "assistant",
         })) as any,
         callbacks: agentCallbacks.callbacks,
+        cache,
       });
 
       messages.push({
