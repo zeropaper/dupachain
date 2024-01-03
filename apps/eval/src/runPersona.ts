@@ -118,6 +118,7 @@ export async function runPersona({
       goalTesterCallbacks.teardown(),
       agentCallbacks.teardown(),
     ]);
+    console.error("run error", error);
     return {
       messages,
       log: [
