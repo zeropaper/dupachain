@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { DynamicStructuredTool } from "langchain/tools";
 import { Callbacks } from "langchain/callbacks";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@local/supabase-types";
 
 type SnowboardSizeRange = {
   min: number;

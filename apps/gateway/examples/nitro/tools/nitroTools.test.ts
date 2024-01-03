@@ -68,7 +68,7 @@ describe("createNitroTools", () => {
     });
   });
 
-  describe("snowboardsByFlex", async () => {
+  describe("snowboardsByFlex", () => {
     it("lists all the boards by flex order asc by default", async () => {
       const { snowboardsByFlex } = tools;
       const result = JSON.parse(
@@ -123,7 +123,7 @@ describe("createNitroTools", () => {
     });
   });
 
-  describe("snowboardsByRidingStyle", async () => {
+  describe("snowboardsByRidingStyle", () => {
     it("lists all the boards by riding style", async () => {
       const { snowboardsByRidingStyle } = tools;
       const result = JSON.parse(
@@ -147,7 +147,7 @@ describe("createNitroTools", () => {
     });
   });
 
-  describe("snowboardsBySizes", async () => {
+  describe("snowboardsBySizes", () => {
     it("lists all the boards by size", async () => {
       const { snowboardsBySizes } = tools;
       let result = JSON.parse(await snowboardsBySizes.invoke({}));
