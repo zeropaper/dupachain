@@ -169,9 +169,17 @@ async function createEvalCallbacks(scope: string): Promise<{
 export async function prepareCallbacks(
   sessionId: string,
 ): Promise<{ callbacks: Callbacks; teardown: () => Promise<LogItems> }> {
-  // TODO: make langfuse optional
   const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
     await import("./config");
+
+  if (!LANGFUSE_BASE_URL || !LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
+    const { handlers, teardown } = await createEvalCallbacks(sessionId);
+    return {
+      callbacks: [handlers],
+      teardown,
+    };
+  }
+
   const callbackHandler = new CallbackHandler({
     publicKey: LANGFUSE_PUBLIC_KEY,
     secretKey: LANGFUSE_SECRET_KEY,
