@@ -4,6 +4,41 @@ import { Callbacks } from "langchain/callbacks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@local/supabase-types";
 
+type SnowboardSizeRange = {
+  min: number;
+  max: number;
+};
+
+function getSnowboardSize(
+  height: number,
+  weight: number,
+  wide: boolean,
+): SnowboardSizeRange {
+  const baseSize = height * 0.88;
+  let sizeAdjustment = 0;
+
+  // Adjust based on weight
+  if (weight < 50) {
+    sizeAdjustment = -3;
+  } else if (weight >= 50 && weight <= 70) {
+    sizeAdjustment = 0;
+  } else if (weight > 70 && weight <= 90) {
+    sizeAdjustment = 3;
+  } else if (weight > 90) {
+    sizeAdjustment = 5;
+  }
+
+  // Adjust for wide boards: reduce the size
+  if (wide) {
+    sizeAdjustment -= 2;
+  }
+
+  return {
+    min: Math.round(baseSize + sizeAdjustment - 2),
+    max: Math.round(baseSize + sizeAdjustment + 2),
+  };
+}
+
 export async function loadTools({ callbacks }: { callbacks?: Callbacks }) {
   const serviceClient = await import("../../../src/createServiceClient").then(
     ({ createServiceClient }) => createServiceClient(),
@@ -353,11 +388,27 @@ export async function loadTools({ callbacks }: { callbacks?: Callbacks }) {
     callbacks,
   });
 
+  const snowboardSizeCalculator = new DynamicStructuredTool({
+    description:
+      "Calculates the size of the snowboard based on height and weight.",
+    name: "snowboard_size_calculator",
+    schema: z.object({
+      size: z.number().positive().describe("size of the rider in cm"),
+      weight: z.number().positive().describe("weight of the rider in kg"),
+      wide: z.boolean().optional().describe("if the snowboard should be wide"),
+    }),
+    func: async function ({ size, weight, wide }, runManager) {
+      const result = getSnowboardSize(size, weight, !!wide);
+      return `${result.min}cm to ${result.max}cm`;
+    },
+  });
+
   return {
     snowboardsSearchTool,
     snowboardsByFlex,
     snowboardsByRidingStyle,
     snowboardsBySizes,
+    snowboardSizeCalculator,
 
     bootsByCharacter,
     bindingsByCharacter,

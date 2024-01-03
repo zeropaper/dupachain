@@ -32,6 +32,8 @@ describe("createNitroTools", () => {
     expect(tools).toHaveProperty("snowboardsByRidingStyle.call");
     expect(tools).toHaveProperty("snowboardsBySizes");
     expect(tools).toHaveProperty("snowboardsBySizes.call");
+    expect(tools).toHaveProperty("snowboardSizeCalculator");
+    expect(tools).toHaveProperty("snowboardSizeCalculator.call");
     expect(tools).toHaveProperty("bindingsByCharacter");
     expect(tools).toHaveProperty("bindingsByCharacter.call");
     expect(tools).toHaveProperty("bootsByCharacter");
@@ -162,5 +164,26 @@ describe("createNitroTools", () => {
       expect(result).toHaveProperty("157");
       expect(result).toHaveProperty("157 mid-wide");
     });
+  });
+
+  describe("snowboardSizeCalculator", () => {
+    it.each([
+      [180, 75, true, "157cm to 161cm"],
+      [180, 75, false, "159cm to 163cm"],
+      [180, 125, false, "161cm to 165cm"],
+      [145, 55, false, "126cm to 130cm"],
+    ])(
+      "calculates the size of a snowboard for %scm, %skg, wide: %s",
+      async (size, weight, wide, expected) => {
+        const { snowboardSizeCalculator } = tools;
+        await expect(
+          snowboardSizeCalculator.invoke({
+            size,
+            weight,
+            wide,
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
   });
 });
