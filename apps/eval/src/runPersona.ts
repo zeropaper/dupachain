@@ -6,6 +6,19 @@ import { PersonaSchema } from "@local/schemas";
 import { getTesterCall } from "./getTesterCall";
 import { prepareCallbacks } from "./createEvalCallbacks";
 
+function normalizeLogs(
+  logResults: PromiseSettledResult<LogItems>[],
+  runId: string,
+) {
+  return logResults
+    .map((r) =>
+      r.status === "fulfilled"
+        ? r.value
+        : ([[Date.now(), runId, "error", r.reason]] satisfies LogItems),
+    )
+    .reduce((acc, val) => acc.concat(val), []);
+}
+
 /**
  * Runs the persona evaluation process.
  *
@@ -34,14 +47,14 @@ export async function runPersona({
 }): Promise<{ messages: EvalMessage[]; log: LogItems }> {
   const messages: EvalMessage[] = [];
 
-  try {
-    const { profile, firstMessage, maxCalls } = persona;
-    // in order to ease the reading/organization of data in/with langfuse
-    // we create 3 different sessions
-    const testerCallbacks = await prepareCallbacks(`${runId} tester`);
-    const goalTesterCallbacks = await prepareCallbacks(`${runId} goal tester`);
-    const agentCallbacks = await prepareCallbacks(`${runId} agent`);
+  const { profile, firstMessage, maxCalls } = persona;
+  // in order to ease the reading/organization of data in/with langfuse
+  // we create 3 different sessions
+  const testerCallbacks = await prepareCallbacks(`${runId} tester`);
+  const goalTesterCallbacks = await prepareCallbacks(`${runId} goal tester`);
+  const agentCallbacks = await prepareCallbacks(`${runId} agent`);
 
+  try {
     for (let i = 0; i < maxCalls; i += 1) {
       const input = await getTesterCall({
         profile,
@@ -86,6 +99,7 @@ export async function runPersona({
         }
       }
     }
+
     // teardown the langfuse managers and get the results
     const logResults = await Promise.allSettled([
       testerCallbacks.teardown(),
@@ -94,18 +108,21 @@ export async function runPersona({
     ]);
     return {
       messages,
-      log: logResults
-        .map((r) =>
-          r.status === "fulfilled"
-            ? r.value
-            : ([[Date.now(), runId, "error", r.reason]] satisfies LogItems),
-        )
-        .reduce((acc, val) => acc.concat(val), []),
+      log: normalizeLogs(logResults, runId),
     };
   } catch (error) {
+    // teardown the langfuse managers and get the results
+    const logResults = await Promise.allSettled([
+      testerCallbacks.teardown(),
+      goalTesterCallbacks.teardown(),
+      agentCallbacks.teardown(),
+    ]);
     return {
       messages,
-      log: [[Date.now(), runId, "error", error]],
+      log: [
+        ...normalizeLogs(logResults, runId),
+        [Date.now(), runId, "error", error],
+      ],
     };
   }
 }
