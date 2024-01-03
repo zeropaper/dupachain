@@ -146,7 +146,7 @@ function renderPrompt(
     renderConfig(personaConfig, personaWrapper);
 
     const info = document.createElement("div");
-    const data = personaInfo.log.reduce(
+    const events = personaInfo.log.reduce(
       (acc, [timestamp, id, eventName, ...rest]) => {
         const actor = id.split(" ").slice(1).join(" ");
         acc[actor] = acc[actor] || {};
@@ -156,7 +156,23 @@ function renderPrompt(
       },
       {} as Record<string, any>,
     );
-    info.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    const errors = personaInfo.log.reduce(
+      (arr, [timestamp, id, eventName, ...rest]) => {
+        if (eventName === "error") {
+          arr.push([id, eventName, ...rest]);
+        }
+        return arr;
+      },
+      [] as any[],
+    );
+    info.innerHTML = `<pre>${JSON.stringify(
+      {
+        events,
+        errors,
+      },
+      null,
+      2,
+    )}</pre>`;
     personaWrapper.appendChild(info);
 
     const details = document.createElement("details");
