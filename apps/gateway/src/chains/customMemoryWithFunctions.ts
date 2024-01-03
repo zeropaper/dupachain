@@ -17,10 +17,7 @@ import {
   FunctionMessage,
   HumanMessage,
 } from "langchain/schema";
-import {
-  ChatMessageHistory,
-  ConversationSummaryBufferMemory,
-} from "langchain/memory";
+import { ChatMessageHistory } from "langchain/memory";
 
 import {
   ChainRunner,
@@ -28,18 +25,21 @@ import {
   instructModelNameSchema,
 } from "../schemas";
 import { findLast } from "../findLast";
+import { CustomChatMemory } from "../memory/CustomMemory";
+import { FileSystemCache } from "@local/cache";
+import { resolve } from "path";
 
-const summaryBufferMemoryWithToolsOptionsSchema = z.object({
+const customMemoryWithToolsOptionsSchema = z.object({
   memory: z
     .object({
-      messagesCount: z.number().default(5),
-      maxTokenLimit: z.number().default(20),
+      messagesCount: z.number().default(2),
       llm: z
         .object({
           modelName: instructModelNameSchema,
           temperature: z.number().positive().max(1).default(0),
         })
         .optional(),
+      entityExtractionTemplate: z.string().optional(),
     })
     .optional(),
   model: z
@@ -51,11 +51,11 @@ const summaryBufferMemoryWithToolsOptionsSchema = z.object({
 });
 
 export function validateConfig(obj: unknown) {
-  return summaryBufferMemoryWithToolsOptionsSchema.parse(obj);
+  return customMemoryWithToolsOptionsSchema.parse(obj);
 }
 
-type SummaryBufferMemoryWithToolsOptions = z.infer<
-  typeof summaryBufferMemoryWithToolsOptionsSchema
+type CustomMemoryWithToolsOptions = z.infer<
+  typeof customMemoryWithToolsOptionsSchema
 >;
 
 export async function runChain({
@@ -65,7 +65,7 @@ export async function runChain({
   tools,
   cache,
   runnerOptions,
-}: Parameters<ChainRunner<SummaryBufferMemoryWithToolsOptions>>[0]) {
+}: Parameters<ChainRunner<CustomMemoryWithToolsOptions>>[0]) {
   const lastUserMessage = findLast(chatMessages, ({ role }) => role === "user");
   if (!lastUserMessage) {
     throw new Error("No last user message found");
@@ -74,10 +74,15 @@ export async function runChain({
   if (!tools.length) {
     throw new Error("No tools passed to chain runner");
   }
+
+  const chatId = lastUserMessage.chat_id;
+  const replaceMeCache = new FileSystemCache({
+    path: resolve(__dirname, `../../../../.cache/memory/${chatId}`),
+  });
+
   const {
     memory: memoryOptions = {
-      messagesCount: 5,
-      maxTokenLimit: 20,
+      messagesCount: 1,
       llm: {
         modelName: "gpt-3.5-turbo-instruct",
         temperature: 0,
@@ -90,25 +95,52 @@ export async function runChain({
   } = validateConfig(runnerOptions || {});
 
   const chatHistory = new ChatMessageHistory(
-    chatMessages
-      .slice(memoryOptions.messagesCount * -2)
-      .map(({ content, role }) =>
-        role === "user" ? new HumanMessage(content) : new AIMessage(content),
-      ),
+    chatMessages.map(({ content, role }) =>
+      role === "user" ? new HumanMessage(content) : new AIMessage(content),
+    ),
   );
 
-  // Initialize the memory with a specific model and token limit
-  const memory = new ConversationSummaryBufferMemory({
-    ...memoryOptions,
+  const memory = new CustomChatMemory({
     llm: new OpenAI({
-      modelName: "gpt-3.5-turbo-instruct",
-      temperature: 0,
       ...memoryOptions.llm,
       callbacks,
       cache,
     }),
+    entityStore: replaceMeCache as any,
     chatHistory,
+    entityExtractionTemplate: memoryOptions.entityExtractionTemplate,
   });
+
+  const vars = await memory.loadMemoryVariables({
+    input: lastUserMessage.content,
+  });
+  const summary = JSON.parse(vars.summary || "{}");
+  const chatHistoryRecap = vars.chat_history || "";
+
+  const fakeMesssages = Object.entries(
+    summary as Record<string, string>,
+  ).reduce(
+    (msgs, [key, val]) => {
+      if (!val) return msgs;
+      switch (key) {
+        case "ridingStyle":
+          msgs.push(["assistant", "Do you have a prefered riding style?"]);
+          msgs.push(["user", val]);
+          break;
+        case "height":
+          msgs.push(["assistant", "What is your height?"]);
+          msgs.push(["user", val]);
+          break;
+        case "weight":
+          msgs.push(["assistant", "What is your weight?"]);
+          msgs.push(["user", val]);
+          break;
+        default:
+      }
+      return msgs;
+    },
+    [] as Array<["user" | "assistant", string]>,
+  );
 
   const model = new ChatOpenAI({
     ...modelOptions,
@@ -118,25 +150,21 @@ export async function runChain({
 
   // Convert to OpenAI tool format
   const modelWithTools = model.bind({
+    callbacks,
     // @ts-expect-error - unclear, probably some type mismatch because it works
     functions: tools.map(formatToOpenAIFunction),
   });
 
-  const messages: [string, string][] = (await chatHistory.getMessages())
-    .slice(-memoryOptions.messagesCount * 2, -1)
-    .map((m: any) => {
-      return [m._getType(), m.content];
-    });
-
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", systemPrompt],
-    ...messages,
+    ...fakeMesssages,
     ["human", "{input}"],
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
 
   const formatAgentSteps = (steps: AgentStep[]): BaseMessage[] =>
     steps.flatMap(({ action, observation }) => {
+      // console.log("formatAgentSteps", steps, action, observation);
       if ("messageLog" in action && action.messageLog !== undefined) {
         const log = action.messageLog as BaseMessage[];
         return log.concat(new FunctionMessage(observation, action.tool));
@@ -170,7 +198,9 @@ export async function runChain({
     {
       input: lastUserMessage.content,
     },
-    { callbacks },
+    {
+      callbacks,
+    },
   );
   return (res && res.output) || res;
 }
