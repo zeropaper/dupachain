@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { config } from "dotenv";
-import { readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
 import { loadEvalFile } from "./loadEvalFile";
 import { runPromptSetup } from "./runPromptSetup";
@@ -12,7 +12,6 @@ config({ path: resolve(__dirname, "../../../.env") });
 
 // TODO: make this a "bin" script (that you can invoke with `npx aival`)
 // TODO: allow passing in a custom config file
-// TODO: extend customization to allow passing runner settings
 
 function md5(str: string) {
   return createHash("md5").update(str).digest("hex");
@@ -91,6 +90,8 @@ async function main() {
   }
 
   await Promise.allSettled(promises);
+
+  await mkdir(resolve(setup.rootDir, `evals-output`));
 
   await writeFile(
     resolve(setup.rootDir, `evals-output/${evalId}.json`),
