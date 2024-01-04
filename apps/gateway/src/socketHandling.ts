@@ -100,88 +100,91 @@ function makeJoinHandler({
   logger: Logger;
   socket: Socket;
 }): (chatId: string, cb?: SocketHandlerCallback) => Promise<void> {
-  // TODO: that code is really cumbersome and should be refactored
   return async (chatId, cb = noop) => {
-    const { data: chat, error } = await client
-      .from("chats")
-      .select()
-      .eq("id", chatId)
-      .single();
-    if (error) {
-      logger.error({
+    try {
+      const { data: chat, error: chatError } = await client
+        .from("chats")
+        .select()
+        .eq("id", chatId)
+        .single();
+
+      if (chatError) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: chatError,
+        });
+        throw new Error(chatError.message);
+      }
+
+      if (!chat) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: "no chat",
+        });
+        throw new Error("no chat");
+      }
+
+      if (!isChatsRow(chat)) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: "invalid chat",
+        });
+        throw new Error("invalid chat");
+      }
+
+      const { data: messages, error: messagesError } = await client
+        .from("chat_messages")
+        .select("content, role, created_at, updated_at, finished, id, chat_id")
+        .eq("chat_id", chatId)
+        .order("created_at", { ascending: true });
+
+      if (messagesError) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: messagesError,
+        });
+        throw new Error(messagesError.message);
+      }
+
+      if (!messages) {
+        logger.error({
+          op: "join",
+          socket: socket.id,
+          error: "no data",
+        });
+        throw new Error("no data");
+      }
+
+      logger.info({
         op: "join",
+        socket: socket.id,
+        chatId,
+        messages,
+      });
+
+      await subscribeToChat({ chat, socket, logger, client });
+
+      logger.info({
+        op: "socket subscribe",
+        socket: socket.id,
+        chatId,
+      });
+      cb({ status: "ok", result: messages });
+    } catch (error) {
+      logger.error({
+        op: "socket subscribe",
         socket: socket.id,
         error,
       });
-      cb({ status: "error", error: error.message });
-      return;
-    }
-    if (!chat) {
-      logger.error({
-        op: "join",
-        socket: socket.id,
-        error: "no chat",
+      cb({
+        status: "error",
+        error: error instanceof Error ? error.message : error,
       });
-      cb({ status: "error", error: "no chat" });
-      return;
     }
-    if (!isChatsRow(chat)) {
-      logger.error({
-        op: "join",
-        socket: socket.id,
-        error: "invalid chat",
-      });
-      cb({ status: "error", error: "invalid chat" });
-      return;
-    }
-    client
-      .from("chat_messages")
-      .select("content, role, created_at, updated_at, finished, id, chat_id")
-      .eq("chat_id", chatId)
-      .order("created_at", { ascending: true })
-      .then(({ data, error }) => {
-        if (error) {
-          logger.error({
-            op: "join",
-            socket: socket.id,
-            error,
-          });
-          cb({ status: "error", error: error.message });
-          return;
-        }
-        if (!data) {
-          logger.error({
-            op: "join",
-            socket: socket.id,
-            error: "no data",
-          });
-          cb({ status: "error", error: "no data" });
-          return;
-        }
-        logger.info({
-          op: "join",
-          socket: socket.id,
-          chatId,
-          messages: data,
-        });
-        subscribeToChat({ chat, socket, logger, client: client })
-          .then(() => {
-            logger.info({
-              op: "socket subscribe",
-              socket: socket.id,
-              chatId,
-            });
-            cb({ status: "ok", result: data });
-          })
-          .catch((error) => {
-            logger.error({
-              op: "socket subscribe",
-              socket: socket.id,
-              error,
-            });
-            cb({ status: "error", error: error.message });
-          });
-      });
   };
 }
 
@@ -201,11 +204,10 @@ function makeStartHandler({
   },
   cb?: SocketHandlerCallback,
 ) => Promise<void> {
-  // TODO: that code is really cumbersome and should be refactored
   return async ({ agentId = DEFAULT_AGENT_ID } = {}, cb = noop) => {
     try {
       const agentDescription = loadAgent(agentId);
-      const { data, error } = await client
+      const { data: chat, error } = await client
         .from("chats")
         .insert({
           metadata: {
@@ -214,50 +216,42 @@ function makeStartHandler({
         })
         .select()
         .single();
+
       if (error) {
         logger.error({
           op: "socket start",
           socket: socket.id,
           error,
         });
-        cb({ status: "error", error: error.message });
-        return;
+        throw new Error(error.message);
       }
-      if (!data) {
+
+      if (!chat) {
         logger.error({
           op: "socket start",
           socket: socket.id,
           error: "no data",
         });
-        cb({ status: "error", error: "no data" });
-        return;
+        throw new Error(`Missing chat data`);
       }
-      if (!isChatsRow(data)) {
+
+      if (!isChatsRow(chat)) {
         logger.error({
           op: "socket start",
           socket: socket.id,
           error: "invalid chat",
         });
-        cb({ status: "error", error: "invalid chat" });
-        return;
+        throw new Error(`Invalid chat data`);
       }
-      subscribeToChat({ chat: data, socket, logger, client })
-        .then(() => {
-          logger.info({
-            op: "socket subscribe",
-            socket: socket.id,
-            chatId: data.id,
-          });
-          cb({ status: "ok", result: { chat_id: data.id } });
-        })
-        .catch((error) => {
-          logger.error({
-            op: "socket subscribe",
-            socket: socket.id,
-            error,
-          });
-          cb({ status: "error", error: error.message });
-        });
+
+      await subscribeToChat({ chat, socket, logger, client });
+
+      logger.info({
+        op: "socket subscribe",
+        socket: socket.id,
+        chatId: chat.id,
+      });
+      cb({ status: "ok", result: { chat_id: chat.id } });
     } catch (error) {
       logger.error({
         op: "socket start",
@@ -268,7 +262,6 @@ function makeStartHandler({
         status: "error",
         error: error instanceof Error ? error.message : error,
       });
-      return;
     }
   };
 }
