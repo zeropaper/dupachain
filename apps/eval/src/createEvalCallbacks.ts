@@ -164,11 +164,17 @@ async function createEvalCallbacks(scope: string): Promise<{
 
 export async function prepareCallbacks(
   sessionId: string,
+  langfuseEnabled: boolean = false,
 ): Promise<{ callbacks: Callbacks; teardown: () => Promise<LogItems> }> {
   const { LANGFUSE_BASE_URL, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY } =
     await import("./config");
 
-  if (!LANGFUSE_BASE_URL || !LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
+  if (
+    !langfuseEnabled ||
+    !LANGFUSE_BASE_URL ||
+    !LANGFUSE_PUBLIC_KEY ||
+    !LANGFUSE_SECRET_KEY
+  ) {
     const { handlers, teardown } = await createEvalCallbacks(sessionId);
     return {
       callbacks: [handlers],
