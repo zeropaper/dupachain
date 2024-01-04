@@ -1,3 +1,11 @@
+export type Info = {
+  setup: ConfigSchema;
+  output: EvalOutput;
+};
+
+import { ConfigSchema } from "@local/schemas";
+import { EvalOutput } from "./types";
+
 export type {
   ConfigSchema,
   GoalSchema,
