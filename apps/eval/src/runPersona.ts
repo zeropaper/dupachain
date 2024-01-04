@@ -117,13 +117,26 @@ export async function runPersona({
       testerCallbacks.teardown(),
       goalTesterCallbacks.teardown(),
       agentCallbacks.teardown(),
-    ]);
+    ]).catch((err) => {
+      console.error("teardown error", err);
+      return [];
+    });
     console.error("run error", error);
     return {
       messages,
       log: [
         ...normalizeLogs(logResults, runId),
-        [Date.now(), runId, "error", error],
+        [
+          Date.now(),
+          runId,
+          "error",
+          error instanceof Error
+            ? {
+                message: error.message,
+                stack: error?.stack,
+              }
+            : error,
+        ],
       ],
     };
   }
