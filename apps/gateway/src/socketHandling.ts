@@ -173,6 +173,7 @@ function makeJoinHandler({
         socket: socket.id,
         chatId,
       });
+      // TODO: this may not scale if they are a lot of messages or they are big...
       cb({ status: "ok", result: messages });
     } catch (error) {
       logger.error({
