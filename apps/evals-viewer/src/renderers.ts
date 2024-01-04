@@ -1,3 +1,4 @@
+import { flipMessageRole } from "./flipMessageRole";
 import type {
   EvalPersonaMap,
   EvalPromptMap,
@@ -26,6 +27,7 @@ export function renderData(data: Info, runnersContainer: HTMLDivElement) {
     runnersContainer.appendChild(runnerWrapper);
 
     const runnerTitle = document.createElement("h1");
+    runnerTitle.id = `runner-${runnerHash}`;
     runnerTitle.textContent = `Runner: ${runnerHash}`;
     runnerWrapper.appendChild(runnerTitle);
 
@@ -51,6 +53,7 @@ export function renderRunner(
     promptsContainer.appendChild(promptWrapper);
 
     const promptTitle = document.createElement("h2");
+    promptTitle.id = `prompt-${promptHash}`;
     promptTitle.textContent = `Prompt: ${promptHash}`;
     promptWrapper.appendChild(promptTitle);
 
@@ -76,7 +79,8 @@ export function renderPrompt(
     personasContainer.appendChild(personaWrapper);
 
     const personaTitle = document.createElement("h3");
-    personaTitle.textContent = `Persona ${personaHash}`;
+    personaTitle.id = `persona-${personaHash}`;
+    personaTitle.textContent = `Persona: ${personaHash}`;
     personaWrapper.appendChild(personaTitle);
 
     renderConfig(personaConfig, personaWrapper);
@@ -117,12 +121,4 @@ export function renderPrompt(
     messagesEl.setMessages(personaInfo.messages.map(flipMessageRole));
     details.appendChild(messagesEl);
   });
-}
-export function flipMessageRole(message: any, index: number) {
-  return {
-    ...message,
-    created_at: "",
-    id: `${index}`,
-    role: message.role === "user" ? "assistant" : "user",
-  };
 }

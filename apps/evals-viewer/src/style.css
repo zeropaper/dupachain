@@ -13,6 +13,17 @@
   --invert-color: #1d1b1bf6;
   --invert-background-color: #dfc8c8e3;
 
+  --error-color: #ffffff;
+  --error-background-color: #ca0000d8;
+
+  --spacing: 1rem;
+  --spacing-xs: calc(var(--spacing) * 0.125);
+  --spacing-sm: calc(var(--spacing) * 0.25);
+  --spacing-md: calc(var(--spacing) * 0.5);
+  --spacing-lg: calc(var(--spacing) * 1);
+  --spacing-xl: calc(var(--spacing) * 2);
+  --spacing-xxl: calc(var(--spacing) * 3);
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -25,6 +36,27 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color: #213547;
+    --background-color: #ffffff;
+
+    --link-color: #646cff;
+    --link-hover-color: #747bff;
+
+    --button-color: #ffffff;
+    --button-background-color: #646cff;
+    --button-color-hover: #ffffff;
+    --button-background-color-hover: #535bf2;
+
+    --invert-color: #dfc8c8e3;
+    --invert-background-color: #1d1b1bf6;
+
+    --error-color: #ffffff;
+    --error-background-color: #ca0000d8;
+  }
 }
 
 a {
@@ -46,8 +78,9 @@ body {
   margin: 0;
   padding: 1rem;
   overflow: hidden;
-  display: flex;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+  gap: var(--spacing-lg);
 }
 
 #app > nav {
@@ -55,13 +88,13 @@ body {
 }
 
 #app > main {
-  flex-grow: 1;
+  overflow: auto;
 }
 
 button {
-  border-radius: 8px;
+  border-radius: var(--spacing-xs);
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: var(--spacing-sm) var(--spacing-md);
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
@@ -72,30 +105,12 @@ button {
 }
 
 button:hover {
-  border-color: #646cff;
+  border-color: var(--button-background-color-hover);
 }
 
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --color: #213547;
-    --background-color: #ffffff;
-
-    --link-color: #646cff;
-    --link-hover-color: #747bff;
-
-    --button-color: #ffffff;
-    --button-background-color: #646cff;
-    --button-color-hover: #ffffff;
-    --button-background-color-hover: #535bf2;
-
-    --invert-color: #dfc8c8e3;
-    --invert-background-color: #1d1b1bf6;
-  }
 }
 
 pre {
@@ -107,46 +122,91 @@ pre {
     monospace;
   font-size: 0.9em;
   line-height: 1.5;
-  padding: 1em;
+  padding: var(--spacing-md);
   overflow: auto;
-  border-radius: 8px;
+  border-radius: var(--spacing-xs);
   background-color: var(--invert-background-color);
   color: var(--invert-color);
   white-space: break-spaces;
 }
 
-.runners,
-.prompts,
-.personas {
+/* Summary styles */
+.summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+  margin: 0;
+  padding: 0;
+}
+
+.summary .prompts {
+  border: 1px solid var(--color);
+  padding: var(--spacing-md);
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.summary .personas {
+  border: 1px solid var(--color);
+  padding: var(--spacing-md);
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.summary .persona {
+  flex-grow: 1;
+  padding: var(--spacing-md);
+}
+
+.summary a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
+
+/* Details styles */
+.details .prompts,
+.details .personas {
   overflow: hidden;
 }
 
-.prompts,
-.personas {
+.details .prompts,
+.details .personas {
   overflow: hidden;
-  margin-left: 2rem;
+  margin-left: var(--spacing-lg);
 }
 
-.runners {
-  padding: 1rem;
-}
-
-.prompts {
-}
-
-.personas {
+.details .personas {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
 }
 
-.persona {
+.details .persona {
   flex-grow: 1;
 }
 
+/* Chat styles */
 dc-chat-messages {
   display: block;
   max-height: 450px;
   overflow-y: auto;
   border: 1px solid var(--color);
-  padding: 1rem;
+  padding: var(--spacing-lg);
+}
+
+/* Error styles */
+.error {
+  color: var(--error-color);
+  background-color: var(--error-background-color);
+}
+
+.error a {
+  color: var(--error-color);
 }

@@ -1,3 +1,4 @@
+import { renderSummaryData } from "./summary-renderers";
 import { renderData } from "./renderers";
 import "./style.css";
 
@@ -45,11 +46,15 @@ async function initEval(id: string) {
   );
   mainEl.textContent = "";
 
-  const runnersContainer = document.createElement("div");
-  runnersContainer.classList.add("runners");
-  mainEl.appendChild(runnersContainer);
+  const summaryRunnersContainer = document.createElement("div");
+  summaryRunnersContainer.classList.add("runners", "summary");
+  mainEl.appendChild(summaryRunnersContainer);
+  renderSummaryData(data, summaryRunnersContainer);
 
-  renderData(data, runnersContainer);
+  const detailsRunnersContainer = document.createElement("div");
+  detailsRunnersContainer.classList.add("runners", "details");
+  mainEl.appendChild(detailsRunnersContainer);
+  renderData(data, detailsRunnersContainer);
 }
 
 export async function init() {
