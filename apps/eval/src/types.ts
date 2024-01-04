@@ -21,12 +21,11 @@ export type ToolsMap = Record<string, AgentExecutor["tools"][number]>;
 
 export type ToolLoader = (options: { callbacks?: any }) => Promise<ToolsMap>;
 
-// TODO: is it really smart to use an array here?
 export type LogItems = [
   number, // timestamp
   string, // scope
   string, // event
-  ...any[],
+  Record<string, any>,
 ][];
 
 export type EvalPersonaResult = {
