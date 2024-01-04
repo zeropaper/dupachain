@@ -2,8 +2,8 @@
   "name": "eval",
   "private": true,
   "scripts": {
-    "eval": "EVALFILE=../gateway/default.evalsconfig.yml tsx src/index.ts",
-    "eval:dev": "EVALFILE=../gateway/default.evalsconfig.yml tsx watch src/index.ts",
+    "eval": "EVALFILE=../gateway/examples/nitro/default.evalsconfig.yml tsx src/index.ts",
+    "eval:dev": "EVALFILE=../gateway/examples/nitro/default.evalsconfig.yml tsx watch src/index.ts",
     "test": "vitest"
   },
   "dependencies": {

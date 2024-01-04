@@ -91,7 +91,7 @@ beforeAll(async () => {
 });
 const systemPrompt = "Your are helping users to find the right snowboard.";
 describe.each([
-  ["./customMemoryWithFunctions"],
+  ["../../examples/nitro/chains/nitroMemoryWithFunctions"],
   ["./entityMemoryWithFunctions"],
   ["./summaryBufferMemoryWithFunctions"],
 ])("%s runChain", (filepath) => {

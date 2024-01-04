@@ -1,0 +1,107 @@
+name: Example Nitro
+prompts:
+  - prompts/reto-1.txt
+  - prompts/reto-2.txt
+runners:
+  - path: chains/nitroMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - snowboardsByFlex
+        - snowboardsByRidingStyle
+        # - snowboardsBySizes
+        # - snowboardSizeCalculator
+
+  - path: chains/nitroMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        # - snowboardsSearchTool
+        # - snowboardsByFlex
+        # - snowboardsByRidingStyle
+        - snowboardsBySizes
+        - snowboardSizeCalculator
+
+  - path: chains/nitroMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - snowboardsByFlex
+        - snowboardsByRidingStyle
+        - snowboardsBySizes
+        - snowboardSizeCalculator
+
+  - path: ../../src/chains/entityMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - snowboardsByFlex
+        - snowboardsByRidingStyle
+        # - snowboardsBySizes
+        # - snowboardSizeCalculator
+
+  - path: ../../src/chains/entityMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        # - snowboardsSearchTool
+        # - snowboardsByFlex
+        # - snowboardsByRidingStyle
+        - snowboardsBySizes
+        - snowboardSizeCalculator
+
+  - path: ../../src/chains/entityMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - snowboardsByFlex
+        - snowboardsByRidingStyle
+        - snowboardsBySizes
+        - snowboardSizeCalculator
+
+  - path: ../../src/chains/summaryBufferMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - snowboardsByFlex
+        - snowboardsByRidingStyle
+        # - snowboardsBySizes
+        # - snowboardSizeCalculator
+
+  - path: ../../src/chains/summaryBufferMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        # - snowboardsSearchTool
+        # - snowboardsByFlex
+        # - snowboardsByRidingStyle
+        - snowboardsBySizes
+        - snowboardSizeCalculator
+
+  - path: ../../src/chains/summaryBufferMemoryWithFunctions.ts
+    tools:
+      loaders:
+        - tools/nitroTools
+      enabled:
+        - snowboardsSearchTool
+        - snowboardsByFlex
+        - snowboardsByRidingStyle
+        - snowboardsBySizes
+        - snowboardSizeCalculator
+personas:
+  - personas/greg.yml
+  - personas/frank.yml
+  # - personas/max.yml

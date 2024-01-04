@@ -23,9 +23,9 @@ import {
   ChainRunner,
   chatModelNameSchema,
   instructModelNameSchema,
-} from "../schemas";
-import { findLast } from "../findLast";
-import { CustomChatMemory } from "../memory/CustomMemory";
+} from "../../../src/schemas";
+import { findLast } from "../../../src/findLast";
+import { CustomChatMemory } from "../../../src/memory/CustomMemory";
 import { FileSystemCache } from "@local/cache";
 import { resolve } from "path";
 
