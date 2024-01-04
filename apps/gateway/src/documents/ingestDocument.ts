@@ -12,13 +12,7 @@ export async function ingestDocument(options: {
   format: DatabaseTable<"documents", "Insert">["format"];
   embeddingType?: "openai" | "hft";
 }) {
-  const {
-    format,
-    content,
-    metadata,
-    reference,
-    embeddingType = "openai",
-  } = options;
+  const { format, content, metadata, reference, embeddingType } = options;
 
   const supabase = createServiceClient();
 
@@ -36,6 +30,10 @@ export async function ingestDocument(options: {
 
   if (error) {
     throw new Error(`Error upserting document: ${error.message}`);
+  }
+
+  if (!embeddingType) {
+    return;
   }
 
   if (format !== "html" && format !== "markdown") {

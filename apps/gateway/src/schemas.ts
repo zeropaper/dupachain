@@ -20,7 +20,8 @@ export const postDocumentBodySchema = z.object({
   reference: z.string(),
   content: z.string(),
   metadata: jsonSchema,
-  format: z.enum(["html", "markdown", "json"]),
+  format: z.enum(["html", "markdown"]),
+  embeddingType: z.enum(["openai", "hft"]).optional(),
 });
 
 export const postMessageBodySchema = z.object({
