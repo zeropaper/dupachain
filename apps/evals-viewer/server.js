@@ -7,7 +7,8 @@ import { glob } from "glob";
 const isProduction = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 5172;
 const base = process.env.BASE || "/";
-const evalsOutput = process.env.EVALS_OUTPUT || "../gateway/evals-output";
+const evalsOutput =
+  process.env.EVALS_OUTPUT || "../gateway/examples/nitro/evals-output";
 
 // Cached production assets
 const templateHtml = isProduction
