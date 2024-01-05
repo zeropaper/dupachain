@@ -25,7 +25,7 @@ import {
   instructModelNameSchema,
 } from "../../../src/schemas";
 import { findLast } from "../../../src/findLast";
-import { CustomChatMemory } from "../../../src/memory/CustomMemory";
+import { CustomChatMemory } from "../../../src/memory/CustomChatMemory";
 import { FileSystemCache } from "@local/cache";
 import { resolve } from "path";
 
@@ -109,13 +109,17 @@ export async function runChain({
     entityStore: replaceMeCache as any,
     chatHistory,
     entityExtractionTemplate: memoryOptions.entityExtractionTemplate,
+    schema: z.object({
+      ridingStyle: z.string().default("unknown"),
+      height: z.string().default("unknown"),
+      weight: z.string().default("unknown"),
+    }),
   });
 
   const vars = await memory.loadMemoryVariables({
     input: lastUserMessage.content,
   });
   const summary = JSON.parse(vars.summary || "{}");
-  const chatHistoryRecap = vars.chat_history || "";
 
   const fakeMesssages = Object.entries(
     summary as Record<string, string>,

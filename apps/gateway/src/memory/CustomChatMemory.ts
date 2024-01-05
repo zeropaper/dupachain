@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { LLMChain } from "langchain/chains";
 import { BaseLLM } from "langchain/llms/base";
 import { PromptTemplate } from "langchain/prompts";
@@ -9,38 +10,27 @@ import {
   getBufferString,
 } from "langchain/memory";
 import { BaseEntityStore } from "langchain/schema";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
-export const summaryPromptTemplate = `You are an AI assistant reading the transcript of a conversation between an AI and a human. You extract the information that can be used to find the right size for a snowboard and return it as a valid JSON object. Your answer only includes the JSON object, nothing else.
-
-EXAMPLE
-Current summary:
-{{ "height": null, "weight": null, "ridingStyle": null }}
-
-New lines of conversation:
-AI: In order to find the right size for your snowboard, I need to know your height and weight.
-Human: I'm 1.8m tall for about 80kg.
-
-Reasoning:
-The height and the weight are given by the human but the riding style is not.
-
-New summary:
-{{ "height": "1.8m", "weight": "80kg", "ridingStyle": null }}
-END OF EXAMPLE
+export const summaryPromptTemplate = `You are an AI assistant reading the transcript of a conversation between an AI and a human. You extract the information needed, and only them, and return it as a valid JSON object. Your answer only includes the JSON object, nothing else.
 
 EXAMPLE
 Current summary:
-{{ "height": null, "weight": null, "ridingStyle": null }}
+{{ "age": null, "location": null }}
+
+JSON schema of the information needed:
+{{"type":"object","properties":{{"age":{{"type":"number"}},"location":{{"type":"string"}}}},"required":["age","location"],"additionalProperties":false}}
 
 New lines of conversation:
-AI: Do you have a prefered riding style?
-Human: I do mostly park.
-
-Reasoning:
-The riding style is given by the human. The height and the weight are not and therefore are not updated.
+AI: How old are you?
+Human: I'm 42.
 
 New summary:
-{{ "height": "1.8m", "weight": "80kg", "ridingStyle": "park" }}
+{{ "age": 42, "location": null }}
 END OF EXAMPLE
+
+JSON schema of the information needed:
+{schema}
 
 Current summary:
 {summary}
@@ -58,6 +48,7 @@ export interface CustomMemoryOptions extends BaseChatMemoryInput {
   humanPrefix?: string;
   k?: number;
   entityStore: BaseEntityStore;
+  schema: z.AnyZodObject;
 }
 
 export class CustomChatMemory extends BaseChatMemory {
@@ -68,6 +59,20 @@ export class CustomChatMemory extends BaseChatMemory {
       inputKey: fields.inputKey,
       outputKey: fields.outputKey,
     });
+    const template = fields.entityExtractionTemplate ?? summaryPromptTemplate;
+    if (!template.includes("{schema}"))
+      throw new Error(
+        `CustomChatMemory: entityExtractionTemplate must include {schema}`,
+      );
+    if (!template.includes("{summary}"))
+      throw new Error(
+        `CustomChatMemory: entityExtractionTemplate must include {summary}`,
+      );
+    if (!template.includes("{new_lines}"))
+      throw new Error(
+        `CustomChatMemory: entityExtractionTemplate must include {new_lines}`,
+      );
+    this.schema = fields.schema;
     this.entityStore = fields.entityStore;
     this.aiPrefix = fields.aiPrefix || this.aiPrefix;
     this.humanPrefix = fields.humanPrefix || this.humanPrefix;
@@ -76,11 +81,11 @@ export class CustomChatMemory extends BaseChatMemory {
     this.chatHistoryKey = fields.chatHistoryKey || this.chatHistoryKey;
     this.entityExtractionChain = new LLMChain({
       llm: this.llm,
-      prompt: PromptTemplate.fromTemplate(
-        fields.entityExtractionTemplate ?? summaryPromptTemplate,
-      ),
+      prompt: PromptTemplate.fromTemplate(template),
     });
   }
+
+  protected schema: z.AnyZodObject;
 
   protected entityStore: BaseEntityStore;
 
@@ -109,14 +114,16 @@ export class CustomChatMemory extends BaseChatMemory {
    */
   async loadMemoryVariables(values: InputValues): Promise<MemoryVariables> {
     const messages = await this.chatHistory.getMessages();
-    if (messages.length < 2) {
-      return {};
-    }
+    // if (messages.length < 2) {
+    //   return {};
+    // }
     const serializedMessages = getBufferString(
       messages.slice(-this.k * 2),
       this.humanPrefix,
       this.aiPrefix,
     );
+    const schema = JSON.stringify(zodToJsonSchema(this.schema));
+    console.log("schema", schema);
     const stored = await this.entityStore.get("memory");
     const output = await this.entityExtractionChain.predict({
       new_lines: serializedMessages,
@@ -128,11 +135,20 @@ export class CustomChatMemory extends BaseChatMemory {
         },
       ),
       input: values.input,
+      schema,
     });
     const buffer = this.returnMessages
       ? messages.slice(-this.k * 2)
       : serializedMessages;
-    await this.entityStore.set("memory", JSON.parse(output));
+    try {
+      await this.entityStore.set("memory", JSON.parse(output));
+    } catch (error) {
+      console.error("CustomMemory set memory error", error, output);
+      return {
+        [this.chatHistoryKey]: buffer,
+        summary: stored,
+      };
+    }
     return {
       [this.chatHistoryKey]: buffer,
       summary: output,
