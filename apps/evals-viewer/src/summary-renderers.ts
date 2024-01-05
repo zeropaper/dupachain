@@ -6,10 +6,6 @@ import type {
   EvalPersonaResult,
 } from "./types";
 
-function logContainsError(log: EvalPersonaResult["log"]) {
-  return log.find(([, , type]) => type === "error");
-}
-
 export function renderSummaryData(
   data: Info,
   runnersContainer: HTMLDivElement,
@@ -58,6 +54,10 @@ export function renderSummaryRunner(
   });
 }
 
+function logContainsError(log: EvalPersonaResult["log"]) {
+  return log.find(([, , type]) => type === "error");
+}
+
 export function renderSummaryPrompt(
   promptInfo: EvalPersonaMap,
   config: ConfigSchema,
@@ -65,7 +65,7 @@ export function renderSummaryPrompt(
 ) {
   Object.entries(promptInfo).forEach(([personaHash, personaInfo], index) => {
     const personaConfig = config.personas[index];
-    console.info("persona", personaConfig, personaInfo);
+    console.info("persona", personaConfig.name, personaInfo.log.at(-1)?.at(2));
     const personaWrapper = document.createElement("div");
     personaWrapper.classList.add("persona");
     if (logContainsError(personaInfo.log)) {
