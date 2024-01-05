@@ -85,7 +85,7 @@ export async function runPromptSetup({
     console.error(error);
     return {
       messages: [],
-      log: [[Date.now(), runId, "error", error]],
+      log: [[Date.now(), runId, "error", error as any]],
     };
   }
 }
