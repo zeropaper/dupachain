@@ -29,11 +29,11 @@ export async function runPromptSetup({
   prompt: string;
   persona: PersonaSchema;
 }): Promise<EvalPersonaResult> {
-  // TODO: create a supabase cache
-  const cache = await LocalFileCache.create(
-    resolve(__dirname, "../../../.cache/langchain"),
-  );
   try {
+    // TODO: use supabase cache?
+    const cache = await LocalFileCache.create(
+      resolve(__dirname, "../../../.cache/langchain"),
+    );
     const runnerScript = await import(resolve(defaultRoot, runner.path));
     if (typeof runnerScript.runChain !== "function") {
       throw new Error(`Invalid runner: ${runner.path}}`);
@@ -43,6 +43,7 @@ export async function runPromptSetup({
     // TODO: not really happy with having this here and others in runPersona...
     // should runPersona take care of the tools?
     // should the callbacks be passed to runPersona?
+    // are these even needed?They don't seem to show up in langfuse...
     const { callbacks, teardown } = await prepareCallbacks(`${runId} tools`);
 
     let toolsMap: ToolsMap = isRunnerWithToolsInfo(runner)
@@ -60,25 +61,26 @@ export async function runPromptSetup({
       systemPrompt: prompt,
       cache,
     });
+
     return {
       messages,
       log: log
         .concat(await teardown())
-        // remove duplicates
-        .reduce(
-          (acc, val) => {
-            if (
-              acc.find(
-                ([timestamp, id]) => val[0] === timestamp && val[1] === id,
-              )
-            ) {
-              return acc;
-            }
-            acc.push(val);
-            return acc;
-          },
-          [] as EvalPersonaResult["log"],
-        )
+        // TODO: remove duplicates, good idea? done right?
+        // .reduce(
+        //   (acc, val) => {
+        //     if (
+        //       acc.find(
+        //         ([timestamp, id]) => val[0] === timestamp && val[1] === id,
+        //       )
+        //     ) {
+        //       return acc;
+        //     }
+        //     acc.push(val);
+        //     return acc;
+        //   },
+        //   [] as EvalPersonaResult["log"],
+        // )
         .sort(([a], [b]) => a - b),
     };
   } catch (error) {
