@@ -9,7 +9,7 @@
   "dependencies": {
     "@local/cache": "workspace:*",
     "@local/cli": "workspace:*",
-    "@local/supabase-types": "workspace:*",
+    "@local/supabase-langchain": "workspace:*",
     "@supabase/supabase-js": "^2.39.1",
     "@xenova/transformers": "^2.12.1",
     "cheerio": "1.0.0-rc.12",
@@ -26,9 +26,11 @@
     "tsx": "^4.7.0",
     "yaml": "^2.3.4",
     "znv": "^0.4.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zod-to-json-schema": "^3.22.3"
   },
   "devDependencies": {
+    "@local/supabase-types": "workspace:*",
     "@local/client": "workspace:*",
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.5",

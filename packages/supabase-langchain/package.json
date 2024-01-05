@@ -1,0 +1,18 @@
+{
+  "name": "@local/supabase-langchain",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest --passWithNoTests"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.1"
+  },
+  "devDependencies": {
+    "@local/supabase-types": "workspace:*",
+    "langchain": "^0.0.198",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
